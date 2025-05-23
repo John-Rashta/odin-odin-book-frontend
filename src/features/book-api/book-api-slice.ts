@@ -1,6 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AmountOptions } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
+import { socket } from "../../../sockets/socket";
+import { notificationTypes, requestTypes } from "../../../util/types";
 
 interface ReturnMessage {
     message?: string
@@ -30,9 +32,6 @@ interface UserInfo {
     } | null;
     followerCount: number;
 };
-
-type requestTypes = "FOLLOW";
-type notificationsTypes = "USER" | "POST" | "COMMENT" | "REQUEST";
 
 interface RequestInfo {
     id: string;
@@ -159,7 +158,7 @@ interface NotificationsInfo {
   id: string;
   content: string;
   createdAt: Date;
-  type: notificationsTypes;
+  type: notificationTypes;
   typeid: string | null;
 };
 
@@ -177,7 +176,19 @@ export const apiSlice = createApi({
     tagTypes: [
         "SelfInfo",
         "PostInfo",
+        "PostsInfo",
+        "UserPostsInfo",
         "CommentInfo",
+        "CommentsInfo",
+        "UserInfo",
+        "UsersInfo",
+        "SearchInfo",
+        "SentInfo",
+        "ReceivedInfo",
+        "FeedInfo",
+        "NotificationInfo",
+        "NotificationsInfo",
+        "PostCommentsInfo"
     ],
     endpoints: (builder) => ({
     createUser: builder.mutation<ReturnMessage, Credentials>({
@@ -211,26 +222,43 @@ export const apiSlice = createApi({
       query: ({user, options}) => ({
         url: `/users/search?user=${user}${getProperQuery(options)}`,
       }),
+      providesTags: (result = {users: []}, error, arg) => [
+        "SearchInfo",
+        ...result.users.map(({id}) => ({type: "UserInfo", id}) as const)
+      ]
     }),
     getUser: builder.query<{ user: (UserInfo & UserExtra) }, string>({
       query: (user) => ({
         url: `/users/${user}`,
       }),
+      providesTags: (result, error, arg) => [ {type: "UserInfo", id: arg}]
     }),
     getUsers: builder.query<{ users: (UserInfo & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
         url: `/users${getProperQuery(options)}`,
       }),
+      providesTags: (result = {users: []}, error, arg) => [
+        "UsersInfo",
+        ...result.users.map(({id}) => ({type: "UserInfo", id}) as const)
+      ]
     }),
     getUserPosts: builder.query<{ posts: (FullPostInfo & Likes & YourLike)[] }, UId & {options: AmountOptions}>({
       query: ({id, options}) => ({
         url: `/users/${id}/posts${getProperQuery(options)}`,
       }),
+      providesTags: (result = { posts:[] }, error, arg) => [
+        {type: "UserPostsInfo", id: arg.id},
+        ...result.posts.map(({id}) => ({type:"PostInfo", id}) as const)
+      ]
     }),
     getFeed: builder.query<{ feed: (FullPostInfo & Likes & YourLike)[] }, AmountOptions>({
       query: (options) => ({
         url: `/users/self/feed${getProperQuery(options)}`,
       }),
+      providesTags: (result  = {feed: []}, error, arg) => [
+        "FeedInfo",
+        ...result.feed.map(({id})=> ({type:"PostInfo", id}) as const)
+      ]
     }),
     getFollowers: builder.query<{ followers: (UserFollowType & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
@@ -242,7 +270,7 @@ export const apiSlice = createApi({
         url: `/users/self/follows${getProperQuery(options)}`,
       }),
     }),
-    stopFollow: builder.query<ReturnMessage, UId>({
+    stopFollow: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
         url: `/users/${id}/follow`,
         method: "DELETE"
@@ -270,36 +298,44 @@ export const apiSlice = createApi({
       query: () => ({
         url: "/requests/sent",
       }),
+      providesTags: ["SentInfo"]
     }),
-    makeRequest: builder.query<ReturnMessage, RequestCreate>({
+    makeRequest: builder.mutation<ReturnMessage, RequestCreate>({
       query: (options) => ({
         url: "/requests",
         method: "POST",
         body: options
       }),
+      invalidatesTags: ["SentInfo"]
     }),
-    acceptRequest: builder.query<ReturnMessage, UId>({
+    acceptRequest: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
         url: `/requests/${id}`,
         method: "PUT",
       }),
+      invalidatesTags: ["ReceivedInfo"]
     }),
-    deleteRequest: builder.query<ReturnMessage, UId>({
+    deleteRequest: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
         url: `/requests/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["ReceivedInfo", "SentInfo"]
     }),
     getPost: builder.query<{ post: FullPostInfo & Likes & YourLike }, UId>({
       query: ({ id }) => ({
         url: `/posts/${id}`,
       }),
-      providesTags: ["PostInfo"],
+      providesTags: (result, error, arg) => [{type: "PostInfo", id: arg.id}],
     }),
     getMyPosts: builder.query<{ posts: (FullPostInfo & Likes & YourLike)[] }, AmountOptions>({
       query: (options) => ({
         url: `/posts${getProperQuery(options)}`,
       }),
+      providesTags: (result= {posts: []}, error, arg) => [
+        "PostsInfo",
+        ...result.posts.map(({id}) => ({type: "PostInfo", id}) as const)
+      ]
     }),
     updatePost: builder.mutation<{post: UpdatedPost & Likes & YourLike}, UpdateContent & UId>({
       query: ({ id, content }) => ({
@@ -307,20 +343,20 @@ export const apiSlice = createApi({
         method: "PUT",
         body: content,
       }),
-      invalidatesTags: ["PostInfo"],
+      invalidatesTags: (result, error, arg) => [{type:"PostInfo", id: arg.id}],
     }),
     deletePost: builder.mutation<ReturnMessage, UId>({
       query: ({ id }) => ({
         url: `/posts/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["PostInfo"],
+      invalidatesTags: (result, error, arg) => [{type:"PostInfo", id: arg.id}],
     }),
      getComment: builder.query<{ comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike }, UId>({
       query: ({ id }) => ({
         url: `/comments/${id}`,
       }),
-      providesTags: ["CommentInfo"],
+      providesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
     }),
     updateComment: builder.mutation<{comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}, UpdateContent & UId>({
       query: ({ id, content }) => ({
@@ -328,30 +364,30 @@ export const apiSlice = createApi({
         method: "PUT",
         body: content,
       }),
-      invalidatesTags: ["CommentInfo"],
+      invalidatesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
     }),
     deleteComment: builder.mutation<ReturnMessage, UId>({
       query: ({ id }) => ({
         url: `/comments/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["CommentInfo"],
+      invalidatesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
     }),
-    createPost: builder.query<{ postid: string }, FormData>({
+    createPost: builder.mutation<{ postid: string }, FormData>({
       query: (form) => ({
         url: `/posts`,
         method: "POST",
         body: form
       }),
     }),
-    createComment: builder.query<{ post: FullPostInfo & Likes }, UId & {info: FormData}>({
+    createComment: builder.mutation<{ post: FullPostInfo & Likes }, UId & {info: FormData}>({
       query: ({ id, info }) => ({
         url: `/posts/${id}`,
         method: "POST",
         body: info
       }),
     }),
-    changePostLike: builder.query<ReturnMessage, UId & LikeTypes>({
+    changePostLike: builder.mutation<ReturnMessage, UId & LikeTypes>({
       query: ({ id, action }) => ({
         url: `/posts/${id}/likes`,
         method: "PUT",
@@ -359,8 +395,9 @@ export const apiSlice = createApi({
           action
         }
       }),
+      invalidatesTags: (result, error, arg) => [{type:"PostInfo", id: arg.id}],
     }),
-    changeCommentLike: builder.query<ReturnMessage, UId & LikeTypes>({
+    changeCommentLike: builder.mutation<ReturnMessage, UId & LikeTypes>({
       query: ({ id, action }) => ({
         url: `/comments/${id}/likes`,
         method: "PUT",
@@ -368,34 +405,48 @@ export const apiSlice = createApi({
           action
         }
       }),
+      invalidatesTags: (result, error, arg) => [{type:"CommentInfo", id: arg.id}],
     }),
     getCommentComments: builder.query<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, UId & {options: AmountOptions}>({
       query: ({ id, options }) => ({
         url: `/comments/${id}/comments${getProperQuery(options)}`,
       }),
+      providesTags: (result = {comments: []}, error, arg) => [
+        {type: "CommentsInfo", id: arg.id},
+        ...result.comments.map(({id}) => ({type: "CommentInfo", id}) as const)
+      ]
     }),
     getPostComments: builder.query<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, UId & {options: AmountOptions}>({
       query: ({ id, options }) => ({
         url: `/posts/${id}/comments${getProperQuery(options)}`,
       }),
-      providesTags: ["CommentInfo"],
+      providesTags: (result = {comments: []}, error, arg) => [
+        {type: "PostCommentsInfo", id: arg.id},
+        ...result.comments.map(({id}) => ({type: "CommentInfo", id}) as const)
+      ],
     }),
     getNotifications: builder.query<{ notifications: NotificationsInfo[] }, void>({
       query: () => ({
         url: `/notifications`,
       }),
+      providesTags: (result = {notifications: []}, error, arg) => [
+        "NotificationsInfo",
+        ...result.notifications.map(({id}) => ({type: "NotificationInfo", id}) as const)
+      ]
     }),
-    clearNotification: builder.query<ReturnMessage, UId>({
+    clearNotification: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
         url: `/notifications/${id}`,
         method: "DELETE"
       }),
+      invalidatesTags: (result, error, arg) => [{type: "NotificationInfo", id: arg.id}]
     }),
-    clearNotifications: builder.query<ReturnMessage, void>({
+    clearNotifications: builder.mutation<ReturnMessage, void>({
       query: () => ({
         url: `/notifications`,
         method: "DELETE"
       }),
+      invalidatesTags: ["NotificationsInfo"]
     }),
     })
 });
