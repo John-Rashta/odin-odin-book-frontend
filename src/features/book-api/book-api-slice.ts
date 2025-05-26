@@ -225,7 +225,17 @@ export const apiSlice = createApi({
       providesTags: (result = {users: []}, error, arg) => [
         "SearchInfo",
         ...result.users.map(({id}) => ({type: "UserInfo", id}) as const)
-      ]
+      ],
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+        const { user } = queryArgs;
+
+        return { user }
+      },
+      merge: (currentCache, newItems, {arg}) => {
+        if (currentCache.users.length === arg.options.skip) {
+          currentCache.users.push(...newItems.users);
+        }
+      },
     }),
     getUser: builder.query<{ user: (UserInfo & UserExtra) }, string>({
       query: (user) => ({
@@ -240,7 +250,16 @@ export const apiSlice = createApi({
       providesTags: (result = {users: []}, error, arg) => [
         "UsersInfo",
         ...result.users.map(({id}) => ({type: "UserInfo", id}) as const)
-      ]
+      ],
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+
+        return endpointName
+      },
+      merge: (currentCache, newItems, {arg}) => {
+        if (currentCache.users.length === arg.skip) {
+          currentCache.users.push(...newItems.users);
+        }
+      },
     }),
     getUserPosts: builder.query<{ posts: (FullPostInfo & Likes & YourLike)[] }, UId & {options: AmountOptions}>({
       query: ({id, options}) => ({
@@ -249,7 +268,17 @@ export const apiSlice = createApi({
       providesTags: (result = { posts:[] }, error, arg) => [
         {type: "UserPostsInfo", id: arg.id},
         ...result.posts.map(({id}) => ({type:"PostInfo", id}) as const)
-      ]
+      ],
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+        const { id } = queryArgs;
+
+        return { id }
+      },
+      merge: (currentCache, newItems, {arg}) => {
+        if (currentCache.posts.length === arg.options.skip) {
+          currentCache.posts.push(...newItems.posts);
+        }
+      },
     }),
     getFeed: builder.query<{ feed: (FullPostInfo & Likes & YourLike)[] }, AmountOptions>({
       query: (options) => ({
@@ -258,23 +287,62 @@ export const apiSlice = createApi({
       providesTags: (result  = {feed: []}, error, arg) => [
         "FeedInfo",
         ...result.feed.map(({id})=> ({type:"PostInfo", id}) as const)
-      ]
+      ],
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+
+        return endpointName
+      },
+      merge: (currentCache, newItems, {arg}) => {
+        if (currentCache.feed.length === arg.skip) {
+          currentCache.feed.push(...newItems.feed);
+        }
+      },
     }),
     getFollowers: builder.query<{ followers: (UserFollowType & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
         url: `/users/self/followers${getProperQuery(options)}`,
       }),
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+
+        return endpointName
+      },
+      merge: (currentCache, newItems, {arg}) => {
+        if (currentCache.followers.length === arg.skip) {
+          currentCache.followers.push(...newItems.followers);
+        }
+      },
     }),
     getFollows: builder.query<{ follows: (UserFollowType & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
         url: `/users/self/follows${getProperQuery(options)}`,
       }),
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+
+        return endpointName
+      },
+      merge: (currentCache, newItems, {arg}) => {
+        if (currentCache.follows.length === arg.skip) {
+          currentCache.follows.push(...newItems.follows);
+        }
+      },
     }),
     stopFollow: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
         url: `/users/${id}/follow`,
         method: "DELETE"
       }),
+      async onQueryStarted({ id, ...patch }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          apiSlice.util.updateQueryData('getFollows', undefined, (draft) => {
+            Object.assign(draft, patch)
+          }),
+        )
+        try {
+          await queryFulfilled
+        } catch {
+          patchResult.undo()
+        }
+      },
     }),
     updateMe: builder.mutation<ReturnMessage, FormData>({
       query: (info) => ({
@@ -335,7 +403,16 @@ export const apiSlice = createApi({
       providesTags: (result= {posts: []}, error, arg) => [
         "PostsInfo",
         ...result.posts.map(({id}) => ({type: "PostInfo", id}) as const)
-      ]
+      ],
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+
+        return endpointName
+      },
+      merge: (currentCache, newItems, {arg}) => {
+        if (currentCache.posts.length === arg.skip) {
+          currentCache.posts.push(...newItems.posts);
+        }
+      },
     }),
     updatePost: builder.mutation<{post: UpdatedPost & Likes & YourLike}, UpdateContent & UId>({
       query: ({ id, content }) => ({
@@ -414,7 +491,17 @@ export const apiSlice = createApi({
       providesTags: (result = {comments: []}, error, arg) => [
         {type: "CommentsInfo", id: arg.id},
         ...result.comments.map(({id}) => ({type: "CommentInfo", id}) as const)
-      ]
+      ],
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+        const { id } = queryArgs;
+
+        return { id }
+      },
+      merge: (currentCache, newItems, {arg}) => {
+        if (currentCache.comments.length === arg.options.skip) {
+          currentCache.comments.push(...newItems.comments);
+        }
+      },
     }),
     getPostComments: builder.query<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, UId & {options: AmountOptions}>({
       query: ({ id, options }) => ({
@@ -424,6 +511,16 @@ export const apiSlice = createApi({
         {type: "PostCommentsInfo", id: arg.id},
         ...result.comments.map(({id}) => ({type: "CommentInfo", id}) as const)
       ],
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+        const { id } = queryArgs;
+
+        return { id }
+      },
+      merge: (currentCache, newItems, {arg}) => {
+        if (currentCache.comments.length === arg.options.skip) {
+          currentCache.comments.push(...newItems.comments);
+        }
+      },
     }),
     getNotifications: builder.query<{ notifications: NotificationsInfo[] }, void>({
       query: () => ({
