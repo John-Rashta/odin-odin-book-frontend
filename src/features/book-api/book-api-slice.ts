@@ -267,8 +267,8 @@ export const apiSlice = createApi({
           
         } catch {}
         
-        await cacheEntryRemoved
-      
+        await cacheEntryRemoved;
+        
         socket.off("user:updated", listener);
       },
     }),
