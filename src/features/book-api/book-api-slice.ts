@@ -3,6 +3,7 @@ import { AmountOptions } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
 import { notificationTypes, requestTypes } from "../../../util/types";
+import { UserUpdateSocket } from "../../../sockets/socketTypes";
 
 interface ReturnMessage {
     message?: string
@@ -188,7 +189,9 @@ export const apiSlice = createApi({
         "FeedInfo",
         "NotificationInfo",
         "NotificationsInfo",
-        "PostCommentsInfo"
+        "PostCommentsInfo",
+        "FollowersInfo",
+        "FollowsInfo",
     ],
     endpoints: (builder) => ({
     createUser: builder.mutation<ReturnMessage, Credentials>({
@@ -241,7 +244,33 @@ export const apiSlice = createApi({
       query: (user) => ({
         url: `/users/${user}`,
       }),
-      providesTags: (result, error, arg) => [ {type: "UserInfo", id: arg}]
+      providesTags: (result, error, arg) => [ {type: "UserInfo", id: arg}],
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: UserUpdateSocket) => {
+          if (data.id === arg) {
+              updateCachedData((draft) => {
+                if (data.type ===  "followers" && data.newCount) {
+                  draft.user.followerCount = data.newCount;
+                } else if (data.type === "user" && data.data) {
+                  Object.assign(draft.user, data.data);
+                }
+              })
+          }
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("user:updated", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved
+      
+        socket.off("user:updated", listener);
+      },
     }),
     getUsers: builder.query<{ users: (UserInfo & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
@@ -311,6 +340,7 @@ export const apiSlice = createApi({
           currentCache.followers.push(...newItems.followers);
         }
       },
+      providesTags: ["FollowersInfo"],
     }),
     getFollows: builder.query<{ follows: (UserFollowType & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
@@ -325,22 +355,32 @@ export const apiSlice = createApi({
           currentCache.follows.push(...newItems.follows);
         }
       },
+      providesTags: ["FollowsInfo"],
     }),
     stopFollow: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
         url: `/users/${id}/follow`,
         method: "DELETE"
       }),
-      async onQueryStarted({ id, ...patch }, { dispatch, queryFulfilled }) {
+        async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          apiSlice.util.updateQueryData('getFollows', undefined, (draft) => {
-            Object.assign(draft, patch)
+          apiSlice.util.updateQueryData('getFollows', {}, (draft) => {
+            const possibleIndex = draft.follows.findIndex((ele) => ele.id === id);
+            if (possibleIndex) {
+              draft.follows.splice(possibleIndex, 1);
+            }
           }),
         )
         try {
           await queryFulfilled
         } catch {
           patchResult.undo()
+
+          /**
+           * Alternatively, on failure you can invalidate the corresponding cache tags
+           * to trigger a re-fetch:
+           * dispatch(api.util.invalidateTags(['Post']))
+           */
         }
       },
     }),
@@ -381,7 +421,7 @@ export const apiSlice = createApi({
         url: `/requests/${id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["ReceivedInfo"]
+      invalidatesTags: ["ReceivedInfo", "FollowersInfo"],
     }),
     deleteRequest: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
@@ -443,12 +483,34 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
     }),
-    deleteComment: builder.mutation<ReturnMessage, UId>({
+    deleteComment: builder.mutation<UId & {postid: string, parentid?: string}, UId>({
       query: ({ id }) => ({
         url: `/comments/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
+       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: deletedInfo } = await queryFulfilled;
+          let patchResult;
+          if (deletedInfo.parentid) {
+              patchResult = dispatch(
+                apiSlice.util.updateQueryData('getCommentComments', {id: deletedInfo.parentid, options: {}}, (draft) => {
+                  const possibleIndex = draft.comments.findIndex((ele) => ele.id === deletedInfo.id);
+                  if (possibleIndex) {
+                    draft.comments.splice(possibleIndex, 1);
+                  }
+                }),
+              )
+          } else {
+              patchResult = dispatch(
+              apiSlice.util.updateQueryData('getPostComments', {id: deletedInfo.postid , options: {}}, (draft) => {
+                const possibleIndex = draft.comments.findIndex((ele) => ele.id === deletedInfo.id);
+                draft.comments.splice(possibleIndex, 1);
+              }),
+            )
+          }
+        } catch {}
+      },
     }),
     createPost: builder.mutation<{ postid: string }, FormData>({
       query: (form) => ({
@@ -457,12 +519,31 @@ export const apiSlice = createApi({
         body: form
       }),
     }),
-    createComment: builder.mutation<{ post: FullPostInfo & Likes }, UId & {info: FormData}>({
-      query: ({ id, info }) => ({
-        url: `/posts/${id}`,
+    createComment: builder.mutation<{ comment: FullCommentInfo & Likes & OwnCommentsCount }, UId & {info: FormData} & {comment?: string}>({
+      query: ({ id, info, comment }) => ({
+        url: `/posts/${id}${comment ? `?comment=${comment}` : ""}`,
         method: "POST",
         body: info
       }),
+      async onQueryStarted({ id, comment}, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newComment } = await queryFulfilled;
+          let patchResult;
+          if (comment) {
+              patchResult = dispatch(
+              apiSlice.util.updateQueryData('getCommentComments', {id: comment, options: {}}, (draft) => {
+                draft.comments.unshift(newComment.comment)
+              }),
+            )
+          } else {
+              patchResult = dispatch(
+              apiSlice.util.updateQueryData('getPostComments', {id, options: {}}, (draft) => {
+                draft.comments.unshift(newComment.comment)
+              }),
+            )
+          }
+        } catch {}
+      },
     }),
     changePostLike: builder.mutation<ReturnMessage, UId & LikeTypes>({
       query: ({ id, action }) => ({
