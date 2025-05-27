@@ -250,15 +250,16 @@ export const apiSlice = createApi({
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const listener = (data: UserUpdateSocket) => {
-          if (data.id === arg) {
-              updateCachedData((draft) => {
-                if (data.type ===  "followers" && data.newCount) {
-                  draft.user.followerCount = data.newCount;
-                } else if (data.type === "user" && data.data) {
-                  Object.assign(draft.user, data.data);
-                }
-              })
+          if (data.id !== arg) {
+            return;
           }
+          updateCachedData((draft) => {
+            if (data.type ===  "followers" && data.newCount) {
+              draft.user.followerCount = data.newCount;
+            } else if (data.type === "user" && data.data) {
+              Object.assign(draft.user, data.data);
+            }
+          });
         };
         try {
           await cacheDataLoaded;
