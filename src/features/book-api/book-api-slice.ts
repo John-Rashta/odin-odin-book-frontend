@@ -3,7 +3,7 @@ import { AmountOptions } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
 import { notificationTypes, requestTypes } from "../../../util/types";
-import { UserUpdateSocket } from "../../../sockets/socketTypes";
+import { NewPostSocket, PostUpdateSocket, UserUpdateSocket, BasicId, FollowersSocket, FollowsSocket, NotificationSocket, CommentUpdateSocket, CommentDeleteSocket, NewCommentSocket } from "../../../sockets/socketTypes";
 
 interface ReturnMessage {
     message?: string
@@ -239,6 +239,33 @@ export const apiSlice = createApi({
           currentCache.users.push(...newItems.users);
         }
       },
+      /*
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: UserUpdateSocket) => {
+          updateCachedData((draft) => {
+            if (data.type === "user" && data.data) {
+              const possibleIndex = draft.users.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                Object.assign(draft.users[possibleIndex], data.data);
+              }
+            }
+          });
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("user:updated", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("user:updated", listener);
+      },
+      */
     }),
     getUser: builder.query<{ user: (UserInfo & UserExtra) }, string>({
       query: (user) => ({
@@ -290,6 +317,33 @@ export const apiSlice = createApi({
           currentCache.users.push(...newItems.users);
         }
       },
+      /*
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: UserUpdateSocket) => {
+          updateCachedData((draft) => {
+            if (data.type === "user" && data.data) {
+              const possibleIndex = draft.users.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                Object.assign(draft.users[possibleIndex], data.data);
+              }
+            }
+          });
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("user:updated", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("user:updated", listener);
+      },
+      */
     }),
     getUserPosts: builder.query<{ posts: (FullPostInfo & Likes & YourLike)[] }, UId & {options: AmountOptions}>({
       query: ({id, options}) => ({
@@ -309,6 +363,55 @@ export const apiSlice = createApi({
           currentCache.posts.push(...newItems.posts);
         }
       },
+       async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const deleteListener = (data: BasicId) => {
+          updateCachedData((draft) => {
+            const possibleIndex = draft.posts.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              draft.posts.splice(possibleIndex, 1);
+            }
+          });
+        };
+        const newListener = (data: NewPostSocket) => {
+          if (data.id !== arg.id) {
+            return;
+          };
+          updateCachedData((draft) => {
+            draft.posts.unshift(data.post);
+          });
+        };
+        const updateListener = (data: PostUpdateSocket) => {
+          if (data.userid !== arg.id) {
+            return;
+          }
+          updateCachedData((draft) => {
+            const possibleIndex = draft.posts.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              if (data.type ===  "content" && data.content) {
+              draft.posts[possibleIndex].content = data.content;
+            } else if (data.type === "likes" && data.likes) {
+              draft.posts[possibleIndex].likesCount = data.likes;
+            }
+          }});
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("post:deleted", deleteListener);
+          socket.on("post:created", newListener);
+          socket.on("post:updated", updateListener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("post:deleted", deleteListener);
+          socket.off("post:created", newListener);
+          socket.off("post:updated", updateListener);
+      },
     }),
     getFeed: builder.query<{ feed: (FullPostInfo & Likes & YourLike)[] }, AmountOptions>({
       query: (options) => ({
@@ -327,6 +430,49 @@ export const apiSlice = createApi({
           currentCache.feed.push(...newItems.feed);
         }
       },
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const deleteListener = (data: BasicId) => {
+          updateCachedData((draft) => {
+            const possibleIndex = draft.feed.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              draft.feed.splice(possibleIndex, 1);
+            }
+          });
+        };
+        const newListener = (data: NewPostSocket) => {
+          updateCachedData((draft) => {
+            draft.feed.unshift(data.post);
+          });
+        };
+        const updateListener = (data: PostUpdateSocket) => {
+          updateCachedData((draft) => {
+            const possibleIndex = draft.feed.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              if (data.type ===  "content" && data.content) {
+              draft.feed[possibleIndex].content = data.content;
+            } else if (data.type === "likes" && data.likes) {
+              draft.feed[possibleIndex].likesCount = data.likes;
+            }
+          }});
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("post:deleted", deleteListener);
+          socket.on("post:created", newListener);
+          socket.on("post:updated", updateListener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("post:deleted", deleteListener);
+          socket.off("post:created", newListener);
+          socket.off("post:updated", updateListener);
+      },
     }),
     getFollowers: builder.query<{ followers: (UserFollowType & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
@@ -342,6 +488,32 @@ export const apiSlice = createApi({
         }
       },
       providesTags: ["FollowersInfo"],
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: FollowersSocket) => {
+          updateCachedData((draft) => {
+            if (data.action === "REMOVE") {
+            const possibleIndex = draft.followers.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              draft.followers.splice(possibleIndex, 1);
+            };
+          }
+          });
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("followers", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("followers", listener);
+      },
+      
     }),
     getFollows: builder.query<{ follows: (UserFollowType & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
@@ -357,6 +529,28 @@ export const apiSlice = createApi({
         }
       },
       providesTags: ["FollowsInfo"],
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: FollowsSocket) => {
+          updateCachedData((draft) => {
+            if (data.action === "ADD") {
+              draft.follows.unshift(data.data);
+            }
+          });
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("follows", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("follows", listener);
+      }
     }),
     stopFollow: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
@@ -436,6 +630,31 @@ export const apiSlice = createApi({
         url: `/posts/${id}`,
       }),
       providesTags: (result, error, arg) => [{type: "PostInfo", id: arg.id}],
+       async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: PostUpdateSocket) => {
+          if (data.id !== arg.id) {
+            return;
+          }
+          updateCachedData((draft) => {
+              if (data.type ===  "content" && data.content) {
+              draft.post.content = data.content;
+            } else if (data.type === "likes" && data.likes) {
+              draft.post.likesCount = data.likes;
+            }
+          });
+        };
+        try {
+          await cacheDataLoaded;
+          socket.on("post:updated", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        socket.off("post:updated", listener);
+      },
     }),
     getMyPosts: builder.query<{ posts: (FullPostInfo & Likes & YourLike)[] }, AmountOptions>({
       query: (options) => ({
@@ -475,6 +694,33 @@ export const apiSlice = createApi({
         url: `/comments/${id}`,
       }),
       providesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: CommentUpdateSocket) => {
+          if (data.id !== arg.id) {
+            return;
+          }
+          updateCachedData((draft) => {
+              if (data.type === "likes" && data.likes) {
+                draft.comment.likesCount = data.likes;
+              } else if (data.type === "comment" && data.comment) {
+                Object.assign(draft.comment, data.comment);
+              }
+          });
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("comment:updated", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("comment:updated", listener);
+      },
     }),
     updateComment: builder.mutation<{comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}, UpdateContent & UId>({
       query: ({ id, content }) => ({
@@ -584,6 +830,58 @@ export const apiSlice = createApi({
           currentCache.comments.push(...newItems.comments);
         }
       },
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const deleteListener = (data: CommentDeleteSocket) => {
+          if (data.parentid !== arg.id) {
+            return;
+          };
+          updateCachedData((draft) => {
+            const possibleIndex = draft.comments.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              draft.comments.splice(possibleIndex, 1);
+            }
+          });
+        };
+        const newListener = (data: NewCommentSocket) => {
+          if (data.comment.commentid !== arg.id) {
+            return;
+          };
+          updateCachedData((draft) => {
+            draft.comments.unshift(data.comment);
+          });
+        };
+        const updateListener = (data: CommentUpdateSocket) => {
+          if (data.parentid !== arg.id) {
+            return;
+          };
+          updateCachedData((draft) => {
+            const possibleIndex = draft.comments.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              if (data.type ===  "comment" && data.comment) {
+                Object.assign(draft.comments[possibleIndex], data.comment);
+            } else if (data.type === "likes" && data.likes) {
+              draft.comments[possibleIndex].likesCount = data.likes;
+            }
+          }});
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("comment:deleted", deleteListener);
+          socket.on("comment:created", newListener);
+          socket.on("comment:updated", updateListener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("comment:deleted", deleteListener);
+        socket.off("comment:created", newListener);
+        socket.off("comment:updated", updateListener);
+      },
     }),
     getPostComments: builder.query<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, UId & {options: AmountOptions}>({
       query: ({ id, options }) => ({
@@ -603,6 +901,58 @@ export const apiSlice = createApi({
           currentCache.comments.push(...newItems.comments);
         }
       },
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const deleteListener = (data: CommentDeleteSocket) => {
+          if (data.parentid) {
+            return;
+          };
+          updateCachedData((draft) => {
+            const possibleIndex = draft.comments.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              draft.comments.splice(possibleIndex, 1);
+            }
+          });
+        };
+        const newListener = (data: NewCommentSocket) => {
+          if (data.comment.commentid) {
+            return;
+          };
+          updateCachedData((draft) => {
+            draft.comments.unshift(data.comment);
+          });
+        };
+        const updateListener = (data: CommentUpdateSocket) => {
+          if (data.parentid) {
+            return;
+          };
+          updateCachedData((draft) => {
+            const possibleIndex = draft.comments.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              if (data.type ===  "comment" && data.comment) {
+                Object.assign(draft.comments[possibleIndex], data.comment);
+            } else if (data.type === "likes" && data.likes) {
+              draft.comments[possibleIndex].likesCount = data.likes;
+            }
+          }});
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("comment:deleted", deleteListener);
+          socket.on("comment:created", newListener);
+          socket.on("comment:updated", updateListener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("comment:deleted", deleteListener);
+        socket.off("comment:created", newListener);
+        socket.off("comment:updated", updateListener);
+      },
     }),
     getNotifications: builder.query<{ notifications: NotificationsInfo[] }, void>({
       query: () => ({
@@ -611,7 +961,29 @@ export const apiSlice = createApi({
       providesTags: (result = {notifications: []}, error, arg) => [
         "NotificationsInfo",
         ...result.notifications.map(({id}) => ({type: "NotificationInfo", id}) as const)
-      ]
+      ],
+       async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: NotificationSocket | BasicId & NotificationSocket) => {
+          updateCachedData((draft) => {
+              draft.notifications.unshift(data.notification);
+          });
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("extraNotifications", listener);
+          socket.on("notification", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("extraNotifications", listener);
+        socket.off("notification", listener);
+      },
     }),
     clearNotification: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({

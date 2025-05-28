@@ -119,12 +119,15 @@ interface CommentUpdateSocket {
     type: "comment" | "likes",
     likes?: number,
     id: string,
-    comment?: CommentType
+    comment?: CommentType,
+    postid: string,
+    parentid?: string,
 };
 
 interface CommentDeleteSocket {
     id: string,
     commentid: string,
+    parentid?: string,
 };
 
 interface PostUpdateSocket {
@@ -132,6 +135,7 @@ interface PostUpdateSocket {
     id: string,
     likes?: number,
     content?: string,
+    userid: string,
 };
 
 interface NewCommentSocket {
@@ -145,6 +149,19 @@ interface NewPostSocket {
 }
 
 interface PostType {
+    image: {
+        url: string;
+    } | null;
+    creator: {
+        id: string;
+        username: string;
+        icon: {
+            source: string;
+        };
+        customIcon: {
+            url: string;
+        } | null;
+    };
     content: string;
     id: string;
     createdAt: Date;
@@ -190,4 +207,13 @@ export {
     ClientToServerEvents,
     Response,
     UserUpdateSocket,
+    PostUpdateSocket,
+    NewPostSocket,
+    BasicId,
+    FollowersSocket,
+    FollowsSocket,
+    NotificationSocket,
+    CommentUpdateSocket,
+    CommentDeleteSocket,
+    NewCommentSocket,
 };
