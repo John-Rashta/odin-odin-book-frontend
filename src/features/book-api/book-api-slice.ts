@@ -656,8 +656,8 @@ export const apiSlice = createApi({
         socket.off("post:updated", listener);
       },
     }),
-    getMyPosts: builder.query<{ posts: (FullPostInfo & Likes & YourLike)[] }, AmountOptions>({
-      query: (options) => ({
+    getMyPosts: builder.query<{ posts: (FullPostInfo & Likes & YourLike)[] }, {options: AmountOptions, id: string}>({
+      query: ({options}) => ({
         url: `/posts${getProperQuery(options)}`,
       }),
       providesTags: (result= {posts: []}, error, arg) => [
@@ -669,9 +669,36 @@ export const apiSlice = createApi({
         return endpointName
       },
       merge: (currentCache, newItems, {arg}) => {
-        if (currentCache.posts.length === arg.skip) {
+        if (currentCache.posts.length === arg.options.skip) {
           currentCache.posts.push(...newItems.posts);
         }
+      },
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const updateListener = (data: PostUpdateSocket) => {
+          if (data.userid !== arg.id) {
+            return;
+          };
+          updateCachedData((draft) => {
+            const possibleIndex = draft.posts.findIndex((ele) => ele.id === data.id);
+            if (possibleIndex) {
+              if (data.type ===  "content" && data.content) {
+              draft.posts[possibleIndex].content = data.content;
+            } else if (data.type === "likes" && data.likes) {
+              draft.posts[possibleIndex].likesCount = data.likes;
+            }
+          }});
+        };
+        try {
+          await cacheDataLoaded;
+          socket.on("post:updated", updateListener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        socket.off("post:updated", updateListener);
       },
     }),
     updatePost: builder.mutation<{post: UpdatedPost & Likes & YourLike}, UpdateContent & UId>({
