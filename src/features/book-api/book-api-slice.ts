@@ -3,7 +3,7 @@ import { AmountOptions } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
 import { notificationTypes, requestTypes } from "../../../util/types";
-import { NewPostSocket, PostUpdateSocket, UserUpdateSocket, BasicId, FollowersSocket, FollowsSocket, NotificationSocket, CommentUpdateSocket, CommentDeleteSocket, NewCommentSocket } from "../../../sockets/socketTypes";
+import { NewPostSocket, PostUpdateSocket, UserUpdateSocket, BasicId, FollowersSocket, FollowsSocket, NotificationSocket, CommentUpdateSocket, CommentDeleteSocket, NewCommentSocket, RequestSocketOptions } from "../../../sockets/socketTypes";
 
 interface ReturnMessage {
     message?: string
@@ -220,6 +220,28 @@ export const apiSlice = createApi({
         url: "/users/self",
       }),
       providesTags: ["SelfInfo"],
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: FollowersSocket) => {
+          updateCachedData((draft) => {
+            if (data.action ===  "REMOVE") {
+              draft.user.followerCount -= 1;
+            }
+          });
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("followers", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("followers", listener);
+      },
     }),
     searchUsers: builder.query<{ users: (UserInfo & UserExtra)[] }, {user: string, options: AmountOptions}>({
       query: ({user, options}) => ({
@@ -596,11 +618,81 @@ export const apiSlice = createApi({
       query: () => ({
         url: "/requests",
       }),
+      providesTags: ["ReceivedInfo"] ,
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: RequestSocketOptions) => {
+          updateCachedData((draft) => {
+            if (data.action === "ADD" && data.data.request) {
+              draft.received.unshift(data.data.request);
+            } else if (data.action === "REMOVE" && data.data.id && data.data.userid) {
+              if (!draft.received[0]) {
+                return;
+              };
+              if (draft.received[0].targetid !== data.data.userid) {
+                return;
+              };
+
+              const possibleIndex = draft.received.findIndex((ele) =>  ele.id === data.data.id);
+              if (possibleIndex) {
+                draft.received.splice(possibleIndex, 1);
+              };
+            };
+          });
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("request", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("request", listener);
+      },
     }),
     getSentRequests: builder.query<{ sent: (RequestInfo & SentExtra)[] }, void>({
       query: () => ({
         url: "/requests/sent",
       }),
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: RequestSocketOptions) => {
+          if (data.action === "ADD") {
+            return;
+          };
+          updateCachedData((draft) => {
+            if (data.action === "REMOVE" && data.data.id && data.data.userid) {
+              if (!draft.sent[0]) {
+                return;
+              };
+              if (draft.sent[0].senderid === data.data.userid) {
+                return;
+              };
+
+              const possibleIndex = draft.sent.findIndex((ele) =>  ele.id === data.data.id);
+              if (possibleIndex) {
+                draft.sent.splice(possibleIndex, 1);
+              };
+            };
+          });
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("request", listener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("request", listener);
+      },
       providesTags: ["SentInfo"]
     }),
     makeRequest: builder.mutation<ReturnMessage, RequestCreate>({
@@ -616,14 +708,19 @@ export const apiSlice = createApi({
         url: `/requests/${id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["ReceivedInfo", "FollowersInfo"],
+      invalidatesTags: ["ReceivedInfo", "FollowersInfo", "SelfInfo"],
     }),
-    deleteRequest: builder.mutation<ReturnMessage, UId>({
+    deleteRequest: builder.mutation<ReturnMessage, UId & {type: "CANCEL" | "REJECT"}>({
       query: ({id}) => ({
         url: `/requests/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["ReceivedInfo", "SentInfo"]
+      invalidatesTags: (result, error, arg) => {
+        if (arg.type === "CANCEL") {
+          return ["SentInfo"];
+        };
+        return ["ReceivedInfo"];
+      }
     }),
     getPost: builder.query<{ post: FullPostInfo & Likes & YourLike }, UId>({
       query: ({ id }) => ({

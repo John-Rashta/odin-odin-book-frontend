@@ -216,4 +216,5 @@ export {
     CommentUpdateSocket,
     CommentDeleteSocket,
     NewCommentSocket,
+    RequestSocketOptions,
 };
