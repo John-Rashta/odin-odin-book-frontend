@@ -51,6 +51,7 @@ interface RequestSocketOptions {
     data: {
         id?: string,
         userid?: string,
+        myid?: string,
         request?: {
             sender: {
         id: string;

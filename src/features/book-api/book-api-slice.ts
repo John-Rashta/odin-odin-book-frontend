@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AmountOptions } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
-import { notificationTypes, requestTypes } from "../../../util/types";
+import { InitialPageParam, notificationTypes, requestTypes } from "../../../util/types";
 import { NewPostSocket, PostUpdateSocket, UserUpdateSocket, BasicId, FollowersSocket, FollowsSocket, NotificationSocket, CommentUpdateSocket, CommentDeleteSocket, NewCommentSocket, RequestSocketOptions } from "../../../sockets/socketTypes";
 
 interface ReturnMessage {
@@ -231,16 +231,37 @@ export const apiSlice = createApi({
             }
           });
         };
+
+        const requestListener = (data: RequestSocketOptions) => {
+          if (data.action ===  "REMOVE") {
+              if (data.data.userid && (data.data.userid !== data.data.myid)) {
+                apiSlice.util.invalidateTags([{type: "UserInfo", id: data.data.userid}]);
+              }
+            }
+        };
+
+        const updateListener = (data: UserUpdateSocket) => {
+          if (data.type ===  "user" && data.data) {
+            apiSlice.util.invalidateTags([{type: "UserInfo", id: data.data.id}]);
+            return;
+          };
+          return;
+
+        };
         try {
           await cacheDataLoaded;
 
           socket.on("followers", listener);
+          socket.on("request", requestListener);
+          socket.on("user:updated", updateListener);
           
         } catch {}
         
         await cacheEntryRemoved;
         
         socket.off("followers", listener);
+        socket.off("request", requestListener);
+        socket.off("user:updated", updateListener);
       },
     }),
     searchUsers: builder.query<{ users: (UserInfo & UserExtra)[] }, {user: string, options: AmountOptions}>({
@@ -322,6 +343,36 @@ export const apiSlice = createApi({
         socket.off("user:updated", listener);
       },
     }),
+    getUsers: builder.infiniteQuery<{ users: (UserInfo & UserExtra)[] },void, InitialPageParam>({
+      infiniteQueryOptions: {
+        initialPageParam: {
+          skip: 0,
+          amount: 30,
+        },
+        getNextPageParam: (
+          lastPage,
+          allPages,
+          lastPageParam,
+          allPageParams,
+        ) => {
+          if (lastPage.users.length === lastPageParam.amount) {
+            return {
+              skip: lastPageParam.amount + lastPageParam.skip,
+              amount: lastPageParam.amount,
+            }
+          } else {
+            return undefined;
+          }
+        },
+      },
+      query: ({pageParam}) => ({
+        url: `/users${getProperQuery(pageParam)}`,
+      }),
+      providesTags: (result = {pages: [], pageParams: []}, error, arg) => [
+        "UsersInfo",
+        ...result.pages.map(({users}) => users.map(({id}) => ({type: "UserInfo", id}) as const)).flat(),
+      ],
+      /*
     getUsers: builder.query<{ users: (UserInfo & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
         url: `/users${getProperQuery(options)}`,
@@ -338,7 +389,7 @@ export const apiSlice = createApi({
         if (currentCache.users.length === arg.skip) {
           currentCache.users.push(...newItems.users);
         }
-      },
+      }, */
       /*
       async onCacheEntryAdded(
         arg,
@@ -509,7 +560,10 @@ export const apiSlice = createApi({
           currentCache.followers.push(...newItems.followers);
         }
       },
-      providesTags: ["FollowersInfo"],
+      providesTags: (result = {followers: []}, error, arg) => [
+        "FollowersInfo",
+        ...result.followers.map(({id}) => ({type: "UserInfo", id}) as const)
+      ],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -550,7 +604,10 @@ export const apiSlice = createApi({
           currentCache.follows.push(...newItems.follows);
         }
       },
-      providesTags: ["FollowsInfo"],
+      providesTags: (result = {follows: []}, error, arg) => [
+        "FollowsInfo",
+        ...result.follows.map(({id}) => ({type: "UserInfo", id}) as const)
+      ],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -579,27 +636,7 @@ export const apiSlice = createApi({
         url: `/users/${id}/follow`,
         method: "DELETE"
       }),
-        async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        const patchResult = dispatch(
-          apiSlice.util.updateQueryData('getFollows', {}, (draft) => {
-            const possibleIndex = draft.follows.findIndex((ele) => ele.id === id);
-            if (possibleIndex) {
-              draft.follows.splice(possibleIndex, 1);
-            }
-          }),
-        )
-        try {
-          await queryFulfilled
-        } catch {
-          patchResult.undo()
-
-          /**
-           * Alternatively, on failure you can invalidate the corresponding cache tags
-           * to trigger a re-fetch:
-           * dispatch(api.util.invalidateTags(['Post']))
-           */
-        }
-      },
+      invalidatesTags: (result, error, arg) => [{ type: 'UserInfo', id: arg.id }],
     }),
     updateMe: builder.mutation<ReturnMessage, FormData>({
       query: (info) => ({
@@ -701,7 +738,7 @@ export const apiSlice = createApi({
         method: "POST",
         body: options
       }),
-      invalidatesTags: ["SentInfo"]
+      invalidatesTags: (result, error, arg) => [ "SentInfo",{ type: 'UserInfo', id: arg.id }],
     }),
     acceptRequest: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
@@ -710,16 +747,16 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["ReceivedInfo", "FollowersInfo", "SelfInfo"],
     }),
-    deleteRequest: builder.mutation<ReturnMessage, UId & {type: "CANCEL" | "REJECT"}>({
+    deleteRequest: builder.mutation<ReturnMessage, UId & {type: "CANCEL" | "REJECT"} & {userid: string}>({
       query: ({id}) => ({
         url: `/requests/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, arg) => {
         if (arg.type === "CANCEL") {
-          return ["SentInfo"];
+          return ["SentInfo", {type: "UserInfo", id: arg.userid}];
         };
-        return ["ReceivedInfo"];
+        return ["ReceivedInfo", {type: "UserInfo", id: arg.userid}];
       }
     }),
     getPost: builder.query<{ post: FullPostInfo & Likes & YourLike }, UId>({
@@ -902,10 +939,10 @@ export const apiSlice = createApi({
           let patchResult;
           if (comment) {
               patchResult = dispatch(
-              apiSlice.util.updateQueryData('getCommentComments', {id: comment, options: {}}, (draft) => {
-                draft.comments.unshift(newComment.comment)
-              }),
-            )
+                apiSlice.util.updateQueryData('getCommentComments', {id: comment, options: {}}, (draft) => {
+                  draft.comments.unshift(newComment.comment)
+                }),
+              );
           } else {
               patchResult = dispatch(
               apiSlice.util.updateQueryData('getPostComments', {id, options: {}}, (draft) => {
