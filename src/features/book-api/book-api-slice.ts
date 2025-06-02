@@ -264,24 +264,31 @@ export const apiSlice = createApi({
         socket.off("user:updated", updateListener);
       },
     }),
-    searchUsers: builder.query<{ users: (UserInfo & UserExtra)[] }, {user: string, options: AmountOptions}>({
-      query: ({user, options}) => ({
-        url: `/users/search?user=${user}${getProperQuery(options)}`,
+    searchUsers: builder.infiniteQuery<{ users: (UserInfo & UserExtra)[] }, string, InitialPageParam>({
+      infiniteQueryOptions: {
+        initialPageParam: {
+          skip: 0,
+          amount: 30,
+        },
+        getNextPageParam: (
+          lastPage,
+          allPages,
+          lastPageParam,
+          allPageParams,
+        ) => {
+          if (lastPage.users.length === lastPageParam.amount) {
+            return {
+              skip: lastPageParam.amount + lastPageParam.skip,
+              amount: lastPageParam.amount,
+            }
+          } else {
+            return undefined;
+          }
+        },
+      },
+      query: ({pageParam, queryArg}) => ({
+        url: `/users/search?user=${queryArg}${getProperQuery(pageParam)}`,
       }),
-      providesTags: (result = {users: []}, error, arg) => [
-        "SearchInfo",
-        ...result.users.map(({id}) => ({type: "UserInfo", id}) as const)
-      ],
-      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
-        const { user } = queryArgs;
-
-        return { user }
-      },
-      merge: (currentCache, newItems, {arg}) => {
-        if (currentCache.users.length === arg.options.skip) {
-          currentCache.users.push(...newItems.users);
-        }
-      },
       /*
       async onCacheEntryAdded(
         arg,
@@ -418,23 +425,30 @@ export const apiSlice = createApi({
       },
       */
     }),
-    getUserPosts: builder.query<{ posts: (FullPostInfo & Likes & YourLike)[] }, UId & {options: AmountOptions}>({
-      query: ({id, options}) => ({
-        url: `/users/${id}/posts${getProperQuery(options)}`,
+    getUserPosts: builder.infiniteQuery<{ posts: (FullPostInfo & Likes & YourLike)[] }, string, InitialPageParam>({
+      query: ({queryArg, pageParam}) => ({
+        url: `/users/${queryArg}/posts${getProperQuery(pageParam)}`,
       }),
-      providesTags: (result = { posts:[] }, error, arg) => [
-        {type: "UserPostsInfo", id: arg.id},
-        ...result.posts.map(({id}) => ({type:"PostInfo", id}) as const)
-      ],
-      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
-        const { id } = queryArgs;
-
-        return { id }
-      },
-      merge: (currentCache, newItems, {arg}) => {
-        if (currentCache.posts.length === arg.options.skip) {
-          currentCache.posts.push(...newItems.posts);
-        }
+      infiniteQueryOptions: {
+        initialPageParam: {
+          skip: 0,
+          amount: 30,
+        },
+        getNextPageParam: (
+          lastPage,
+          allPages,
+          lastPageParam,
+          allPageParams,
+        ) => {
+          if (lastPage.posts.length === lastPageParam.amount) {
+            return {
+              skip: lastPageParam.amount + lastPageParam.skip,
+              amount: lastPageParam.amount,
+            }
+          } else {
+            return undefined;
+          }
+        },
       },
        async onCacheEntryAdded(
         arg,
@@ -442,33 +456,38 @@ export const apiSlice = createApi({
       ) {
         const deleteListener = (data: BasicId) => {
           updateCachedData((draft) => {
-            const possibleIndex = draft.posts.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              draft.posts.splice(possibleIndex, 1);
-            }
+            draft.pages.forEach(({posts}) => {
+              const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                posts.splice(possibleIndex, 1);
+              }
+            })
           });
         };
         const newListener = (data: NewPostSocket) => {
-          if (data.id !== arg.id) {
+          if (data.id !== arg) {
             return;
           };
           updateCachedData((draft) => {
-            draft.posts.unshift(data.post);
+            draft.pages[0].posts.unshift(data.post);
           });
         };
         const updateListener = (data: PostUpdateSocket) => {
-          if (data.userid !== arg.id) {
+          if (data.userid !== arg) {
             return;
           }
           updateCachedData((draft) => {
-            const possibleIndex = draft.posts.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              if (data.type ===  "content" && data.content) {
-              draft.posts[possibleIndex].content = data.content;
-            } else if (data.type === "likes" && data.likes) {
-              draft.posts[possibleIndex].likesCount = data.likes;
-            }
-          }});
+            draft.pages.forEach(({posts}) => {
+               const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                if (data.type ===  "content" && data.content) {
+                posts[possibleIndex].content = data.content;
+                } else if (data.type === "likes" && data.likes) {
+                  posts[possibleIndex].likesCount = data.likes;
+                }
+              }
+            })
+          });
         };
         try {
           await cacheDataLoaded;
@@ -486,22 +505,30 @@ export const apiSlice = createApi({
           socket.off("post:updated", updateListener);
       },
     }),
-    getFeed: builder.query<{ feed: (FullPostInfo & Likes & YourLike)[] }, AmountOptions>({
-      query: (options) => ({
-        url: `/users/self/feed${getProperQuery(options)}`,
+    getFeed: builder.infiniteQuery<{ feed: (FullPostInfo & Likes & YourLike)[] }, void, InitialPageParam>({
+      query: ({pageParam}) => ({
+        url: `/users/self/feed${getProperQuery(pageParam)}`,
       }),
-      providesTags: (result  = {feed: []}, error, arg) => [
-        "FeedInfo",
-        ...result.feed.map(({id})=> ({type:"PostInfo", id}) as const)
-      ],
-      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
-
-        return endpointName
-      },
-      merge: (currentCache, newItems, {arg}) => {
-        if (currentCache.feed.length === arg.skip) {
-          currentCache.feed.push(...newItems.feed);
-        }
+      infiniteQueryOptions: {
+        initialPageParam: {
+          skip: 0,
+          amount: 30,
+        },
+        getNextPageParam: (
+          lastPage,
+          allPages,
+          lastPageParam,
+          allPageParams,
+        ) => {
+          if (lastPage.feed.length === lastPageParam.amount) {
+            return {
+              skip: lastPageParam.amount + lastPageParam.skip,
+              amount: lastPageParam.amount,
+            }
+          } else {
+            return undefined;
+          }
+        },
       },
       async onCacheEntryAdded(
         arg,
@@ -509,27 +536,32 @@ export const apiSlice = createApi({
       ) {
         const deleteListener = (data: BasicId) => {
           updateCachedData((draft) => {
-            const possibleIndex = draft.feed.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              draft.feed.splice(possibleIndex, 1);
-            }
+            draft.pages.forEach(({feed}) => {
+              const possibleIndex = feed.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                feed.splice(possibleIndex, 1);
+              };
+            })
           });
         };
         const newListener = (data: NewPostSocket) => {
           updateCachedData((draft) => {
-            draft.feed.unshift(data.post);
+            draft.pages[0].feed.unshift(data.post);
           });
         };
         const updateListener = (data: PostUpdateSocket) => {
           updateCachedData((draft) => {
-            const possibleIndex = draft.feed.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              if (data.type ===  "content" && data.content) {
-              draft.feed[possibleIndex].content = data.content;
-            } else if (data.type === "likes" && data.likes) {
-              draft.feed[possibleIndex].likesCount = data.likes;
-            }
-          }});
+            draft.pages.forEach(({feed}) => {
+              const possibleIndex = feed.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                if (data.type ===  "content" && data.content) {
+                  feed[possibleIndex].content = data.content;
+                } else if (data.type === "likes" && data.likes) {
+                  feed[possibleIndex].likesCount = data.likes;
+                };
+              };
+            })
+          });
         };
         try {
           await cacheDataLoaded;
@@ -547,23 +579,31 @@ export const apiSlice = createApi({
           socket.off("post:updated", updateListener);
       },
     }),
-    getFollowers: builder.query<{ followers: (UserFollowType & UserExtra)[] }, AmountOptions>({
-      query: (options) => ({
-        url: `/users/self/followers${getProperQuery(options)}`,
+    getFollowers: builder.infiniteQuery<{ followers: (UserFollowType & UserExtra)[] }, void, InitialPageParam>({
+      query: ({pageParam}) => ({
+        url: `/users/self/followers${getProperQuery(pageParam)}`,
       }),
-      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
-
-        return endpointName
+      infiniteQueryOptions: {
+        initialPageParam: {
+          skip: 0,
+          amount: 30,
+        },
+        getNextPageParam: (
+          lastPage,
+          allPages,
+          lastPageParam,
+          allPageParams,
+        ) => {
+          if (lastPage.followers.length === lastPageParam.amount) {
+            return {
+              skip: lastPageParam.amount + lastPageParam.skip,
+              amount: lastPageParam.amount,
+            }
+          } else {
+            return undefined;
+          }
+        },
       },
-      merge: (currentCache, newItems, {arg}) => {
-        if (currentCache.followers.length === arg.skip) {
-          currentCache.followers.push(...newItems.followers);
-        }
-      },
-      providesTags: (result = {followers: []}, error, arg) => [
-        "FollowersInfo",
-        ...result.followers.map(({id}) => ({type: "UserInfo", id}) as const)
-      ],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -571,11 +611,13 @@ export const apiSlice = createApi({
         const listener = (data: FollowersSocket) => {
           updateCachedData((draft) => {
             if (data.action === "REMOVE") {
-            const possibleIndex = draft.followers.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              draft.followers.splice(possibleIndex, 1);
+              draft.pages.forEach(({followers}) => {
+                const possibleIndex = followers.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  followers.splice(possibleIndex, 1);
+                };
+              });
             };
-          }
           });
         };
         try {
@@ -591,23 +633,31 @@ export const apiSlice = createApi({
       },
       
     }),
-    getFollows: builder.query<{ follows: (UserFollowType & UserExtra)[] }, AmountOptions>({
-      query: (options) => ({
-        url: `/users/self/follows${getProperQuery(options)}`,
+    getFollows: builder.infiniteQuery<{ follows: (UserFollowType & UserExtra)[] }, void, InitialPageParam>({
+      query: ({pageParam}) => ({
+        url: `/users/self/follows${getProperQuery(pageParam)}`,
       }),
-      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
-
-        return endpointName
+      infiniteQueryOptions: {
+        initialPageParam: {
+          skip: 0,
+          amount: 30,
+        },
+        getNextPageParam: (
+          lastPage,
+          allPages,
+          lastPageParam,
+          allPageParams,
+        ) => {
+          if (lastPage.follows.length === lastPageParam.amount) {
+            return {
+              skip: lastPageParam.amount + lastPageParam.skip,
+              amount: lastPageParam.amount,
+            }
+          } else {
+            return undefined;
+          }
+        },
       },
-      merge: (currentCache, newItems, {arg}) => {
-        if (currentCache.follows.length === arg.skip) {
-          currentCache.follows.push(...newItems.follows);
-        }
-      },
-      providesTags: (result = {follows: []}, error, arg) => [
-        "FollowsInfo",
-        ...result.follows.map(({id}) => ({type: "UserInfo", id}) as const)
-      ],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -615,7 +665,7 @@ export const apiSlice = createApi({
         const listener = (data: FollowsSocket) => {
           updateCachedData((draft) => {
             if (data.action === "ADD") {
-              draft.follows.unshift(data.data);
+              draft.pages[0].follows.unshift(data.data);
             }
           });
         };
@@ -790,40 +840,51 @@ export const apiSlice = createApi({
         socket.off("post:updated", listener);
       },
     }),
-    getMyPosts: builder.query<{ posts: (FullPostInfo & Likes & YourLike)[] }, {options: AmountOptions, id: string}>({
-      query: ({options}) => ({
-        url: `/posts${getProperQuery(options)}`,
+    getMyPosts: builder.infiniteQuery<{ posts: (FullPostInfo & Likes & YourLike)[] }, string,  InitialPageParam>({
+      query: ({pageParam}) => ({
+        url: `/posts${getProperQuery(pageParam)}`,
       }),
-      providesTags: (result= {posts: []}, error, arg) => [
-        "PostsInfo",
-        ...result.posts.map(({id}) => ({type: "PostInfo", id}) as const)
-      ],
-      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
-
-        return endpointName
-      },
-      merge: (currentCache, newItems, {arg}) => {
-        if (currentCache.posts.length === arg.options.skip) {
-          currentCache.posts.push(...newItems.posts);
-        }
+      infiniteQueryOptions: {
+        initialPageParam: {
+          skip: 0,
+          amount: 30,
+        },
+        getNextPageParam: (
+          lastPage,
+          allPages,
+          lastPageParam,
+          allPageParams,
+        ) => {
+          if (lastPage.posts.length === lastPageParam.amount) {
+            return {
+              skip: lastPageParam.amount + lastPageParam.skip,
+              amount: lastPageParam.amount,
+            }
+          } else {
+            return undefined;
+          }
+        },
       },
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const updateListener = (data: PostUpdateSocket) => {
-          if (data.userid !== arg.id) {
+          if (data.userid !== arg) {
             return;
           };
           updateCachedData((draft) => {
-            const possibleIndex = draft.posts.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              if (data.type ===  "content" && data.content) {
-              draft.posts[possibleIndex].content = data.content;
-            } else if (data.type === "likes" && data.likes) {
-              draft.posts[possibleIndex].likesCount = data.likes;
-            }
-          }});
+            draft.pages.forEach(({posts}) => {
+              const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                if (data.type ===  "content" && data.content) {
+                  posts[possibleIndex].content = data.content;
+                } else if (data.type === "likes" && data.likes) {
+                  posts[possibleIndex].likesCount = data.likes;
+                };
+              };
+            });
+          });
         };
         try {
           await cacheDataLoaded;
@@ -901,19 +962,25 @@ export const apiSlice = createApi({
           const { data: deletedInfo } = await queryFulfilled;
           let patchResult;
           if (deletedInfo.parentid) {
-              patchResult = dispatch(
-                apiSlice.util.updateQueryData('getCommentComments', {id: deletedInfo.parentid, options: {}}, (draft) => {
-                  const possibleIndex = draft.comments.findIndex((ele) => ele.id === deletedInfo.id);
+            patchResult = dispatch(
+              apiSlice.util.updateQueryData('getCommentComments', deletedInfo.parentid, (draft) => {
+                draft.pages.forEach(({comments}) => {
+                  const possibleIndex = comments.findIndex((ele) => ele.id === deletedInfo.id);
                   if (possibleIndex) {
-                    draft.comments.splice(possibleIndex, 1);
-                  }
-                }),
-              )
+                    comments.splice(possibleIndex, 1);
+                  };
+                });
+              }),
+            );
           } else {
               patchResult = dispatch(
-              apiSlice.util.updateQueryData('getPostComments', {id: deletedInfo.postid , options: {}}, (draft) => {
-                const possibleIndex = draft.comments.findIndex((ele) => ele.id === deletedInfo.id);
-                draft.comments.splice(possibleIndex, 1);
+              apiSlice.util.updateQueryData('getPostComments',deletedInfo.postid, (draft) => {
+                draft.pages.forEach(({comments}) => {
+                  const possibleIndex = comments.findIndex((ele) => ele.id === deletedInfo.id);
+                  if (possibleIndex) {
+                    comments.splice(possibleIndex, 1);
+                  }
+                })
               }),
             )
           }
@@ -939,14 +1006,14 @@ export const apiSlice = createApi({
           let patchResult;
           if (comment) {
               patchResult = dispatch(
-                apiSlice.util.updateQueryData('getCommentComments', {id: comment, options: {}}, (draft) => {
-                  draft.comments.unshift(newComment.comment)
+                apiSlice.util.updateQueryData('getCommentComments', comment, (draft) => {
+                  draft.pages[0].comments.unshift(newComment.comment)
                 }),
               );
           } else {
               patchResult = dispatch(
-              apiSlice.util.updateQueryData('getPostComments', {id, options: {}}, (draft) => {
-                draft.comments.unshift(newComment.comment)
+              apiSlice.util.updateQueryData('getPostComments', id, (draft) => {
+                draft.pages[0].comments.unshift(newComment.comment);
               }),
             )
           }
@@ -973,60 +1040,72 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: (result, error, arg) => [{type:"CommentInfo", id: arg.id}],
     }),
-    getCommentComments: builder.query<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, UId & {options: AmountOptions}>({
-      query: ({ id, options }) => ({
-        url: `/comments/${id}/comments${getProperQuery(options)}`,
+    getCommentComments: builder.infiniteQuery<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, string,  InitialPageParam>({
+      query: ({ queryArg, pageParam }) => ({
+        url: `/comments/${queryArg}/comments${getProperQuery(pageParam)}`,
       }),
-      providesTags: (result = {comments: []}, error, arg) => [
-        {type: "CommentsInfo", id: arg.id},
-        ...result.comments.map(({id}) => ({type: "CommentInfo", id}) as const)
-      ],
-      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
-        const { id } = queryArgs;
-
-        return { id }
-      },
-      merge: (currentCache, newItems, {arg}) => {
-        if (currentCache.comments.length === arg.options.skip) {
-          currentCache.comments.push(...newItems.comments);
-        }
+      infiniteQueryOptions: {
+        initialPageParam: {
+          skip: 0,
+          amount: 30,
+        },
+        getNextPageParam: (
+          lastPage,
+          allPages,
+          lastPageParam,
+          allPageParams,
+        ) => {
+          if (lastPage.comments.length === lastPageParam.amount) {
+            return {
+              skip: lastPageParam.amount + lastPageParam.skip,
+              amount: lastPageParam.amount,
+            }
+          } else {
+            return undefined;
+          }
+        },
       },
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const deleteListener = (data: CommentDeleteSocket) => {
-          if (data.parentid !== arg.id) {
+          if (data.parentid !== arg) {
             return;
           };
           updateCachedData((draft) => {
-            const possibleIndex = draft.comments.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              draft.comments.splice(possibleIndex, 1);
-            }
+            draft.pages.forEach(({comments}) => {
+              const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                comments.splice(possibleIndex, 1);
+              };
+            })
           });
         };
         const newListener = (data: NewCommentSocket) => {
-          if (data.comment.commentid !== arg.id) {
+          if (data.comment.commentid !== arg) {
             return;
           };
           updateCachedData((draft) => {
-            draft.comments.unshift(data.comment);
+            draft.pages[0].comments.unshift(data.comment);
           });
         };
         const updateListener = (data: CommentUpdateSocket) => {
-          if (data.parentid !== arg.id) {
+          if (data.parentid !== arg) {
             return;
           };
           updateCachedData((draft) => {
-            const possibleIndex = draft.comments.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              if (data.type ===  "comment" && data.comment) {
-                Object.assign(draft.comments[possibleIndex], data.comment);
-            } else if (data.type === "likes" && data.likes) {
-              draft.comments[possibleIndex].likesCount = data.likes;
-            }
-          }});
+            draft.pages.forEach(({comments}) => {
+              const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                if (data.type ===  "comment" && data.comment) {
+                  Object.assign(comments[possibleIndex], data.comment);
+                } else if (data.type === "likes" && data.likes) {
+                  comments[possibleIndex].likesCount = data.likes;
+                }
+              }
+            });
+          });
         };
         try {
           await cacheDataLoaded;
@@ -1044,60 +1123,72 @@ export const apiSlice = createApi({
         socket.off("comment:updated", updateListener);
       },
     }),
-    getPostComments: builder.query<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, UId & {options: AmountOptions}>({
-      query: ({ id, options }) => ({
-        url: `/posts/${id}/comments${getProperQuery(options)}`,
+    getPostComments: builder.infiniteQuery<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, string, InitialPageParam>({
+      query: ({ queryArg, pageParam }) => ({
+        url: `/posts/${queryArg}/comments${getProperQuery(pageParam)}`,
       }),
-      providesTags: (result = {comments: []}, error, arg) => [
-        {type: "PostCommentsInfo", id: arg.id},
-        ...result.comments.map(({id}) => ({type: "CommentInfo", id}) as const)
-      ],
-      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
-        const { id } = queryArgs;
-
-        return { id }
-      },
-      merge: (currentCache, newItems, {arg}) => {
-        if (currentCache.comments.length === arg.options.skip) {
-          currentCache.comments.push(...newItems.comments);
-        }
+      infiniteQueryOptions: {
+        initialPageParam: {
+          skip: 0,
+          amount: 30,
+        },
+        getNextPageParam: (
+          lastPage,
+          allPages,
+          lastPageParam,
+          allPageParams,
+        ) => {
+          if (lastPage.comments.length === lastPageParam.amount) {
+            return {
+              skip: lastPageParam.amount + lastPageParam.skip,
+              amount: lastPageParam.amount,
+            }
+          } else {
+            return undefined;
+          }
+        },
       },
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const deleteListener = (data: CommentDeleteSocket) => {
-          if (data.parentid) {
+          if (data.parentid || data.postid !== arg) {
             return;
           };
           updateCachedData((draft) => {
-            const possibleIndex = draft.comments.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              draft.comments.splice(possibleIndex, 1);
-            }
+            draft.pages.forEach(({comments}) => {
+              const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                comments.splice(possibleIndex, 1);
+              };
+            })
           });
         };
         const newListener = (data: NewCommentSocket) => {
-          if (data.comment.commentid) {
+          if (data.comment.commentid || data.comment.postid !== arg) {
             return;
           };
           updateCachedData((draft) => {
-            draft.comments.unshift(data.comment);
+            draft.pages[0].comments.unshift(data.comment);
           });
         };
         const updateListener = (data: CommentUpdateSocket) => {
-          if (data.parentid) {
+          if (data.parentid || data.postid !== arg) {
             return;
           };
           updateCachedData((draft) => {
-            const possibleIndex = draft.comments.findIndex((ele) => ele.id === data.id);
-            if (possibleIndex) {
-              if (data.type ===  "comment" && data.comment) {
-                Object.assign(draft.comments[possibleIndex], data.comment);
-            } else if (data.type === "likes" && data.likes) {
-              draft.comments[possibleIndex].likesCount = data.likes;
-            }
-          }});
+            draft.pages.forEach(({comments}) => {
+              const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+              if (possibleIndex) {
+                if (data.type ===  "comment" && data.comment) {
+                  Object.assign(comments[possibleIndex], data.comment);
+                } else if (data.type === "likes" && data.likes) {
+                  comments[possibleIndex].likesCount = data.likes;
+                }
+              };
+            })
+          });
         };
         try {
           await cacheDataLoaded;

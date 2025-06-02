@@ -127,7 +127,7 @@ interface CommentUpdateSocket {
 
 interface CommentDeleteSocket {
     id: string,
-    commentid: string,
+    postid: string,
     parentid?: string,
 };
 
