@@ -166,7 +166,17 @@ interface NotificationsInfo {
 interface RequestCreate {
   id: string,
   type: requestTypes
-}
+};
+
+interface CommentInfo {
+  id: string;
+  content: string;
+  edited: boolean;
+  commentid: string | null;
+  postid: string;
+  sentAt: Date;
+  senderid: string;
+};
 
 export const apiSlice = createApi({
     reducerPath: "api",
@@ -174,6 +184,7 @@ export const apiSlice = createApi({
         baseUrl: "http://localhost:3000",
         credentials: "include",
     }),
+    keepUnusedDataFor: 3,
     tagTypes: [
         "SelfInfo",
         "PostInfo",
@@ -289,7 +300,7 @@ export const apiSlice = createApi({
       query: ({pageParam, queryArg}) => ({
         url: `/users/search?user=${queryArg}${getProperQuery(pageParam)}`,
       }),
-      /*
+      providesTags: ["SearchInfo"],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -297,25 +308,63 @@ export const apiSlice = createApi({
         const listener = (data: UserUpdateSocket) => {
           updateCachedData((draft) => {
             if (data.type === "user" && data.data) {
-              const possibleIndex = draft.users.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
-                Object.assign(draft.users[possibleIndex], data.data);
-              }
+              draft.pages.forEach(({users}) => {
+                const possibleIndex = users.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  Object.assign(users[possibleIndex], data.data);
+                }
+              })
             }
           });
+        };
+
+        const followsListener = (data: FollowsSocket) => {
+          if (data.action !== "ADD") {
+            return;
+          }
+          updateCachedData((draft) => {
+            draft.pages.forEach(({users}) => {
+              const possibleIndex = users.findIndex((ele) => ele.id === data.data.id);
+              if (possibleIndex) {
+                users[possibleIndex].followers = {id: "1"};
+                users[possibleIndex].receivedRequests = undefined;
+              }
+            })
+          });
+        };
+
+        const requestListener = (data: RequestSocketOptions) => {
+          if (data.action !== "REMOVE" || !data.data.userid || !data.data.myid) {
+            return;
+          };
+
+          if (data.data.userid === data.data.myid) {
+            return;
+          };
+          updateCachedData((draft) => {
+            draft.pages.forEach(({users}) => {
+              const possibleIndex = users.findIndex((ele) => ele.id === data.data.userid);
+              if (possibleIndex) {
+                users[possibleIndex].receivedRequests = undefined;
+              }
+            });
+          })
         };
         try {
           await cacheDataLoaded;
 
           socket.on("user:updated", listener);
+          socket.on("follows", followsListener);
+          socket.on("request", requestListener);
           
         } catch {}
         
         await cacheEntryRemoved;
         
         socket.off("user:updated", listener);
+        socket.off("follows", followsListener);
+        socket.off("request", requestListener);
       },
-      */
     }),
     getUser: builder.query<{ user: (UserInfo & UserExtra) }, string>({
       query: (user) => ({
@@ -375,10 +424,71 @@ export const apiSlice = createApi({
       query: ({pageParam}) => ({
         url: `/users${getProperQuery(pageParam)}`,
       }),
-      providesTags: (result = {pages: [], pageParams: []}, error, arg) => [
-        "UsersInfo",
-        ...result.pages.map(({users}) => users.map(({id}) => ({type: "UserInfo", id}) as const)).flat(),
-      ],
+      providesTags: ["UsersInfo"],
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+      ) {
+        const listener = (data: UserUpdateSocket) => {
+          updateCachedData((draft) => {
+            if (data.type === "user" && data.data) {
+              draft.pages.forEach(({users}) => {
+                const possibleIndex = users.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  Object.assign(users[possibleIndex], data.data);
+                }
+              })
+            }
+          });
+        };
+
+        const followsListener = (data: FollowsSocket) => {
+          if (data.action !== "ADD") {
+            return;
+          }
+          updateCachedData((draft) => {
+            draft.pages.forEach(({users}) => {
+              const possibleIndex = users.findIndex((ele) => ele.id === data.data.id);
+              if (possibleIndex) {
+                users[possibleIndex].followers = {id: "1"};
+                users[possibleIndex].receivedRequests = undefined;
+              }
+            })
+          });
+        };
+
+        const requestListener = (data: RequestSocketOptions) => {
+          if (data.action !== "REMOVE" || !data.data.userid || !data.data.myid) {
+            return;
+          };
+
+          if (data.data.userid === data.data.myid) {
+            return;
+          };
+          updateCachedData((draft) => {
+            draft.pages.forEach(({users}) => {
+              const possibleIndex = users.findIndex((ele) => ele.id === data.data.userid);
+              if (possibleIndex) {
+                users[possibleIndex].receivedRequests = undefined;
+              }
+            });
+          })
+        };
+        try {
+          await cacheDataLoaded;
+
+          socket.on("user:updated", listener);
+          socket.on("follows", followsListener);
+          socket.on("request", requestListener);
+          
+        } catch {}
+        
+        await cacheEntryRemoved;
+        
+        socket.off("user:updated", listener);
+        socket.off("follows", followsListener);
+        socket.off("request", requestListener);
+      },
       /*
     getUsers: builder.query<{ users: (UserInfo & UserExtra)[] }, AmountOptions>({
       query: (options) => ({
@@ -504,6 +614,7 @@ export const apiSlice = createApi({
           socket.off("post:created", newListener);
           socket.off("post:updated", updateListener);
       },
+      providesTags: ["UserPostsInfo"]
     }),
     getFeed: builder.infiniteQuery<{ feed: (FullPostInfo & Likes & YourLike)[] }, void, InitialPageParam>({
       query: ({pageParam}) => ({
@@ -578,6 +689,7 @@ export const apiSlice = createApi({
           socket.off("post:created", newListener);
           socket.off("post:updated", updateListener);
       },
+      providesTags: ["FeedInfo"],
     }),
     getFollowers: builder.infiniteQuery<{ followers: (UserFollowType & UserExtra)[] }, void, InitialPageParam>({
       query: ({pageParam}) => ({
@@ -620,17 +732,70 @@ export const apiSlice = createApi({
             };
           });
         };
+
+        const userListener = (data: UserUpdateSocket) => {
+          updateCachedData((draft) => {
+            if (data.type === "user" && data.data) {
+              draft.pages.forEach(({followers}) => {
+                const possibleIndex = followers.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  Object.assign(followers[possibleIndex], data.data);
+                }
+              })
+            }
+          });
+        };
+
+        const followsListener = (data: FollowsSocket) => {
+          if (data.action !== "ADD") {
+            return;
+          }
+          updateCachedData((draft) => {
+            draft.pages.forEach(({followers}) => {
+              const possibleIndex = followers.findIndex((ele) => ele.id === data.data.id);
+              if (possibleIndex) {
+                followers[possibleIndex].followers = {id: "1"};
+                followers[possibleIndex].receivedRequests = undefined;
+              }
+            })
+          });
+        };
+
+        const requestListener = (data: RequestSocketOptions) => {
+          if (data.action !== "REMOVE" || !data.data.userid || !data.data.myid) {
+            return;
+          };
+
+          if (data.data.userid === data.data.myid) {
+            return;
+          };
+          updateCachedData((draft) => {
+            draft.pages.forEach(({followers}) => {
+              const possibleIndex = followers.findIndex((ele) => ele.id === data.data.userid);
+              if (possibleIndex) {
+                followers[possibleIndex].receivedRequests = undefined;
+              }
+            });
+          })
+        };
         try {
           await cacheDataLoaded;
 
           socket.on("followers", listener);
+          socket.on("user:updated", userListener);
+          socket.on("follows", followsListener);
+          socket.on("request", requestListener);
           
         } catch {}
         
         await cacheEntryRemoved;
         
         socket.off("followers", listener);
+        socket.off("user:updated", userListener);
+        socket.off("follows", followsListener);
+        socket.off("request", requestListener);
       },
+      providesTags: ["FollowersInfo"],
       
     }),
     getFollows: builder.infiniteQuery<{ follows: (UserFollowType & UserExtra)[] }, void, InitialPageParam>({
@@ -669,17 +834,33 @@ export const apiSlice = createApi({
             }
           });
         };
+        const userListener = (data: UserUpdateSocket) => {
+          updateCachedData((draft) => {
+            if (data.type === "user" && data.data) {
+              draft.pages.forEach(({follows}) => {
+                const possibleIndex = follows.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  Object.assign(follows[possibleIndex], data.data);
+                }
+              })
+            }
+          });
+        };
+
         try {
           await cacheDataLoaded;
 
           socket.on("follows", listener);
+          socket.on("user:updated", userListener);
           
         } catch {}
         
         await cacheEntryRemoved;
         
         socket.off("follows", listener);
-      }
+        socket.off("user:updated", userListener);
+      },
+      providesTags: ["FollowsInfo"],
     }),
     stopFollow: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
@@ -687,6 +868,61 @@ export const apiSlice = createApi({
         method: "DELETE"
       }),
       invalidatesTags: (result, error, arg) => [{ type: 'UserInfo', id: arg.id }],
+      async onQueryStarted({ id }, { dispatch, getState ,queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          const queryArgs = apiSlice.util.selectCachedArgsForQuery(
+            getState(),
+            "searchUsers"
+          );
+
+          queryArgs.forEach((arg) => {
+            dispatch(
+              apiSlice.util.updateQueryData('searchUsers', arg, (draft) => {
+                draft.pages.forEach(({users}) => {
+                  const possibleIndex = users.findIndex((ele) => ele.id === id);
+                  if (possibleIndex) {
+                    users[possibleIndex].followers = undefined;
+                  }
+                })
+              }),
+            );
+          });
+
+          dispatch(
+            apiSlice.util.updateQueryData('getUsers', undefined, (draft) => {
+              draft.pages.forEach(({users}) => {
+                  const possibleIndex = users.findIndex((ele) => ele.id === id);
+                  if (possibleIndex) {
+                    users[possibleIndex].followers = undefined;
+                  }
+                })
+            }),
+          );
+
+          dispatch(
+            apiSlice.util.updateQueryData('getFollows', undefined, (draft) => {
+              draft.pages.forEach(({follows}) => {
+                const possibleIndex = follows.findIndex((ele) => ele.id === id);
+                if (possibleIndex) {
+                  follows.splice(possibleIndex, 1);
+                }
+              })
+            }),
+          );
+
+          dispatch(
+            apiSlice.util.updateQueryData('getFollowers', undefined, (draft) => {
+              draft.pages.forEach(({followers}) => {
+                const possibleIndex = followers.findIndex((ele) => ele.id === id);
+                if (possibleIndex) {
+                  followers[possibleIndex].followers = undefined;
+                }
+              })
+            }),
+          );
+        } catch {}
+      },
     }),
     updateMe: builder.mutation<ReturnMessage, FormData>({
       query: (info) => ({
@@ -782,20 +1018,64 @@ export const apiSlice = createApi({
       },
       providesTags: ["SentInfo"]
     }),
-    makeRequest: builder.mutation<ReturnMessage, RequestCreate>({
+    makeRequest: builder.mutation<UId, RequestCreate>({
       query: (options) => ({
         url: "/requests",
         method: "POST",
         body: options
       }),
       invalidatesTags: (result, error, arg) => [ "SentInfo",{ type: 'UserInfo', id: arg.id }],
+      async onQueryStarted({ id }, { dispatch, getState ,queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          const queryArgs = apiSlice.util.selectCachedArgsForQuery(
+            getState(),
+            "searchUsers"
+          );
+
+          queryArgs.forEach((arg) => {
+            dispatch(
+              apiSlice.util.updateQueryData('searchUsers', arg, (draft) => {
+                draft.pages.forEach(({users}) => {
+                  const possibleIndex = users.findIndex((ele) => ele.id === id);
+                  if (possibleIndex) {
+                    users[possibleIndex].receivedRequests = {id: data.id};
+                  }
+                })
+              }),
+            );
+          });
+
+          dispatch(
+            apiSlice.util.updateQueryData('getUsers', undefined, (draft) => {
+              draft.pages.forEach(({users}) => {
+                  const possibleIndex = users.findIndex((ele) => ele.id === id);
+                  if (possibleIndex) {
+                    users[possibleIndex].receivedRequests = {id: data.id};
+                  }
+                })
+            }),
+          );
+
+          dispatch(
+            apiSlice.util.updateQueryData('getFollowers', undefined, (draft) => {
+              draft.pages.forEach(({followers}) => {
+                  const possibleIndex = followers.findIndex((ele) => ele.id === id);
+                  if (possibleIndex) {
+                    followers[possibleIndex].receivedRequests = {id: data.id};
+                  }
+                })
+            }),
+          );
+        } catch {}
+      },
     }),
     acceptRequest: builder.mutation<ReturnMessage, UId>({
       query: ({id}) => ({
         url: `/requests/${id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["ReceivedInfo", "FollowersInfo", "SelfInfo"],
+      invalidatesTags: ["ReceivedInfo", "SelfInfo", "FollowersInfo"],
     }),
     deleteRequest: builder.mutation<ReturnMessage, UId & {type: "CANCEL" | "REJECT"} & {userid: string}>({
       query: ({id}) => ({
@@ -807,7 +1087,50 @@ export const apiSlice = createApi({
           return ["SentInfo", {type: "UserInfo", id: arg.userid}];
         };
         return ["ReceivedInfo", {type: "UserInfo", id: arg.userid}];
-      }
+      },
+      async onQueryStarted({ id, userid, type }, { dispatch, getState ,queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          if (type === "CANCEL") {
+            const queryArgs = apiSlice.util.selectCachedArgsForQuery(
+            getState(),
+            "searchUsers"
+            );
+            queryArgs.forEach((arg) => {
+              dispatch(
+                apiSlice.util.updateQueryData('searchUsers', arg, (draft) => {
+                  draft.pages.forEach(({users}) => {
+                    const possibleIndex = users.findIndex((ele) => ele.id === userid);
+                    if (possibleIndex) {
+                      users[possibleIndex].receivedRequests = undefined;
+                    }
+                  })
+                }),
+              );
+            });
+            dispatch(
+              apiSlice.util.updateQueryData('getUsers', undefined, (draft) => {
+                draft.pages.forEach(({users}) => {
+                    const possibleIndex = users.findIndex((ele) => ele.id === userid);
+                    if (possibleIndex) {
+                      users[possibleIndex].receivedRequests = undefined;
+                    }
+                  })
+              }),
+            );
+            dispatch(
+            apiSlice.util.updateQueryData('getFollowers', undefined, (draft) => {
+              draft.pages.forEach(({followers}) => {
+                  const possibleIndex = followers.findIndex((ele) => ele.id === id);
+                  if (possibleIndex) {
+                    followers[possibleIndex].receivedRequests = undefined;
+                  }
+                })
+            }),
+           );
+          }
+        } catch {}
+      },
     }),
     getPost: builder.query<{ post: FullPostInfo & Likes & YourLike }, UId>({
       query: ({ id }) => ({
@@ -950,6 +1273,35 @@ export const apiSlice = createApi({
         method: "PUT",
         body: content,
       }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: { comment } } = await queryFulfilled;
+          let patchResult;
+          if (comment.commentid) {
+            patchResult = dispatch(
+              apiSlice.util.updateQueryData('getCommentComments', comment.commentid, (draft) => {
+                draft.pages.forEach(({comments}) => {
+                  const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
+                  if (possibleIndex) {
+                    Object.assign(comments[possibleIndex], comment);
+                  };
+                });
+              }),
+            );
+          } else {
+              patchResult = dispatch(
+              apiSlice.util.updateQueryData('getPostComments', comment.postid, (draft) => {
+                draft.pages.forEach(({comments}) => {
+                  const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
+                   if (possibleIndex) {
+                    Object.assign(comments[possibleIndex], comment);
+                  };
+                })
+              }),
+            )
+          }
+        } catch {}
+      },
       invalidatesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
     }),
     deleteComment: builder.mutation<UId & {postid: string, parentid?: string}, UId>({
@@ -1020,7 +1372,7 @@ export const apiSlice = createApi({
         } catch {}
       },
     }),
-    changePostLike: builder.mutation<ReturnMessage, UId & LikeTypes>({
+    changePostLike: builder.mutation<YourLike & UpdatedPost, UId & LikeTypes>({
       query: ({ id, action }) => ({
         url: `/posts/${id}/likes`,
         method: "PUT",
@@ -1029,8 +1381,65 @@ export const apiSlice = createApi({
         }
       }),
       invalidatesTags: (result, error, arg) => [{type:"PostInfo", id: arg.id}],
+       async onQueryStarted({ id, action }, { dispatch, getState ,queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          dispatch(
+            apiSlice.util.updateQueryData('getFeed', undefined, (draft) => {
+              draft.pages.forEach(({feed}) => {
+                const possibleIndex = feed.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  if (action === "ADD") {
+                    feed[possibleIndex].likes = [{id:"1"}];
+                  } else {
+                    feed[possibleIndex].likes = undefined;
+                  }
+                }
+              });
+            }),
+          );
+
+          dispatch(
+            apiSlice.util.updateQueryData('getUserPosts', data.creatorid, (draft) => {
+              draft.pages.forEach(({posts}) => {
+                const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  if (action === "ADD") {
+                    posts[possibleIndex].likes = [{id:"1"}];
+                  } else {
+                    posts[possibleIndex].likes = undefined;
+                  }
+                }
+              });
+            }),
+          );
+
+          const queryArgs = apiSlice.util.selectCachedArgsForQuery(
+            getState(),
+            "getMyPosts"
+          );
+
+          queryArgs.forEach((myarg) => {
+            dispatch( 
+            apiSlice.util.updateQueryData('getMyPosts', myarg, (draft) => {
+              draft.pages.forEach(({posts}) => {
+                const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  if (action === "ADD") {
+                    posts[possibleIndex].likes = [{id:"1"}];
+                  } else {
+                    posts[possibleIndex].likes = undefined;
+                  }
+                }
+              });
+            }),
+          );
+          });
+        } catch {}
+      },
     }),
-    changeCommentLike: builder.mutation<ReturnMessage, UId & LikeTypes>({
+    changeCommentLike: builder.mutation<CommentInfo & YourLike, UId & LikeTypes>({
       query: ({ id, action }) => ({
         url: `/comments/${id}/likes`,
         method: "PUT",
@@ -1038,6 +1447,43 @@ export const apiSlice = createApi({
           action
         }
       }),
+      async onQueryStarted({ id, action}, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          let patchResult;
+          if (data.commentid) {
+              patchResult = dispatch(
+                apiSlice.util.updateQueryData('getCommentComments', data.commentid, (draft) => {
+                  draft.pages.forEach(({comments}) => {
+                    const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+                    if (possibleIndex) {
+                      if (action === "ADD") {
+                        comments[possibleIndex].likes = [{id:"1"}];
+                      } else {
+                        comments[possibleIndex].likes = undefined;
+                      }
+                    }
+                  });
+                }),
+              );
+          } else {
+            patchResult = dispatch(
+              apiSlice.util.updateQueryData('getPostComments', data.postid, (draft) => {
+                  draft.pages.forEach(({comments}) => {
+                    const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+                    if (possibleIndex) {
+                      if (action === "ADD") {
+                        comments[possibleIndex].likes = [{id:"1"}];
+                      } else {
+                        comments[possibleIndex].likes = undefined;
+                      }
+                    }
+                  })
+              }),
+            )
+          }
+        } catch {}
+      },
       invalidatesTags: (result, error, arg) => [{type:"CommentInfo", id: arg.id}],
     }),
     getCommentComments: builder.infiniteQuery<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, string,  InitialPageParam>({
@@ -1065,6 +1511,7 @@ export const apiSlice = createApi({
           }
         },
       },
+      providesTags: ["CommentsInfo"],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -1148,6 +1595,7 @@ export const apiSlice = createApi({
           }
         },
       },
+      providesTags: ["PostCommentsInfo"],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
