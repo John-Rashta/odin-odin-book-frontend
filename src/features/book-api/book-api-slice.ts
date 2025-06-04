@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { AmountOptions } from "../../../util/interfaces";
+import { RequestInfo, ReceivedExtra, SentExtra, UserExtra } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
 import { InitialPageParam, notificationTypes, requestTypes } from "../../../util/types";
@@ -32,37 +32,6 @@ interface UserInfo {
         url: string;
     } | null;
     followerCount: number;
-};
-
-interface RequestInfo {
-    id: string;
-    senderid: string;
-    targetid: string;
-    sentAt: Date;
-    type: requestTypes;
-};
-
-interface ReceivedExtra {
-  sender: {
-    id: string;
-    username: string;
-  };
-}
-
-interface SentExtra {
-   target: {
-    id: string;
-    username: string;
-  };
-}
-
-interface UserExtra {
-    receivedRequests?: {
-        id: string;
-    };
-    followers?: {
-        id: string;
-    };
 };
 
 interface IconInfo {
@@ -1086,7 +1055,7 @@ export const apiSlice = createApi({
         if (arg.type === "CANCEL") {
           return ["SentInfo", {type: "UserInfo", id: arg.userid}];
         };
-        return ["ReceivedInfo", {type: "UserInfo", id: arg.userid}];
+        return ["ReceivedInfo"];
       },
       async onQueryStarted({ id, userid, type }, { dispatch, getState ,queryFulfilled }) {
         try {
@@ -1701,3 +1670,10 @@ export const apiSlice = createApi({
     }),
     })
 });
+
+export const {
+  useGetReceivedRequestsQuery,
+  useGetSentRequestsQuery,
+  useAcceptRequestMutation,
+  useDeleteRequestMutation,
+} = apiSlice;
