@@ -36,10 +36,40 @@ interface UserExtra {
     };
 };
 
+interface UserFollowType {
+  id: string;
+    username: string;
+    icon: {
+        source: string;
+    };
+    customIcon: {
+        url: string;
+    } | null;
+};
+
+interface UserInfo {
+    id: string;
+    iconid: string;
+    username: string;
+    aboutMe?: string;
+    joinedAt: Date;
+    icon: {
+        id: number;
+        source: string;
+    };
+    customIcon: {
+        url: string;
+    } | null;
+    followerCount: number;
+};
+
+
 export {
     AmountOptions,
     RequestInfo,
     ReceivedExtra,
     SentExtra,
     UserExtra,
+    UserFollowType,
+    UserInfo
 };

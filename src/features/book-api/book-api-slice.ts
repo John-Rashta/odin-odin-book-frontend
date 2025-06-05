@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RequestInfo, ReceivedExtra, SentExtra, UserExtra } from "../../../util/interfaces";
+import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
 import { InitialPageParam, notificationTypes, requestTypes } from "../../../util/types";
@@ -16,22 +16,6 @@ interface Credentials {
 
 interface UId {
     id: string;
-};
-
-interface UserInfo {
-    id: string;
-    iconid: string;
-    username: string;
-    aboutMe?: string;
-    joinedAt: Date;
-    icon: {
-        id: number;
-        source: string;
-    };
-    customIcon: {
-        url: string;
-    } | null;
-    followerCount: number;
 };
 
 interface IconInfo {
@@ -111,17 +95,6 @@ interface OwnCommentsCount {
 
 interface LikeTypes {
   action: "ADD" | "REMOVE"
-};
-
-interface UserFollowType {
-  id: string;
-    username: string;
-    icon: {
-        source: string;
-    };
-    customIcon: {
-        url: string;
-    } | null;
 };
 
 interface NotificationsInfo {
@@ -1676,4 +1649,10 @@ export const {
   useGetSentRequestsQuery,
   useAcceptRequestMutation,
   useDeleteRequestMutation,
+  useGetFollowsInfiniteQuery,
+  useGetFollowersInfiniteQuery,
+  useStopFollowMutation,
+  useMakeRequestMutation,
+  useGetUsersInfiniteQuery,
+  useSearchUsersInfiniteQuery,
 } = apiSlice;
