@@ -63,6 +63,36 @@ interface UserInfo {
     followerCount: number;
 };
 
+interface FullPostInfo {
+  id: string;
+  content: string;
+  createdAt: Date;
+  creatorid: string;
+  edited: boolean;
+  image: {
+      url: string;
+  } | null;
+  creator: {
+      id: string;
+      username: string;
+      icon: {
+          source: string;
+      };
+      customIcon: {
+          url: string;
+      } | null;
+  };
+};
+
+interface Likes {
+  likesCount: number;
+};
+
+interface YourLike {
+  likes?: {
+    id: string
+  }[]
+};
 
 export {
     AmountOptions,
@@ -71,5 +101,8 @@ export {
     SentExtra,
     UserExtra,
     UserFollowType,
-    UserInfo
+    UserInfo,
+    FullPostInfo,
+    Likes,
+    YourLike,
 };

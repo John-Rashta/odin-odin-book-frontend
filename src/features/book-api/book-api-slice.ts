@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo } from "../../../util/interfaces";
+import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo, FullPostInfo, Likes, YourLike } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
 import { InitialPageParam, notificationTypes, requestTypes } from "../../../util/types";
@@ -21,27 +21,6 @@ interface UId {
 interface IconInfo {
   id: number;
   source: string;
-};
-
-interface FullPostInfo {
-  id: string;
-  content: string;
-  createdAt: Date;
-  creatorid: string;
-  edited: boolean;
-  image: {
-      url: string;
-  } | null;
-  creator: {
-      id: string;
-      username: string;
-      icon: {
-          source: string;
-      };
-      customIcon: {
-          url: string;
-      } | null;
-  };
 };
 
 interface UpdateContent {
@@ -77,16 +56,6 @@ interface FullCommentInfo {
   commentid: string | null;
   postid: string;
   senderid: string;
-};
-
-interface Likes {
-  likesCount: number;
-};
-
-interface YourLike {
-  likes?: {
-    id: string
-  }[]
 };
 
 interface OwnCommentsCount {
@@ -1655,4 +1624,7 @@ export const {
   useMakeRequestMutation,
   useGetUsersInfiniteQuery,
   useSearchUsersInfiniteQuery,
+  useGetMyPostsInfiniteQuery,
+  useGetFeedInfiniteQuery,
+  useChangePostLikeMutation,
 } = apiSlice;
