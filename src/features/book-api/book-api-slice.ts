@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo, FullPostInfo, Likes, YourLike } from "../../../util/interfaces";
+import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo, FullPostInfo, Likes, YourLike, OwnCommentsCount } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
 import { InitialPageParam, notificationTypes, requestTypes } from "../../../util/types";
@@ -56,10 +56,6 @@ interface FullCommentInfo {
   commentid: string | null;
   postid: string;
   senderid: string;
-};
-
-interface OwnCommentsCount {
-  ownCommentsCount: number;
 };
 
 interface LikeTypes {
@@ -446,7 +442,7 @@ export const apiSlice = createApi({
       },
       */
     }),
-    getUserPosts: builder.infiniteQuery<{ posts: (FullPostInfo & Likes & YourLike)[] }, string, InitialPageParam>({
+    getUserPosts: builder.infiniteQuery<{ posts: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] }, string, InitialPageParam>({
       query: ({queryArg, pageParam}) => ({
         url: `/users/${queryArg}/posts${getProperQuery(pageParam)}`,
       }),
@@ -490,7 +486,7 @@ export const apiSlice = createApi({
             return;
           };
           updateCachedData((draft) => {
-            draft.pages[0].posts.unshift(data.post);
+            draft.pages[0].posts.unshift({...data.post, ownCommentsCount:0});
           });
         };
         const updateListener = (data: PostUpdateSocket) => {
@@ -527,7 +523,7 @@ export const apiSlice = createApi({
       },
       providesTags: ["UserPostsInfo"]
     }),
-    getFeed: builder.infiniteQuery<{ feed: (FullPostInfo & Likes & YourLike)[] }, void, InitialPageParam>({
+    getFeed: builder.infiniteQuery<{ feed: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] }, void, InitialPageParam>({
       query: ({pageParam}) => ({
         url: `/users/self/feed${getProperQuery(pageParam)}`,
       }),
@@ -568,7 +564,7 @@ export const apiSlice = createApi({
         };
         const newListener = (data: NewPostSocket) => {
           updateCachedData((draft) => {
-            draft.pages[0].feed.unshift(data.post);
+            draft.pages[0].feed.unshift({...data.post, ownCommentsCount:0});
           });
         };
         const updateListener = (data: PostUpdateSocket) => {
@@ -1043,7 +1039,7 @@ export const apiSlice = createApi({
         } catch {}
       },
     }),
-    getPost: builder.query<{ post: FullPostInfo & Likes & YourLike }, UId>({
+    getPost: builder.query<{ post: FullPostInfo & Likes & YourLike & OwnCommentsCount }, UId>({
       query: ({ id }) => ({
         url: `/posts/${id}`,
       }),
@@ -1074,7 +1070,7 @@ export const apiSlice = createApi({
         socket.off("post:updated", listener);
       },
     }),
-    getMyPosts: builder.infiniteQuery<{ posts: (FullPostInfo & Likes & YourLike)[] }, string,  InitialPageParam>({
+    getMyPosts: builder.infiniteQuery<{ posts: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] }, string,  InitialPageParam>({
       query: ({pageParam}) => ({
         url: `/posts${getProperQuery(pageParam)}`,
       }),
@@ -1220,35 +1216,6 @@ export const apiSlice = createApi({
         url: `/comments/${id}`,
         method: "DELETE",
       }),
-       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        try {
-          const { data: deletedInfo } = await queryFulfilled;
-          let patchResult;
-          if (deletedInfo.parentid) {
-            patchResult = dispatch(
-              apiSlice.util.updateQueryData('getCommentComments', deletedInfo.parentid, (draft) => {
-                draft.pages.forEach(({comments}) => {
-                  const possibleIndex = comments.findIndex((ele) => ele.id === deletedInfo.id);
-                  if (possibleIndex) {
-                    comments.splice(possibleIndex, 1);
-                  };
-                });
-              }),
-            );
-          } else {
-              patchResult = dispatch(
-              apiSlice.util.updateQueryData('getPostComments',deletedInfo.postid, (draft) => {
-                draft.pages.forEach(({comments}) => {
-                  const possibleIndex = comments.findIndex((ele) => ele.id === deletedInfo.id);
-                  if (possibleIndex) {
-                    comments.splice(possibleIndex, 1);
-                  }
-                })
-              }),
-            )
-          }
-        } catch {}
-      },
     }),
     createPost: builder.mutation<{ postid: string }, FormData>({
       query: (form) => ({
@@ -1263,25 +1230,6 @@ export const apiSlice = createApi({
         method: "POST",
         body: info
       }),
-      async onQueryStarted({ id, comment}, { dispatch, queryFulfilled }) {
-        try {
-          const { data: newComment } = await queryFulfilled;
-          let patchResult;
-          if (comment) {
-              patchResult = dispatch(
-                apiSlice.util.updateQueryData('getCommentComments', comment, (draft) => {
-                  draft.pages[0].comments.unshift(newComment.comment)
-                }),
-              );
-          } else {
-              patchResult = dispatch(
-              apiSlice.util.updateQueryData('getPostComments', id, (draft) => {
-                draft.pages[0].comments.unshift(newComment.comment);
-              }),
-            )
-          }
-        } catch {}
-      },
     }),
     changePostLike: builder.mutation<YourLike & UpdatedPost, UId & LikeTypes>({
       query: ({ id, action }) => ({
@@ -1428,25 +1376,53 @@ export const apiSlice = createApi({
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const deleteListener = (data: CommentDeleteSocket) => {
-          if (data.parentid !== arg) {
+          if (data.parentid !== arg || data.superparentid !== arg) {
             return;
           };
-          updateCachedData((draft) => {
-            draft.pages.forEach(({comments}) => {
-              const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
-                comments.splice(possibleIndex, 1);
-              };
-            })
-          });
+
+          if (data.superparentid === arg && data.parentid) {
+            updateCachedData((draft) => {
+              draft.pages.forEach(({comments}) => {
+                const possibleIndex = comments.findIndex((ele) => ele.id === data.parentid);
+                if (possibleIndex) {
+                  comments[possibleIndex].ownCommentsCount -= 1;
+                };
+              })
+            });
+          };
+
+          if (data.parentid === arg) {
+            updateCachedData((draft) => {
+              draft.pages.forEach(({comments}) => {
+                const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  comments.splice(possibleIndex, 1);
+                };
+              })
+            });
+          };
         };
         const newListener = (data: NewCommentSocket) => {
-          if (data.comment.commentid !== arg) {
+          if (data.comment.commentid !== arg || data.superparentid !== arg) {
             return;
           };
-          updateCachedData((draft) => {
-            draft.pages[0].comments.unshift(data.comment);
-          });
+
+          if (data.superparentid === arg && data.comment.commentid) {
+            updateCachedData((draft) => {
+              draft.pages.forEach(({comments}) => {
+                const possibleIndex = comments.findIndex((ele) => ele.id === data.comment.commentid);
+                if (possibleIndex) {
+                  comments[possibleIndex].ownCommentsCount += 1;
+                };
+              })
+            });
+          }
+          
+          if (data.comment.commentid === arg) {
+            updateCachedData((draft) => {
+              draft.pages[0].comments.unshift(data.comment);
+            });
+          };
         };
         const updateListener = (data: CommentUpdateSocket) => {
           if (data.parentid !== arg) {
@@ -1512,25 +1488,57 @@ export const apiSlice = createApi({
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const deleteListener = (data: CommentDeleteSocket) => {
-          if (data.parentid || data.postid !== arg) {
+          if (data.postid !== arg) {
             return;
           };
-          updateCachedData((draft) => {
-            draft.pages.forEach(({comments}) => {
-              const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
-                comments.splice(possibleIndex, 1);
-              };
-            })
-          });
+
+          if(!data.superparentid && data.parentid) {
+            updateCachedData((draft) => {
+              draft.pages.forEach(({comments}) => {
+                const possibleIndex = comments.findIndex((ele) => ele.id === data.parentid);
+                if (possibleIndex) {
+                  comments[possibleIndex].ownCommentsCount -= 1;
+                };
+              })
+            });
+            return;
+          };
+
+          if (!data.parentid) {
+            updateCachedData((draft) => {
+              draft.pages.forEach(({comments}) => {
+                const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+                if (possibleIndex) {
+                  comments.splice(possibleIndex, 1);
+                };
+              })
+            });
+            return;
+          };
         };
         const newListener = (data: NewCommentSocket) => {
-          if (data.comment.commentid || data.comment.postid !== arg) {
+          if (data.comment.postid !== arg) {
             return;
           };
-          updateCachedData((draft) => {
-            draft.pages[0].comments.unshift(data.comment);
-          });
+
+          if (!data.superparentid && data.comment.commentid) {
+            updateCachedData((draft) => {
+              draft.pages.forEach(({comments}) => {
+                const possibleIndex = comments.findIndex((ele) =>  ele.id === data.comment.commentid);
+                if (possibleIndex) {
+                  comments[possibleIndex].ownCommentsCount += 1;
+                }
+              })
+            });
+            return;
+          }
+
+          if (!data.comment.commentid) {
+            updateCachedData((draft) => {
+              draft.pages[0].comments.unshift(data.comment);
+            });
+            return;
+          };
         };
         const updateListener = (data: CommentUpdateSocket) => {
           if (data.parentid || data.postid !== arg) {
@@ -1627,4 +1635,6 @@ export const {
   useGetMyPostsInfiniteQuery,
   useGetFeedInfiniteQuery,
   useChangePostLikeMutation,
+  useGetUserPostsInfiniteQuery,
+  useGetUserQuery,
 } = apiSlice;

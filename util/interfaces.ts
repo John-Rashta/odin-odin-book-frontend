@@ -94,6 +94,10 @@ interface YourLike {
   }[]
 };
 
+interface OwnCommentsCount {
+  ownCommentsCount: number;
+};
+
 export {
     AmountOptions,
     RequestInfo,
@@ -105,4 +109,5 @@ export {
     FullPostInfo,
     Likes,
     YourLike,
+    OwnCommentsCount
 };

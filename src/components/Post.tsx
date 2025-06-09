@@ -1,12 +1,12 @@
 import { useSelector } from "react-redux"
 import { selectMyId } from "../features/manager/manager-slice"
 import { useChangePostLikeMutation } from "../features/book-api/book-api-slice";
-import { FullPostInfo, Likes, YourLike } from "../../util/interfaces";
+import { FullPostInfo, Likes, OwnCommentsCount, YourLike } from "../../util/interfaces";
 import { isUUID } from "validator";
 import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
 
-export default function Post({info} : {info: FullPostInfo & Likes & YourLike}) {
+export default function Post({info} : {info: FullPostInfo & Likes & YourLike & OwnCommentsCount}) {
     const myId = useSelector(selectMyId);
     const [ changeLike ] = useChangePostLikeMutation();
     
@@ -36,6 +36,9 @@ export default function Post({info} : {info: FullPostInfo & Likes & YourLike}) {
                     {info.image ? <img src={info.image.url} alt="" /> : <></>}
                 </div>
                 <div>
+                    <div>
+                        {info.ownCommentsCount}
+                    </div>
                     <div>
                         {info.likesCount}
                     </div>
