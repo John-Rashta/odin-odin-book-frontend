@@ -46,7 +46,7 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                             {comment.ownCommentsCount > 0 ? comment.ownCommentsCount : ""}
                         </div>
                         <div>
-                            {comment.likesCount}
+                            {comment.likesCount > 0 ? comment.likesCount : ""}
                         </div>
                         { isUUID(myId) &&
                             <button 
