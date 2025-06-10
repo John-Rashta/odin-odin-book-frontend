@@ -1,5 +1,6 @@
 import { useGetFeedInfiniteQuery } from "../features/book-api/book-api-slice";
 import Post from "./Post";
+import PostCreate from "./PostCreate";
 
 export default function Feed() {
     const { postsData, isFetchingNextPage, error, isLoading, hasNextPage, fetchNextPage } = useGetFeedInfiniteQuery(undefined, {
@@ -17,6 +18,7 @@ export default function Feed() {
                 </div> : error ? <div>
                     Failed Loading Feed!
                 </div> : (postsData && postsData.length > 0) ? <div>
+                    <PostCreate />
                     <div>
                     {
                         postsData.map((ele) => {

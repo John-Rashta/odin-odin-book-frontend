@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo, FullPostInfo, Likes, YourLike, OwnCommentsCount } from "../../../util/interfaces";
+import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo, FullPostInfo, Likes, YourLike, OwnCommentsCount, FullCommentInfo } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
 import { InitialPageParam, notificationTypes, requestTypes } from "../../../util/types";
@@ -33,29 +33,6 @@ interface UpdatedPost {
   createdAt: Date;
   creatorid: string;
   edited: boolean;
-};
-
-interface FullCommentInfo {
-  image: {
-      url: string;
-  } | null;
-  sender: {
-      id: string;
-      username: string;
-      icon: {
-          source: string;
-      };
-      customIcon: {
-          url: string;
-      } | null;
-  };
-  id: string;
-  content: string;
-  edited: boolean;
-  sentAt: Date;
-  commentid: string | null;
-  postid: string;
-  senderid: string;
 };
 
 interface LikeTypes {
@@ -1130,7 +1107,7 @@ export const apiSlice = createApi({
       query: ({ id, content }) => ({
         url: `/posts/${id}`,
         method: "PUT",
-        body: content,
+        body: {content},
       }),
       invalidatesTags: (result, error, arg) => [{type:"PostInfo", id: arg.id}],
     }),
@@ -1178,7 +1155,7 @@ export const apiSlice = createApi({
       query: ({ id, content }) => ({
         url: `/comments/${id}`,
         method: "PUT",
-        body: content,
+        body: {content},
       }),
       async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
         try {
@@ -1637,4 +1614,10 @@ export const {
   useChangePostLikeMutation,
   useGetUserPostsInfiniteQuery,
   useGetUserQuery,
+  useGetPostQuery,
+  useGetCommentCommentsInfiniteQuery,
+  useGetPostCommentsInfiniteQuery,
+  useCreateCommentMutation,
+  useCreatePostMutation,
+  useUpdateCommentMutation,
 } = apiSlice;

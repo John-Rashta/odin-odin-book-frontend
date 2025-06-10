@@ -98,6 +98,30 @@ interface OwnCommentsCount {
   ownCommentsCount: number;
 };
 
+
+interface FullCommentInfo {
+  image: {
+      url: string;
+  } | null;
+  sender: {
+      id: string;
+      username: string;
+      icon: {
+          source: string;
+      };
+      customIcon: {
+          url: string;
+      } | null;
+  };
+  id: string;
+  content: string;
+  edited: boolean;
+  sentAt: Date;
+  commentid: string | null;
+  postid: string;
+  senderid: string;
+};
+
 export {
     AmountOptions,
     RequestInfo,
@@ -109,5 +133,6 @@ export {
     FullPostInfo,
     Likes,
     YourLike,
-    OwnCommentsCount
+    OwnCommentsCount,
+    FullCommentInfo,
 };
