@@ -64,22 +64,34 @@ export default function PostEdit({postid, closeModal} : {postid: string, closeMo
   return (
     <>
       {postData && (
-        <form
-          onSubmit={handleSubmit}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <input
-            type="text"
-            name="editInput"
-            id="editInput"
-            onChange={(e) => setTextValue(e.target.value)}
-            value={textValue}
-          />
-          <button ref={cancelRef} onClick={() => closeModal()} type="button">
-            Cancel
-          </button>
-          <button type="submit">Confirm</button>
-        </form>
+        <div className="modalBackground" style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+        }}>
+          <div className="modalContainer" style={{
+            position: "absolute"
+          }}>
+            <form
+              onSubmit={handleSubmit}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                type="text"
+                name="editInput"
+                id="editInput"
+                onChange={(e) => setTextValue(e.target.value)}
+                value={textValue}
+              />
+              <button ref={cancelRef} onClick={() => closeModal()} type="button">
+                Cancel
+              </button>
+              <button type="submit">Confirm</button>
+            </form>
+          </div>
+        </div>
       )}
     </>
   );
