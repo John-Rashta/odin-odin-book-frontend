@@ -5,8 +5,9 @@ import { FullPostInfo, Likes, OwnCommentsCount, YourLike } from "../../util/inte
 import { isUUID } from "validator";
 import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
+import { ModalStartFunction } from "../../util/types";
 
-export default function Post({info} : {info: FullPostInfo & Likes & YourLike & OwnCommentsCount}) {
+export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & YourLike & OwnCommentsCount, modalFunc?: ModalStartFunction}) {
     const myId = useSelector(selectMyId);
     const [ changeLike ] = useChangePostLikeMutation();
     

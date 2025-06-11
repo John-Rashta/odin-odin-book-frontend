@@ -1,13 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo, FullPostInfo, Likes, YourLike, OwnCommentsCount, FullCommentInfo } from "../../../util/interfaces";
+import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo, FullPostInfo, Likes, YourLike, OwnCommentsCount, FullCommentInfo, ReturnMessage, NotificationsInfo } from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
 import { InitialPageParam, notificationTypes, requestTypes } from "../../../util/types";
 import { NewPostSocket, PostUpdateSocket, UserUpdateSocket, BasicId, FollowersSocket, FollowsSocket, NotificationSocket, CommentUpdateSocket, CommentDeleteSocket, NewCommentSocket, RequestSocketOptions } from "../../../sockets/socketTypes";
-
-interface ReturnMessage {
-    message?: string
-};
 
 interface Credentials {
   username: string;
@@ -37,14 +33,6 @@ interface UpdatedPost {
 
 interface LikeTypes {
   action: "ADD" | "REMOVE"
-};
-
-interface NotificationsInfo {
-  id: string;
-  content: string;
-  createdAt: Date;
-  type: notificationTypes;
-  typeid: string | null;
 };
 
 interface RequestCreate {
@@ -271,16 +259,53 @@ export const apiSlice = createApi({
             }
           });
         };
+
+         const followsListener = (data: FollowsSocket) => {
+          if (data.action !== "ADD") {
+            return;
+          };
+
+          if (data.data.id !== arg) {
+            return;
+          };
+
+           updateCachedData((draft) => {
+            draft.user.followers = {id: "1"};
+            draft.user.receivedRequests = undefined;
+          });
+        };
+
+        const requestListener = (data: RequestSocketOptions) => {
+          if (data.action !== "REMOVE" || !data.data.userid || !data.data.myid) {
+            return;
+          };
+
+          if (data.data.userid !== arg) {
+            return;
+          }
+
+          if (data.data.userid === data.data.myid) {
+            return;
+          };
+
+          updateCachedData((draft) => {
+            draft.user.receivedRequests = undefined;
+          });
+        };
         try {
           await cacheDataLoaded;
 
           socket.on("user:updated", listener);
+          socket.on("follows", followsListener);
+          socket.on("request", requestListener);
           
         } catch {}
         
         await cacheEntryRemoved;
         
         socket.off("user:updated", listener);
+        socket.off("follows", followsListener);
+        socket.off("request", requestListener);
       },
     }),
     getUsers: builder.infiniteQuery<{ users: (UserInfo & UserExtra)[] },void, InitialPageParam>({
@@ -1620,4 +1645,15 @@ export const {
   useCreateCommentMutation,
   useCreatePostMutation,
   useUpdateCommentMutation,
+  useUpdateMeMutation,
+  useLoginUserMutation,
+  useCreateUserMutation,
+  useLogoutUserMutation,
+  useGetIconsQuery,
+  useGetSelfQuery,
+  useUpdatePostMutation,
+  useGetNotificationsQuery,
+  useClearNotificationMutation,
+  useClearNotificationsMutation,
+  useGetCommentQuery,
 } = apiSlice;

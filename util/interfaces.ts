@@ -1,4 +1,4 @@
-import { requestTypes } from "./types";
+import { notificationTypes, requestTypes } from "./types";
 
 interface AmountOptions  {
   amount?: number;
@@ -122,6 +122,24 @@ interface FullCommentInfo {
   senderid: string;
 };
 
+
+interface ReturnMessage {
+    message?: string
+};
+
+interface PwInfo {
+  checkValue: string;
+  changeValue: React.Dispatch<React.SetStateAction<string>>;
+};
+
+interface NotificationsInfo {
+  id: string;
+  content: string;
+  createdAt: Date;
+  type: notificationTypes;
+  typeid: string | null;
+};
+
 export {
     AmountOptions,
     RequestInfo,
@@ -135,4 +153,7 @@ export {
     YourLike,
     OwnCommentsCount,
     FullCommentInfo,
+    ReturnMessage,
+    PwInfo,
+    NotificationsInfo,
 };

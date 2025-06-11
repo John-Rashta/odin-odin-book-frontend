@@ -5,8 +5,9 @@ import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
 import { isUUID } from "validator";
 import { useChangePostLikeMutation } from "../features/book-api/book-api-slice";
+import { ModalStartFunction } from "../../util/types";
 
-export default function PostProfile({post} : {post: FullPostInfo & Likes & YourLike & OwnCommentsCount}) {
+export default function PostProfile({post, modalFunc} : {post: FullPostInfo & Likes & YourLike & OwnCommentsCount, modalFunc?: ModalStartFunction}) {
     const myId = useSelector(selectMyId);
     const [ changeLike ] = useChangePostLikeMutation();
     return (
