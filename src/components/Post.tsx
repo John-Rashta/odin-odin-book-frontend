@@ -6,20 +6,24 @@ import { isUUID } from "validator";
 import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
 import { ModalStartFunction } from "../../util/types";
+import { useState } from "react";
+import { Ellipsis } from "lucide-react";
+import TextOptions from "./TextOptions";
 
 export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & YourLike & OwnCommentsCount, modalFunc?: ModalStartFunction}) {
     const myId = useSelector(selectMyId);
     const [ changeLike ] = useChangePostLikeMutation();
+    const [showOptions, setShowOptions] = useState(false);
     
     return (
-        <div data-id={info.id}>
+        <div className="clickOption" data-postid={info.id}>
             <div>
-                <img data-userid={info.creator.id} src={info.creator.customIcon?.url || info.creator.icon.source} alt="" />
+                <img className="userOption" data-userid={info.creator.id} src={info.creator.customIcon?.url || info.creator.icon.source} alt="" />
             </div>
             <div>
                 <div>
                     <div>
-                        <div data-userid={info.creator.id}>
+                        <div className="userOption" data-userid={info.creator.id}>
                         {info.creator.username}
                         </div>
                         <div>
@@ -47,12 +51,23 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
                     <button 
                         {...(info.likes ? {style: {backgroundColor: "black"}} : {})}
                         onClick={(e) => {
+                            e.stopPropagation();
                             e.currentTarget.disabled = true;
                             changeLike({id: info.id, action: (info.likes ? "REMOVE" : "ADD")}).unwrap().finally(() => {
                                 e.currentTarget.disabled = false;
                             })
                         }}
-                    >L</button>}
+                    >L</button>
+                    }
+                    {
+                        myId === info.creatorid ? <Ellipsis onClick={(e) => {
+                            e.stopPropagation();
+                            setShowOptions(!showOptions);
+                        }} /> : <></>
+                    }
+                    {
+                    (showOptions && typeof modalFunc === "function") && <TextOptions textId={info.id} type="POST" editFunc={modalFunc} closeFunc={() => setShowOptions(false)} />
+                    }
                 </div>
 
             </div>

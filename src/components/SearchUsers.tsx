@@ -3,6 +3,7 @@ import { useSearchUsersInfiniteQuery } from "../features/book-api/book-api-slice
 import { useLocation } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import User from "./User";
+import ClickWrapper from "./ClickWrapper";
 
 export default function SearchUsers() {
     const possibleSearch = useLocation().state;
@@ -34,13 +35,13 @@ export default function SearchUsers() {
                     </div> : error ? <div>
                         Error Searching!
                     </div> : (searchData && searchData.length > 0 && searchValue !== "") ? <div>
-                        <div>
+                        <ClickWrapper>
                             {
                                 searchData.map((ele) => {
                                     return <User key={ele.id} user={ele} />
                                 })
                             }
-                        </div>
+                        </ClickWrapper>
                             {
                                 (!isFetchingNextPage && hasNextPage) ? <button onClick={() => fetchNextPage()}>
                                     Load More

@@ -1,4 +1,5 @@
 import { useGetUsersInfiniteQuery } from "../features/book-api/book-api-slice";
+import ClickWrapper from "./ClickWrapper";
 import User from "./User";
 
 export default function Users() {
@@ -16,13 +17,16 @@ export default function Users() {
             </div> : error ? <div>
                 Failed Loading Users...
             </div> : (usersData && usersData.length > 0) ? <div>
-                <div>
+                <ClickWrapper>
                     {usersData.map((ele) => {
                         return <User key={ele.id} user={ele} />
                     })}
-                </div>
+                </ClickWrapper>
                 {
-                    (!isFetchingNextPage && hasNextPage) ? <button onClick={() => fetchNextPage()}>
+                    (!isFetchingNextPage && hasNextPage) ? <button onClick={(e) => {
+                        e.stopPropagation();
+                        fetchNextPage();
+                        }}>
                         Load More
                     </button> : <></>
                 }

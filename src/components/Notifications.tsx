@@ -1,4 +1,5 @@
 import { useClearNotificationsMutation, useGetNotificationsQuery } from "../features/book-api/book-api-slice"
+import ClickWrapper from "./ClickWrapper";
 import MiniNotifications from "./MiniNotifications";
 
 export default function Notifications() {
@@ -18,13 +19,16 @@ export default function Notifications() {
                 </div> : error ? <div>
                     Failed Loading Notifications!
                 </div> : (notificationsData && notificationsData.length > 0) ? <div>
-                    {
-                        notificationsData.map((ele) => {
-                            return <MiniNotifications key={ele.id} notification={ele} />
-                        })
-                    }
+                    <ClickWrapper>
+                        {
+                            notificationsData.map((ele) => {
+                                return <MiniNotifications key={ele.id} notification={ele} />
+                            })
+                        }
+                    </ClickWrapper>
                     <div>
-                        <button onClick={() => {
+                        <button onClick={(e) => {
+                            e.stopPropagation();
                             clearNotifications();
                         }}>Clear Notifications</button>
                     </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useGetFollowersInfiniteQuery, useGetFollowsInfiniteQuery } from "../features/book-api/book-api-slice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import User from "./User";
+import ClickWrapper from "./ClickWrapper";
 
 export default function Followships() {
     const [selectedType, setSelectedType] = useState("FOLLOWS");
@@ -32,15 +33,18 @@ export default function Followships() {
                         </div> : followersError ? <div>
                             Failed Loading Followers!
                         </div> : (followersData && followersData.length > 0) ? <div>
-                            <div>
+                            <ClickWrapper>
                             {
                                 followersData.map((ele) => {
                                 return <User key={ele.id} user={ele} />
                                 })
                             }
-                            </div>
+                            </ClickWrapper>
                             {
-                                (!isFetchingFollowerNext && hasNextFollower) ? <button onClick={() => fetchNextFollower()}>
+                                (!isFetchingFollowerNext && hasNextFollower) ? <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    fetchNextFollower();
+                                    }}>
                                     Load More
                                 </button> : <></>
                             }
@@ -53,15 +57,18 @@ export default function Followships() {
                         </div> : followsError ? <div>
                             Failed Loading Follows!
                         </div> : (followsData && followsData.length > 0) ? <div>
-                            <div>
+                            <ClickWrapper>
                             {
                                 followsData.map((ele) => {
                                     return <User key={ele.id} user={ele} />
                                 })
                             }
-                            </div>
+                            </ClickWrapper>
                             {
-                                (!isFetchingFollowNext && hasNextFollow) ? <button onClick={() => fetchNextFollow()}>
+                                (!isFetchingFollowNext && hasNextFollow) ? <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    fetchNextFollow();
+                                    }}>
                                     Load More
                                 </button> : <></>
                             }

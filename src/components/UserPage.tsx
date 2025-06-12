@@ -3,9 +3,15 @@ import { useGetUserPostsInfiniteQuery, useGetUserQuery } from "../features/book-
 import { selectUserId } from "../features/manager/manager-slice";
 import UserProfile from "./UserProfile";
 import Post from "./Post";
+import { useState } from "react";
+import PostEdit from "./PostEdit";
+import { isUUID } from "validator";
+import ClickWrapper from "./ClickWrapper";
 
 export default function UserPage() {
-    const userId = useSelector(selectUserId)
+    const userId = useSelector(selectUserId);
+     const [showModal, setShowModal] = useState(false);
+    const [editId, setEditId] = useState("");
     const {postsData, error: postsError, isLoading: postsLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useGetUserPostsInfiniteQuery(userId, {
         selectFromResult: result => ({
             ...result,
@@ -18,6 +24,11 @@ export default function UserPage() {
             userData: result.data?.user
         })
     });
+
+    const editFunction = function editFunctionForModal(id: string) {
+        setEditId(id);
+        setShowModal(true);
+    };
 
     return (
         <main>
@@ -34,11 +45,16 @@ export default function UserPage() {
                         </div> : error ? <div>
                             Failed Loading Posts!
                         </div> : (postsData && postsData.length > 0) ? <div>
-                            {postsData.map((ele) => {
-                                return <Post key={ele.id} info={ele}/>
-                            })}
+                            <ClickWrapper>
+                                {postsData.map((ele) => {
+                                    return <Post key={ele.id} info={ele} modalFunc={editFunction}/>
+                                })}
+                            </ClickWrapper>
                             {
-                                (!isFetchingNextPage && hasNextPage) ? <button onClick={() => fetchNextPage()}>
+                                (!isFetchingNextPage && hasNextPage) ? <button onClick={(e) => {
+                                    e.stopPropagation();
+                                    fetchNextPage();
+                                    }}>
                                     Load More
                                 </button> : <></>
                             }
@@ -50,6 +66,9 @@ export default function UserPage() {
                     No User Yet!
                 </div>
             }
+        {
+            (showModal && isUUID(editId)) && <PostEdit postid={editId} closeModal={() => setShowModal(false)} />
+        }
         </main>
     )
 };

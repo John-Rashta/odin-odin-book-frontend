@@ -24,7 +24,10 @@ export default function Request({info} : {info: InfoType}) {
                          {`You sent a Follow Request to ${info.target.username}`}
                     </div>
                     <div>
-                        <button onClick={() => deleteRequest({id: info.id, type: "CANCEL", userid: info.target.id})}>Cancel</button>
+                        <button onClick={(e) => {
+                            e.stopPropagation();
+                            deleteRequest({id: info.id, type: "CANCEL", userid: info.target.id});
+                            }}>Cancel</button>
                     </div>
                     
                 </div> : ("sender" in info) ? <div>
@@ -32,8 +35,14 @@ export default function Request({info} : {info: InfoType}) {
                          {`${info.sender.username} sent you a Follow Request`}
                     </div>
                     <div>
-                        <button onClick={() => acceptRequest({id: info.id})}>Accept</button>
-                        <button onClick={() => deleteRequest({id: info.id, type: "REJECT", userid: info.sender.id})}>Reject</button>
+                        <button onClick={(e) => {
+                            e.stopPropagation();
+                            acceptRequest({id: info.id});
+                            }}>Accept</button>
+                        <button onClick={(e) => {
+                            e.stopPropagation();
+                            deleteRequest({id: info.id, type: "REJECT", userid: info.sender.id})
+                            }}>Reject</button>
                     </div>
                 </div> : <div>
                     Error Request!

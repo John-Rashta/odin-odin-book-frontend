@@ -1656,4 +1656,6 @@ export const {
   useClearNotificationMutation,
   useClearNotificationsMutation,
   useGetCommentQuery,
+  useDeleteCommentMutation,
+  useDeletePostMutation,
 } = apiSlice;
