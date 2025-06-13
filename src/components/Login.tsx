@@ -6,6 +6,7 @@ import { useLoginUserMutation } from "../features/book-api/book-api-slice";
 import isAscii from "validator/lib/isAscii";
 import isAlphanumeric from "validator/lib/isAlphanumeric";
 import { setAuthState } from "../features/auth/auth-slice";
+import { socket } from "../../sockets/socket";
 
 export default function Login() {
   const [loginUser] = useLoginUserMutation();
@@ -26,6 +27,7 @@ export default function Login() {
     loginUser({ username, password })
       .unwrap()
       .then((result) => {
+        socket.connect();
         dispatch(setMyId(result.id));
         dispatch(setAuthState(true));
         navigate("/");
