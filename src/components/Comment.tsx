@@ -11,7 +11,6 @@ import { selectMyId } from "../features/manager/manager-slice";
 import TextOptions from "./TextOptions";
 import { Ellipsis } from "lucide-react";
 import CommentEdit from "./CommentEdit";
-import ClickWrapper from "./ClickWrapper";
 
 export default function Comment({comment} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}) {
     const myId = useSelector(selectMyId);
@@ -97,13 +96,13 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
             }
             {
                 (showComments && commentsData && commentsData.length > 0 ) && <div>
-                    <ClickWrapper>
+                    <div>
                         {
                             commentsData.map((ele) => {
                                 return <Comment key={ele.id} comment={ele} />
                             })
                         }
-                    </ClickWrapper>
+                    </div>
                     {
                         (!isFetchingNextPage && hasNextPage) ? <button onClick={(e) => {
                             e.stopPropagation();
