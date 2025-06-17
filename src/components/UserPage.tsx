@@ -7,18 +7,26 @@ import { useState } from "react";
 import PostEdit from "./PostEdit";
 import { isUUID } from "validator";
 import ClickWrapper from "./ClickWrapper";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function UserPage() {
-    const userId = useSelector(selectUserId);
-     const [showModal, setShowModal] = useState(false);
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentId = searchParams.get("id") || "";
+    if (!isUUID(currentId)) {
+        ///REDIRECT
+        navigate("/");
+        return;
+    };
+    const [showModal, setShowModal] = useState(false);
     const [editId, setEditId] = useState("");
-    const {postsData, error: postsError, isLoading: postsLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useGetUserPostsInfiniteQuery(userId, {
+    const {postsData, error: postsError, isLoading: postsLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useGetUserPostsInfiniteQuery(currentId, {
         selectFromResult: result => ({
             ...result,
             postsData: result.data?.pages.map(({posts}) => posts).flat()
         })
     });
-    const {userData, error, isLoading} = useGetUserQuery(userId, {
+    const {userData, error, isLoading} = useGetUserQuery(currentId, {
         selectFromResult: result => ({
             ...result,
             userData: result.data?.user

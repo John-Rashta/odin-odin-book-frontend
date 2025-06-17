@@ -3,8 +3,6 @@ import { useGetNotificationsQuery, useLogoutUserMutation, useSearchUsersInfinite
 import { skipToken } from "@reduxjs/toolkit/query";
 import { NavLink, useNavigate } from "react-router-dom";
 import MiniUser from "./MiniUser";
-import { setUserId } from "../features/manager/manager-slice";
-import { useDispatch } from "react-redux";
 import { ClickType } from "../../util/types";
 import MiniNotifications from "./MiniNotifications";
 import ClickWrapper from "./ClickWrapper";
@@ -27,7 +25,6 @@ export default function Header() {
         })
     });
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     const handleClick = function handleClickingSearchResult(event: ClickType) {
     const target = event.target as HTMLElement;
@@ -40,9 +37,8 @@ export default function Header() {
       return;
     }
 
-    dispatch(setUserId(possibleUser));
     setSearchValue("");
-    navigate("/user");
+    navigate(`/user?id=${possibleUser}`);
   };
 
     return (
@@ -52,7 +48,7 @@ export default function Header() {
                 <div style={{position: "relative"}}>
                     <form onSubmit={(e) => {
                         e.preventDefault();
-                        navigate("/search", {state: searchValue});
+                        navigate(`/search?user=${searchValue}`);
                         return;
                     }}>
                         <input 
@@ -70,7 +66,7 @@ export default function Header() {
                             <div onClick={handleClick}>
                                 {
                                     searchData.length > 0 ? searchData.map((ele) => {
-                                        return <MiniUser user={ele} />
+                                        return <MiniUser key={ele.id} user={ele} />
                                     }) : <div>
                                         No Result Found
                                     </div>

@@ -1,12 +1,9 @@
 import React from "react";
 import { ClickType } from "../../util/types";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setCommentId, setPostId, setUserId } from "../features/manager/manager-slice";
 
 export default function ClickWrapper({children} : {children: React.ReactNode}) {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
     const handleClick = function handleClickingToRedirect(event: ClickType) {
         event.stopPropagation();
         event.preventDefault();
@@ -20,8 +17,7 @@ export default function ClickWrapper({children} : {children: React.ReactNode}) {
             if (!userId) {
                 return;
             };
-            dispatch(setUserId(userId));
-            navigate("/user");
+            navigate(`/user?id=${userId}`);
             return;
         };
         const possiblePost = target.closest(".postOption") as HTMLElement | null;
@@ -29,9 +25,8 @@ export default function ClickWrapper({children} : {children: React.ReactNode}) {
             const postId = possiblePost.dataset.postid;
             if (!postId) {
                 return;
-            }
-            dispatch(setPostId(postId));
-            navigate("/post");
+            };
+            navigate(`/post?id=${postId}`);
             return;
         };
         const possibleComment = target.closest(".commentOption") as HTMLElement | null;
@@ -40,8 +35,7 @@ export default function ClickWrapper({children} : {children: React.ReactNode}) {
             if (!commentId) {
                 return;
             };
-            dispatch(setCommentId(commentId));
-            navigate("/comment");
+            navigate(`/comment?id=${commentId}`);
             return;
         } else if (target.closest(".requestOption")) {
             navigate("/requests");

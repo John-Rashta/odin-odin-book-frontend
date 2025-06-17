@@ -114,37 +114,15 @@ export const apiSlice = createApi({
             }
           });
         };
-
-        const requestListener = (data: RequestSocketOptions) => {
-          if (data.action ===  "REMOVE") {
-              if (data.data.userid && (data.data.userid !== data.data.myid)) {
-                apiSlice.util.invalidateTags([{type: "UserInfo", id: data.data.userid}]);
-              }
-            }
-        };
-
-        const updateListener = (data: UserUpdateSocket) => {
-          if (data.type ===  "user" && data.data) {
-            apiSlice.util.invalidateTags([{type: "UserInfo", id: data.data.id}]);
-            return;
-          };
-          return;
-
-        };
         try {
           await cacheDataLoaded;
 
           socket.on("followers", listener);
-          socket.on("request", requestListener);
-          socket.on("user:updated", updateListener);
-          
         } catch {}
         
         await cacheEntryRemoved;
         
         socket.off("followers", listener);
-        socket.off("request", requestListener);
-        socket.off("user:updated", updateListener);
       },
     }),
     searchUsers: builder.infiniteQuery<{ users: (UserInfo & UserExtra)[] }, string, InitialPageParam>({
@@ -170,7 +148,7 @@ export const apiSlice = createApi({
         },
       },
       query: ({pageParam, queryArg}) => ({
-        url: `/users/search?user=${queryArg}${getProperQuery(pageParam)}`,
+        url: `/users/search?user=${queryArg}${getProperQuery(pageParam).substring(1)}`,
       }),
       providesTags: ["SearchInfo"],
       async onCacheEntryAdded(
@@ -182,7 +160,7 @@ export const apiSlice = createApi({
             if (data.type === "user" && data.data) {
               draft.pages.forEach(({users}) => {
                 const possibleIndex = users.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   Object.assign(users[possibleIndex], data.data);
                 }
               })
@@ -197,8 +175,8 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({users}) => {
               const possibleIndex = users.findIndex((ele) => ele.id === data.data.id);
-              if (possibleIndex) {
-                users[possibleIndex].followers = {id: "1"};
+              if (possibleIndex !== -1) {
+                users[possibleIndex].followers = [{id: "1"}];
                 users[possibleIndex].receivedRequests = undefined;
               }
             })
@@ -216,7 +194,7 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({users}) => {
               const possibleIndex = users.findIndex((ele) => ele.id === data.data.userid);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 users[possibleIndex].receivedRequests = undefined;
               }
             });
@@ -252,7 +230,7 @@ export const apiSlice = createApi({
             return;
           }
           updateCachedData((draft) => {
-            if (data.type ===  "followers" && data.newCount) {
+            if (data.type ===  "followers" && data.newCount !== undefined) {
               draft.user.followerCount = data.newCount;
             } else if (data.type === "user" && data.data) {
               Object.assign(draft.user, data.data);
@@ -270,7 +248,7 @@ export const apiSlice = createApi({
           };
 
            updateCachedData((draft) => {
-            draft.user.followers = {id: "1"};
+            draft.user.followers = [{id: "1"}];
             draft.user.receivedRequests = undefined;
           });
         };
@@ -295,6 +273,7 @@ export const apiSlice = createApi({
         try {
           await cacheDataLoaded;
 
+          const response = await socket.emitWithAck("user:join", {id: arg});
           socket.on("user:updated", listener);
           socket.on("follows", followsListener);
           socket.on("request", requestListener);
@@ -343,7 +322,7 @@ export const apiSlice = createApi({
             if (data.type === "user" && data.data) {
               draft.pages.forEach(({users}) => {
                 const possibleIndex = users.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   Object.assign(users[possibleIndex], data.data);
                 }
               })
@@ -358,8 +337,8 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({users}) => {
               const possibleIndex = users.findIndex((ele) => ele.id === data.data.id);
-              if (possibleIndex) {
-                users[possibleIndex].followers = {id: "1"};
+              if (possibleIndex !== -1) {
+                users[possibleIndex].followers = [{id: "1"}];
                 users[possibleIndex].receivedRequests = undefined;
               }
             })
@@ -377,7 +356,7 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({users}) => {
               const possibleIndex = users.findIndex((ele) => ele.id === data.data.userid);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 users[possibleIndex].receivedRequests = undefined;
               }
             });
@@ -477,7 +456,7 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({posts}) => {
               const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 posts.splice(possibleIndex, 1);
               }
             })
@@ -498,10 +477,10 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({posts}) => {
                const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 if (data.type ===  "content" && data.content) {
                 posts[possibleIndex].content = data.content;
-                } else if (data.type === "likes" && data.likes) {
+                } else if (data.type === "likes" && data.likes !== undefined) {
                   posts[possibleIndex].likesCount = data.likes;
                 }
               }
@@ -532,7 +511,7 @@ export const apiSlice = createApi({
       infiniteQueryOptions: {
         initialPageParam: {
           skip: 0,
-          amount: 30,
+          amount: 10,
         },
         getNextPageParam: (
           lastPage,
@@ -558,7 +537,7 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({feed}) => {
               const possibleIndex = feed.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 feed.splice(possibleIndex, 1);
               };
             })
@@ -570,13 +549,15 @@ export const apiSlice = createApi({
           });
         };
         const updateListener = (data: PostUpdateSocket) => {
+          console.log("heelo")
           updateCachedData((draft) => {
             draft.pages.forEach(({feed}) => {
               const possibleIndex = feed.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 if (data.type ===  "content" && data.content) {
                   feed[possibleIndex].content = data.content;
-                } else if (data.type === "likes" && data.likes) {
+                } else if (data.type === "likes" && data.likes !== undefined) {
+                  console.log(data.likes)
                   feed[possibleIndex].likesCount = data.likes;
                 };
               };
@@ -595,8 +576,8 @@ export const apiSlice = createApi({
         await cacheEntryRemoved;
         
         socket.off("post:deleted", deleteListener);
-          socket.off("post:created", newListener);
-          socket.off("post:updated", updateListener);
+        socket.off("post:created", newListener);
+        socket.off("post:updated", updateListener);
       },
       providesTags: ["FeedInfo"],
     }),
@@ -634,7 +615,7 @@ export const apiSlice = createApi({
             if (data.action === "REMOVE") {
               draft.pages.forEach(({followers}) => {
                 const possibleIndex = followers.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   followers.splice(possibleIndex, 1);
                 };
               });
@@ -647,7 +628,7 @@ export const apiSlice = createApi({
             if (data.type === "user" && data.data) {
               draft.pages.forEach(({followers}) => {
                 const possibleIndex = followers.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   Object.assign(followers[possibleIndex], data.data);
                 }
               })
@@ -662,8 +643,8 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({followers}) => {
               const possibleIndex = followers.findIndex((ele) => ele.id === data.data.id);
-              if (possibleIndex) {
-                followers[possibleIndex].followers = {id: "1"};
+              if (possibleIndex !== -1) {
+                followers[possibleIndex].followers = [{id: "1"}];
                 followers[possibleIndex].receivedRequests = undefined;
               }
             })
@@ -681,7 +662,7 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({followers}) => {
               const possibleIndex = followers.findIndex((ele) => ele.id === data.data.userid);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 followers[possibleIndex].receivedRequests = undefined;
               }
             });
@@ -748,7 +729,7 @@ export const apiSlice = createApi({
             if (data.type === "user" && data.data) {
               draft.pages.forEach(({follows}) => {
                 const possibleIndex = follows.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   Object.assign(follows[possibleIndex], data.data);
                 }
               })
@@ -790,7 +771,7 @@ export const apiSlice = createApi({
               apiSlice.util.updateQueryData('searchUsers', arg, (draft) => {
                 draft.pages.forEach(({users}) => {
                   const possibleIndex = users.findIndex((ele) => ele.id === id);
-                  if (possibleIndex) {
+                  if (possibleIndex !== -1) {
                     users[possibleIndex].followers = undefined;
                   }
                 })
@@ -802,7 +783,7 @@ export const apiSlice = createApi({
             apiSlice.util.updateQueryData('getUsers', undefined, (draft) => {
               draft.pages.forEach(({users}) => {
                   const possibleIndex = users.findIndex((ele) => ele.id === id);
-                  if (possibleIndex) {
+                  if (possibleIndex !== -1) {
                     users[possibleIndex].followers = undefined;
                   }
                 })
@@ -813,7 +794,7 @@ export const apiSlice = createApi({
             apiSlice.util.updateQueryData('getFollows', undefined, (draft) => {
               draft.pages.forEach(({follows}) => {
                 const possibleIndex = follows.findIndex((ele) => ele.id === id);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   follows.splice(possibleIndex, 1);
                 }
               })
@@ -824,7 +805,7 @@ export const apiSlice = createApi({
             apiSlice.util.updateQueryData('getFollowers', undefined, (draft) => {
               draft.pages.forEach(({followers}) => {
                 const possibleIndex = followers.findIndex((ele) => ele.id === id);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   followers[possibleIndex].followers = undefined;
                 }
               })
@@ -868,7 +849,7 @@ export const apiSlice = createApi({
               };
 
               const possibleIndex = draft.received.findIndex((ele) =>  ele.id === data.data.id);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 draft.received.splice(possibleIndex, 1);
               };
             };
@@ -908,7 +889,7 @@ export const apiSlice = createApi({
               };
 
               const possibleIndex = draft.sent.findIndex((ele) =>  ele.id === data.data.id);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 draft.sent.splice(possibleIndex, 1);
               };
             };
@@ -947,8 +928,8 @@ export const apiSlice = createApi({
               apiSlice.util.updateQueryData('searchUsers', arg, (draft) => {
                 draft.pages.forEach(({users}) => {
                   const possibleIndex = users.findIndex((ele) => ele.id === id);
-                  if (possibleIndex) {
-                    users[possibleIndex].receivedRequests = {id: data.id};
+                  if (possibleIndex !== -1) {
+                    users[possibleIndex].receivedRequests = [{id: data.id}];
                   }
                 })
               }),
@@ -959,8 +940,8 @@ export const apiSlice = createApi({
             apiSlice.util.updateQueryData('getUsers', undefined, (draft) => {
               draft.pages.forEach(({users}) => {
                   const possibleIndex = users.findIndex((ele) => ele.id === id);
-                  if (possibleIndex) {
-                    users[possibleIndex].receivedRequests = {id: data.id};
+                  if (possibleIndex !== -1) {
+                    users[possibleIndex].receivedRequests = [{id: data.id}];
                   }
                 })
             }),
@@ -970,8 +951,8 @@ export const apiSlice = createApi({
             apiSlice.util.updateQueryData('getFollowers', undefined, (draft) => {
               draft.pages.forEach(({followers}) => {
                   const possibleIndex = followers.findIndex((ele) => ele.id === id);
-                  if (possibleIndex) {
-                    followers[possibleIndex].receivedRequests = {id: data.id};
+                  if (possibleIndex !== -1) {
+                    followers[possibleIndex].receivedRequests = [{id: data.id}];
                   }
                 })
             }),
@@ -1010,7 +991,7 @@ export const apiSlice = createApi({
                 apiSlice.util.updateQueryData('searchUsers', arg, (draft) => {
                   draft.pages.forEach(({users}) => {
                     const possibleIndex = users.findIndex((ele) => ele.id === userid);
-                    if (possibleIndex) {
+                    if (possibleIndex !== -1) {
                       users[possibleIndex].receivedRequests = undefined;
                     }
                   })
@@ -1021,7 +1002,7 @@ export const apiSlice = createApi({
               apiSlice.util.updateQueryData('getUsers', undefined, (draft) => {
                 draft.pages.forEach(({users}) => {
                     const possibleIndex = users.findIndex((ele) => ele.id === userid);
-                    if (possibleIndex) {
+                    if (possibleIndex !== -1) {
                       users[possibleIndex].receivedRequests = undefined;
                     }
                   })
@@ -1031,7 +1012,7 @@ export const apiSlice = createApi({
             apiSlice.util.updateQueryData('getFollowers', undefined, (draft) => {
               draft.pages.forEach(({followers}) => {
                   const possibleIndex = followers.findIndex((ele) => ele.id === id);
-                  if (possibleIndex) {
+                  if (possibleIndex !== -1) {
                     followers[possibleIndex].receivedRequests = undefined;
                   }
                 })
@@ -1057,18 +1038,21 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
               if (data.type ===  "content" && data.content) {
               draft.post.content = data.content;
-            } else if (data.type === "likes" && data.likes) {
+            } else if (data.type === "likes" && data.likes !== undefined) {
               draft.post.likesCount = data.likes;
             }
           });
         };
         try {
           await cacheDataLoaded;
+          const response = await socket.emitWithAck("post:join", {id: arg.id, comments: "yes"});
+          console.log(response)
           socket.on("post:updated", listener);
           
         } catch {}
         
         await cacheEntryRemoved;
+        const response = await socket.emitWithAck("post:leave", {id: arg.id});
         socket.off("post:updated", listener);
       },
     }),
@@ -1108,10 +1092,10 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({posts}) => {
               const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 if (data.type ===  "content" && data.content) {
                   posts[possibleIndex].content = data.content;
-                } else if (data.type === "likes" && data.likes) {
+                } else if (data.type === "likes" && data.likes !==  undefined) {
                   posts[possibleIndex].likesCount = data.likes;
                 };
               };
@@ -1157,7 +1141,7 @@ export const apiSlice = createApi({
             return;
           }
           updateCachedData((draft) => {
-              if (data.type === "likes" && data.likes) {
+              if (data.type === "likes" && data.likes !== undefined) {
                 draft.comment.likesCount = data.likes;
               } else if (data.type === "comment" && data.comment) {
                 Object.assign(draft.comment, data.comment);
@@ -1191,7 +1175,7 @@ export const apiSlice = createApi({
               apiSlice.util.updateQueryData('getCommentComments', comment.commentid, (draft) => {
                 draft.pages.forEach(({comments}) => {
                   const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
-                  if (possibleIndex) {
+                  if (possibleIndex !== -1) {
                     Object.assign(comments[possibleIndex], comment);
                   };
                 });
@@ -1202,7 +1186,7 @@ export const apiSlice = createApi({
               apiSlice.util.updateQueryData('getPostComments', comment.postid, (draft) => {
                 draft.pages.forEach(({comments}) => {
                   const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
-                   if (possibleIndex) {
+                   if (possibleIndex !== -1) {
                     Object.assign(comments[possibleIndex], comment);
                   };
                 })
@@ -1233,7 +1217,7 @@ export const apiSlice = createApi({
         body: info
       }),
     }),
-    changePostLike: builder.mutation<YourLike & UpdatedPost, UId & LikeTypes>({
+    changePostLike: builder.mutation<{post: YourLike & UpdatedPost}, UId & LikeTypes>({
       query: ({ id, action }) => ({
         url: `/posts/${id}/likes`,
         method: "PUT",
@@ -1244,13 +1228,14 @@ export const apiSlice = createApi({
       invalidatesTags: (result, error, arg) => [{type:"PostInfo", id: arg.id}],
        async onQueryStarted({ id, action }, { dispatch, getState ,queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          const { data : {post} } = await queryFulfilled;
 
           dispatch(
             apiSlice.util.updateQueryData('getFeed', undefined, (draft) => {
               draft.pages.forEach(({feed}) => {
-                const possibleIndex = feed.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                const possibleIndex = feed.findIndex((ele) => ele.id === post.id);
+                console.log(possibleIndex)
+                if (possibleIndex !== -1) {
                   if (action === "ADD") {
                     feed[possibleIndex].likes = [{id:"1"}];
                   } else {
@@ -1262,10 +1247,10 @@ export const apiSlice = createApi({
           );
 
           dispatch(
-            apiSlice.util.updateQueryData('getUserPosts', data.creatorid, (draft) => {
+            apiSlice.util.updateQueryData('getUserPosts', post.creatorid, (draft) => {
               draft.pages.forEach(({posts}) => {
-                const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                const possibleIndex = posts.findIndex((ele) => ele.id === post.id);
+                if (possibleIndex !== -1) {
                   if (action === "ADD") {
                     posts[possibleIndex].likes = [{id:"1"}];
                   } else {
@@ -1285,8 +1270,8 @@ export const apiSlice = createApi({
             dispatch( 
             apiSlice.util.updateQueryData('getMyPosts', myarg, (draft) => {
               draft.pages.forEach(({posts}) => {
-                const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                const possibleIndex = posts.findIndex((ele) => ele.id === post.id);
+                if (possibleIndex !== -1) {
                   if (action === "ADD") {
                     posts[possibleIndex].likes = [{id:"1"}];
                   } else {
@@ -1300,7 +1285,7 @@ export const apiSlice = createApi({
         } catch {}
       },
     }),
-    changeCommentLike: builder.mutation<CommentInfo & YourLike, UId & LikeTypes>({
+    changeCommentLike: builder.mutation<{comment: CommentInfo & YourLike}, UId & LikeTypes>({
       query: ({ id, action }) => ({
         url: `/comments/${id}/likes`,
         method: "PUT",
@@ -1310,14 +1295,14 @@ export const apiSlice = createApi({
       }),
       async onQueryStarted({ id, action}, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          const { data: {comment} } = await queryFulfilled;
           let patchResult;
-          if (data.commentid) {
+          if (comment.commentid) {
               patchResult = dispatch(
-                apiSlice.util.updateQueryData('getCommentComments', data.commentid, (draft) => {
+                apiSlice.util.updateQueryData('getCommentComments', comment.commentid, (draft) => {
                   draft.pages.forEach(({comments}) => {
-                    const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
-                    if (possibleIndex) {
+                    const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
+                    if (possibleIndex !== -1) {
                       if (action === "ADD") {
                         comments[possibleIndex].likes = [{id:"1"}];
                       } else {
@@ -1329,10 +1314,10 @@ export const apiSlice = createApi({
               );
           } else {
             patchResult = dispatch(
-              apiSlice.util.updateQueryData('getPostComments', data.postid, (draft) => {
+              apiSlice.util.updateQueryData('getPostComments', comment.postid, (draft) => {
                   draft.pages.forEach(({comments}) => {
-                    const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
-                    if (possibleIndex) {
+                    const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
+                    if (possibleIndex !== -1) {
                       if (action === "ADD") {
                         comments[possibleIndex].likes = [{id:"1"}];
                       } else {
@@ -1386,7 +1371,7 @@ export const apiSlice = createApi({
             updateCachedData((draft) => {
               draft.pages.forEach(({comments}) => {
                 const possibleIndex = comments.findIndex((ele) => ele.id === data.parentid);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   comments[possibleIndex].ownCommentsCount -= 1;
                 };
               })
@@ -1397,7 +1382,7 @@ export const apiSlice = createApi({
             updateCachedData((draft) => {
               draft.pages.forEach(({comments}) => {
                 const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   comments.splice(possibleIndex, 1);
                 };
               })
@@ -1413,7 +1398,7 @@ export const apiSlice = createApi({
             updateCachedData((draft) => {
               draft.pages.forEach(({comments}) => {
                 const possibleIndex = comments.findIndex((ele) => ele.id === data.comment.commentid);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   comments[possibleIndex].ownCommentsCount += 1;
                 };
               })
@@ -1433,10 +1418,10 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({comments}) => {
               const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 if (data.type ===  "comment" && data.comment) {
                   Object.assign(comments[possibleIndex], data.comment);
-                } else if (data.type === "likes" && data.likes) {
+                } else if (data.type === "likes" && data.likes !== undefined) {
                   comments[possibleIndex].likesCount = data.likes;
                 }
               }
@@ -1498,7 +1483,7 @@ export const apiSlice = createApi({
             updateCachedData((draft) => {
               draft.pages.forEach(({comments}) => {
                 const possibleIndex = comments.findIndex((ele) => ele.id === data.parentid);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   comments[possibleIndex].ownCommentsCount -= 1;
                 };
               })
@@ -1510,7 +1495,7 @@ export const apiSlice = createApi({
             updateCachedData((draft) => {
               draft.pages.forEach(({comments}) => {
                 const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   comments.splice(possibleIndex, 1);
                 };
               })
@@ -1527,7 +1512,7 @@ export const apiSlice = createApi({
             updateCachedData((draft) => {
               draft.pages.forEach(({comments}) => {
                 const possibleIndex = comments.findIndex((ele) =>  ele.id === data.comment.commentid);
-                if (possibleIndex) {
+                if (possibleIndex !== -1) {
                   comments[possibleIndex].ownCommentsCount += 1;
                 }
               })
@@ -1549,10 +1534,10 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             draft.pages.forEach(({comments}) => {
               const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
-              if (possibleIndex) {
+              if (possibleIndex !== -1) {
                 if (data.type ===  "comment" && data.comment) {
                   Object.assign(comments[possibleIndex], data.comment);
-                } else if (data.type === "likes" && data.likes) {
+                } else if (data.type === "likes" && data.likes !== undefined) {
                   comments[possibleIndex].likesCount = data.likes;
                 }
               };

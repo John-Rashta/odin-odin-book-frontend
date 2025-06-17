@@ -11,6 +11,7 @@ export default function UserProfile({info} : {info: UserInfo & UserExtra }) {
     const [ deleteRequest ] = useDeleteRequestMutation();
     const [ stopFollowing ] = useStopFollowMutation();
     const [ makeRequest ] = useMakeRequestMutation();
+    
     return (
         <div>
             <div>
@@ -24,16 +25,16 @@ export default function UserProfile({info} : {info: UserInfo & UserExtra }) {
                 </div>
             </div>
             {
-            info.followers ? <div>
+            (info.followers && info.followers.length > 0) ? <div>
                 <button onClick={() =>  stopFollowing({id: info.id})}>Stop Following</button>
-            </div> : info.receivedRequests ? <div>
+            </div> : (info.receivedRequests && info.receivedRequests.length > 0) ? <div>
                 Pending Request <button onClick={() => {
                     if (!info.receivedRequests) {
                         return;
                     }
-                    deleteRequest({id: info.receivedRequests.id, type: "CANCEL", userid: info.id})
+                    deleteRequest({id: info.receivedRequests[0].id, type: "CANCEL", userid: info.id})
                     }}>X</button>
-            </div> : (isUUID(myId) && <div> 
+            </div> : ((isUUID(myId) && myId !== info.id) && <div> 
                     <button onClick={() => makeRequest({id: info.id, type: "FOLLOW"})}>Request Follow</button>
                     </div>) || <></>
             }

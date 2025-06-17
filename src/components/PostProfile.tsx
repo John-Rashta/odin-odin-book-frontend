@@ -40,11 +40,11 @@ export default function PostProfile({post, modalFunc} : {post: FullPostInfo & Li
                 </div>
                 { isUUID(myId) &&
                 <button 
-                    {...(post.likes ? {style: {backgroundColor: "black"}} : {})}
+                    {...((post.likes && post.likes.length > 0) ? {style: {backgroundColor: "black"}} : {})}
                     onClick={(e) => {
                         e.stopPropagation();
                         e.currentTarget.disabled = true;
-                        changeLike({id: post.id, action: (post.likes ? "REMOVE" : "ADD")}).unwrap().finally(() => {
+                        changeLike({id: post.id, action: ((post.likes && post.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
                             e.currentTarget.disabled = false;
                         })
                     }}

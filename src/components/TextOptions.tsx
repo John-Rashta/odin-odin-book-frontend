@@ -51,7 +51,7 @@ export default function TextOptions({textId, editFunc, type, closeFunc} : {textI
     };
 
     return (
-        <div>
+        <div style={{position: "absolute"}}>
             <button onClick={handleEdit}>
                 Edit
             </button>

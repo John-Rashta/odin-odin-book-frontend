@@ -1,36 +1,32 @@
 import { useNavigate } from "react-router-dom";
 import { UserExtra, UserFollowType, UserInfo } from "../../util/interfaces";
-import { useDispatch } from "react-redux";
-import { setUserId } from "../features/manager/manager-slice";
 import { useDeleteRequestMutation, useMakeRequestMutation, useStopFollowMutation } from "../features/book-api/book-api-slice";
 
 export default function UserOptions({user} : {user: UserFollowType & UserExtra | UserInfo & UserExtra }) {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
     const [ stopFollowing ] = useStopFollowMutation();
     const [ deleteRequest ] = useDeleteRequestMutation();
     const [ makeRequest ] = useMakeRequestMutation();
     return (
-        <div>
+        <div style={{position: "absolute"}}>
             <button onClick={() => {
-                dispatch(setUserId(user.id));
-                navigate("/user");
+                navigate(`/user?id=${user.id}`);
             }}>
                 Profile
             </button>
             {
-            user.followers ?
+            (user.followers && user.followers.length > 0) ?
                 <button onClick={(e) =>  {
                     e.stopPropagation();
                     stopFollowing({id: user.id});
                 }}>Stop Following</button>
-                 : user.receivedRequests ? <div>
+                 : (user.receivedRequests && user.receivedRequests.length > 0) ? <div>
                 Pending Request <button onClick={(e) => {
                     e.stopPropagation();
                     if (!user.receivedRequests) {
                         return;
                     }
-                    deleteRequest({id: user.receivedRequests.id, type: "CANCEL", userid: user.id})
+                    deleteRequest({id: user.receivedRequests[0].id, type: "CANCEL", userid: user.id})
                     }}>X</button>
             </div> : <div> 
                     <button onClick={(e) => {

@@ -30,10 +30,10 @@ interface SentExtra {
 interface UserExtra {
     receivedRequests?: {
         id: string;
-    };
+    }[];
     followers?: {
         id: string;
-    };
+    }[];
 };
 
 interface UserFollowType {

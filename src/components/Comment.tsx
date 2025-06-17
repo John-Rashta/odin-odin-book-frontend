@@ -56,17 +56,17 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                             </div>
                             { isUUID(myId) &&
                                 <button 
-                                    {...(comment.likes ? {style: {backgroundColor: "black"}} : {})}
+                                    {...((comment.likes && comment.likes.length > 0) ? {style: {backgroundColor: "black"}} : {})}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         e.currentTarget.disabled = true;
-                                        changeLike({id: comment.id, action: (comment.likes ? "REMOVE" : "ADD")}).unwrap().finally(() => {
+                                        changeLike({id: comment.id, action: ((comment.likes && comment.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
                                             e.currentTarget.disabled = false;
                                         })
                                     }}
                                 >L</button>
                             }
-                            <div>
+                            <div style={{position: "relative"}}>
                                 {
                                     myId === comment.senderid ? <Ellipsis onClick={(e) => {
                                         e.stopPropagation();

@@ -1,28 +1,27 @@
-import { useSelector } from "react-redux"
-import { selectCommentId } from "../features/manager/manager-slice"
 import { useGetCommentCommentsInfiniteQuery, useGetCommentQuery } from "../features/book-api/book-api-slice";
 import { isUUID } from "validator";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Comment from "./Comment";
 import CommentProfile from "./CommentProfile";
 import ClickWrapper from "./ClickWrapper";
 
 export default function CommentPage() {
-    const commentId = useSelector(selectCommentId);
+    const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
-    if (!isUUID(commentId)) {
+    const currentId = searchParams.get("id") || "";
+    if (!isUUID(currentId)) {
         ///REDIRECT
         navigate("/");
         return;
-    }
-    const {commentData, isLoading, error } = useGetCommentQuery({id: commentId}, {
+    };
+    const {commentData, isLoading, error } = useGetCommentQuery({id: currentId}, {
         selectFromResult: (result) => ({
             ...result,
             commentData: result.data?.comment
         })
     });
 
-    const {commentsData, isFetchingNextPage, hasNextPage, fetchNextPage  } = useGetCommentCommentsInfiniteQuery(commentId, {
+    const {commentsData, isFetchingNextPage, hasNextPage, fetchNextPage  } = useGetCommentCommentsInfiniteQuery(currentId, {
          selectFromResult: result => ({
             ...result,
             commentsData: result.data?.pages.map(({comments}) => comments).flat()

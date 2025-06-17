@@ -16,7 +16,7 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
     const [showOptions, setShowOptions] = useState(false);
     
     return (
-        <div className="clickOption" data-postid={info.id}>
+        <div className="clickOption postOption" data-postid={info.id}>
             <div>
                 <img className="userOption" data-userid={info.creator.id} src={info.creator.customIcon?.url || info.creator.icon.source} alt="" />
             </div>
@@ -49,25 +49,27 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
                     </div>
                     { isUUID(myId) &&
                     <button 
-                        {...(info.likes ? {style: {backgroundColor: "black"}} : {})}
+                        {...((info.likes && info.likes.length > 0) ? {style: {backgroundColor: "black"}} : {})}
                         onClick={(e) => {
                             e.stopPropagation();
-                            e.currentTarget.disabled = true;
-                            changeLike({id: info.id, action: (info.likes ? "REMOVE" : "ADD")}).unwrap().finally(() => {
-                                e.currentTarget.disabled = false;
+                            ///e.currentTarget.disabled = true;
+                            changeLike({id: info.id, action: ((info.likes && info.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
+                                ///e.currentTarget.disabled = false;
                             })
                         }}
                     >L</button>
                     }
-                    {
-                        myId === info.creatorid ? <Ellipsis onClick={(e) => {
-                            e.stopPropagation();
-                            setShowOptions(!showOptions);
-                        }} /> : <></>
-                    }
-                    {
-                    (showOptions && typeof modalFunc === "function") && <TextOptions textId={info.id} type="POST" editFunc={modalFunc} closeFunc={() => setShowOptions(false)} />
-                    }
+                    <div style={{position: "relative"}}>
+                        {
+                            myId === info.creatorid ? <Ellipsis onClick={(e) => {
+                                e.stopPropagation();
+                                setShowOptions(!showOptions);
+                            }} /> : <></>
+                        }
+                        {
+                        (showOptions && typeof modalFunc === "function") && <TextOptions textId={info.id} type="POST" editFunc={modalFunc} closeFunc={() => setShowOptions(false)} />
+                        }
+                    </div>
                 </div>
 
             </div>
