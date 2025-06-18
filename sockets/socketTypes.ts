@@ -86,7 +86,8 @@ interface NotificationSocket {
 
 interface FollowsSocket  {
     action: "ADD" | "REMOVE",
-    data: {
+    id?: string,
+    data?: {
         id: string;
         username: string;
         icon: {

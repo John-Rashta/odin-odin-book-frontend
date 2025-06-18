@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Comment from "./Comment";
 import CommentProfile from "./CommentProfile";
 import ClickWrapper from "./ClickWrapper";
+import CommentCreate from "./CommentCreate";
 
 export default function CommentPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -38,6 +39,7 @@ export default function CommentPage() {
         </div> : commentData ? 
             <div>
                 <CommentProfile comment={commentData} />
+                <CommentCreate postid={commentData.postid} commentid={commentData.id} />
                 <div>
                         {
                             (commentsData && commentsData.length > 0) ? <div>

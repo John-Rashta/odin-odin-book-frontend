@@ -1,23 +1,24 @@
 import { useState } from "react";
 import { FullCommentInfo, Likes, OwnCommentsCount, YourLike } from "../../util/interfaces";
-import { useGetCommentCommentsInfiniteQuery } from "../features/book-api/book-api-slice";
+import { useChangeCommentLikeMutation, useGetCommentCommentsInfiniteQuery } from "../features/book-api/book-api-slice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
 import { isUUID } from "validator";
-import { useChangePostLikeMutation } from "../features/book-api/book-api-slice";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
 import TextOptions from "./TextOptions";
 import { Ellipsis } from "lucide-react";
 import CommentEdit from "./CommentEdit";
+import CommentCreate from "./CommentCreate";
 
 export default function Comment({comment} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}) {
     const myId = useSelector(selectMyId);
     const [showComments, setShowComments] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
+    const [showReply, setShowReply] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [ changeLike ] = useChangePostLikeMutation();
+    const [ changeLike ] = useChangeCommentLikeMutation();
     const { commentsData, isFetchingNextPage, hasNextPage, fetchNextPage } = useGetCommentCommentsInfiniteQuery(showComments ? comment.id : skipToken, {
          selectFromResult: result => ({
             ...result,
@@ -59,9 +60,9 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                                     {...((comment.likes && comment.likes.length > 0) ? {style: {backgroundColor: "black"}} : {})}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        e.currentTarget.disabled = true;
+                                        ///e.currentTarget.disabled = true;
                                         changeLike({id: comment.id, action: ((comment.likes && comment.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
-                                            e.currentTarget.disabled = false;
+                                            ///e.currentTarget.disabled = false;
                                         })
                                     }}
                                 >L</button>
@@ -79,7 +80,14 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                             </div>
                         </div>
                     </div>
+                    <button onClick={(e) => {
+                        e.stopPropagation()
+                        setShowReply(true)
+                    }}>Reply</button>
                 </div>
+            }
+            {
+                showReply && <CommentCreate commentid={comment.id} postid={comment.postid} changeCreate={() =>  setShowReply(false)} />
             }
             {
             comment.ownCommentsCount > 0 && (showComments ? <button onClick={(e) =>  {

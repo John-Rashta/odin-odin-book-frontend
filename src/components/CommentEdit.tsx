@@ -15,7 +15,7 @@ export default function CommentEdit({comment, changeEdit} : {comment: FullCommen
         buttonRef.current.disabled = true;
     };
     const target = event.target as HTMLFormElement;
-    const content = target.editInput.value;
+    const content = target.textInput.value;
     if (content === "" && !comment.image) {
         if (buttonRef.current) {
             buttonRef.current.disabled = false;
@@ -52,7 +52,9 @@ export default function CommentEdit({comment, changeEdit} : {comment: FullCommen
                     value={textValue}
                     onChange={(e) => setTextValue(e.target.value)}
                 />
-                <button ref={buttonRef} onClick={() => changeEdit()} type="button">
+                <button ref={buttonRef} onClick={(e) => {
+                    e.stopPropagation()
+                    changeEdit()}} type="button">
                     Cancel
                 </button>
                 <button type="submit">Confirm</button>

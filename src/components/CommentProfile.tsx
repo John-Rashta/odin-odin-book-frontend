@@ -6,7 +6,7 @@ import { locale } from "../../util/helpers";
 import { isUUID } from "validator";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
-import { useChangePostLikeMutation } from "../features/book-api/book-api-slice";
+import { useChangeCommentLikeMutation } from "../features/book-api/book-api-slice";
 import { Ellipsis } from "lucide-react";
 import TextOptions from "./TextOptions";
 
@@ -14,7 +14,7 @@ export default function CommentProfile({comment} : {comment: FullCommentInfo & L
     const [showOptions, setShowOptions] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
     const myId = useSelector(selectMyId);
-    const [ changeLike ] = useChangePostLikeMutation();
+    const [ changeLike ] = useChangeCommentLikeMutation();
 
     return (
         <>
@@ -50,9 +50,9 @@ export default function CommentProfile({comment} : {comment: FullCommentInfo & L
                                 {...((comment.likes && comment.likes.length > 0) ? {style: {backgroundColor: "black"}} : {})}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    e.currentTarget.disabled = true;
+                                    ///e.currentTarget.disabled = true;
                                     changeLike({id: comment.id, action: ((comment.likes && comment.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
-                                        e.currentTarget.disabled = false;
+                                        ///e.currentTarget.disabled = false;
                                     })
                                 }}
                             >L</button>

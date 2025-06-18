@@ -37,9 +37,18 @@ export default function CommentCreate({postid, commentid, changeCreate} : {posti
 
     newForm.append("content", content);
 
-    createComment({info: newForm, id: postid, ...(commentid ? {comment: commentid} : {})});
-    setTextValue("");
-    target.reset();
+    if (typeof changeCreate === "function") {
+      createComment({info: newForm, id: postid, ...(commentid ? {comment: commentid} : {})}).unwrap().then(() => {
+        changeCreate();
+      }).catch(() => {
+        setTextValue("");
+        target.reset();
+      });
+    } else {
+      createComment({info: newForm, id: postid, ...(commentid ? {comment: commentid} : {})});
+      setTextValue("");
+      target.reset();
+    };
   };
 
     return (
@@ -67,7 +76,10 @@ export default function CommentCreate({postid, commentid, changeCreate} : {posti
                 </div>
                 {
                     typeof changeCreate === "function" ? <button type="button"
-                    onClick={() => changeCreate()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      changeCreate();
+                    }}
                     >Cancel</button> : <></>
                 }
                 <button type="submit">Send</button>

@@ -56,7 +56,7 @@ export const apiSlice = createApi({
         baseUrl: "http://localhost:3000",
         credentials: "include",
     }),
-    keepUnusedDataFor: 3,
+    keepUnusedDataFor: 1,
     tagTypes: [
         "SelfInfo",
         "PostInfo",
@@ -114,15 +114,25 @@ export const apiSlice = createApi({
             }
           });
         };
+
+        const followsListener = (data: FollowsSocket) => {
+          if (data.action === "ADD" && data.data) {
+            socket.emitWithAck("follow:join", {id: data.data.id});
+          } else if (data.action === "REMOVE" && data.id) {
+            socket.emitWithAck("follow:leave", {id: data.id});
+          }
+        };
         try {
           await cacheDataLoaded;
 
           socket.on("followers", listener);
+          socket.on("follows", followsListener);
         } catch {}
         
         await cacheEntryRemoved;
         
         socket.off("followers", listener);
+        socket.off("follows", followsListener);
       },
     }),
     searchUsers: builder.infiniteQuery<{ users: (UserInfo & UserExtra)[] }, string, InitialPageParam>({
@@ -169,12 +179,12 @@ export const apiSlice = createApi({
         };
 
         const followsListener = (data: FollowsSocket) => {
-          if (data.action !== "ADD") {
+          if (data.action !== "ADD" || !data.data) {
             return;
           }
           updateCachedData((draft) => {
             draft.pages.forEach(({users}) => {
-              const possibleIndex = users.findIndex((ele) => ele.id === data.data.id);
+              const possibleIndex = users.findIndex((ele) => ele.id === data.data?.id);
               if (possibleIndex !== -1) {
                 users[possibleIndex].followers = [{id: "1"}];
                 users[possibleIndex].receivedRequests = undefined;
@@ -243,7 +253,7 @@ export const apiSlice = createApi({
             return;
           };
 
-          if (data.data.id !== arg) {
+          if (!data.data || data.data.id !== arg) {
             return;
           };
 
@@ -282,6 +292,7 @@ export const apiSlice = createApi({
         
         await cacheEntryRemoved;
         
+        const response = await socket.emitWithAck("user:leave", {id: arg});
         socket.off("user:updated", listener);
         socket.off("follows", followsListener);
         socket.off("request", requestListener);
@@ -331,12 +342,12 @@ export const apiSlice = createApi({
         };
 
         const followsListener = (data: FollowsSocket) => {
-          if (data.action !== "ADD") {
+          if (data.action !== "ADD" || !data.data) {
             return;
           }
           updateCachedData((draft) => {
             draft.pages.forEach(({users}) => {
-              const possibleIndex = users.findIndex((ele) => ele.id === data.data.id);
+              const possibleIndex = users.findIndex((ele) => ele.id === data.data?.id);
               if (possibleIndex !== -1) {
                 users[possibleIndex].followers = [{id: "1"}];
                 users[possibleIndex].receivedRequests = undefined;
@@ -549,7 +560,6 @@ export const apiSlice = createApi({
           });
         };
         const updateListener = (data: PostUpdateSocket) => {
-          console.log("heelo")
           updateCachedData((draft) => {
             draft.pages.forEach(({feed}) => {
               const possibleIndex = feed.findIndex((ele) => ele.id === data.id);
@@ -557,7 +567,6 @@ export const apiSlice = createApi({
                 if (data.type ===  "content" && data.content) {
                   feed[possibleIndex].content = data.content;
                 } else if (data.type === "likes" && data.likes !== undefined) {
-                  console.log(data.likes)
                   feed[possibleIndex].likesCount = data.likes;
                 };
               };
@@ -567,17 +576,17 @@ export const apiSlice = createApi({
         try {
           await cacheDataLoaded;
 
-          socket.on("post:deleted", deleteListener);
-          socket.on("post:created", newListener);
-          socket.on("post:updated", updateListener);
+          socket.on("follow:post:deleted", deleteListener);
+          socket.on("follow:post:created", newListener);
+          socket.on("follow:post:updated", updateListener);
           
         } catch {}
         
         await cacheEntryRemoved;
         
-        socket.off("post:deleted", deleteListener);
-        socket.off("post:created", newListener);
-        socket.off("post:updated", updateListener);
+        socket.off("follow:post:deleted", deleteListener);
+        socket.off("follow:post:created", newListener);
+        socket.off("follow:post:updated", updateListener);
       },
       providesTags: ["FeedInfo"],
     }),
@@ -637,12 +646,12 @@ export const apiSlice = createApi({
         };
 
         const followsListener = (data: FollowsSocket) => {
-          if (data.action !== "ADD") {
+          if (data.action !== "ADD" || !data.data) {
             return;
           }
           updateCachedData((draft) => {
             draft.pages.forEach(({followers}) => {
-              const possibleIndex = followers.findIndex((ele) => ele.id === data.data.id);
+              const possibleIndex = followers.findIndex((ele) => ele.id === data.data?.id);
               if (possibleIndex !== -1) {
                 followers[possibleIndex].followers = [{id: "1"}];
                 followers[possibleIndex].receivedRequests = undefined;
@@ -718,9 +727,12 @@ export const apiSlice = createApi({
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const listener = (data: FollowsSocket) => {
+          if (!data.data) {
+            return;
+          }
           updateCachedData((draft) => {
             if (data.action === "ADD") {
-              draft.pages[0].follows.unshift(data.data);
+              draft.pages[0].follows.unshift(data.data as (UserFollowType & UserExtra));
             }
           });
         };
@@ -965,7 +977,7 @@ export const apiSlice = createApi({
         url: `/requests/${id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["ReceivedInfo", "SelfInfo", "FollowersInfo"],
+      invalidatesTags: ["ReceivedInfo", "FollowersInfo"],
     }),
     deleteRequest: builder.mutation<ReturnMessage, UId & {type: "CANCEL" | "REJECT"} & {userid: string}>({
       query: ({id}) => ({
@@ -1046,7 +1058,6 @@ export const apiSlice = createApi({
         try {
           await cacheDataLoaded;
           const response = await socket.emitWithAck("post:join", {id: arg.id, comments: "yes"});
-          console.log(response)
           socket.on("post:updated", listener);
           
         } catch {}
@@ -1148,15 +1159,45 @@ export const apiSlice = createApi({
               }
           });
         };
-        try {
-          await cacheDataLoaded;
+         const deleteListener = (data: CommentDeleteSocket) => {
+          if (data.parentid !== arg.id) {
+            return;
+          };
 
+          updateCachedData((draft) => {
+            draft.comment.ownCommentsCount -= 1;
+          })
+        };
+        const newListener = (data: NewCommentSocket) => {
+          console.log(data)
+          if (data.comment.commentid !== arg.id) {
+            return;
+          };
+
+          updateCachedData((draft) => {
+            draft.comment.ownCommentsCount += 1;
+          })
+        };
+        let commentData : (FullCommentInfo & Likes & OwnCommentsCount & YourLike) | undefined;
+        try {
+          const {data: {comment}} = await cacheDataLoaded;
+          commentData = comment;
+          const response = await socket.emitWithAck("post:join", {id: commentData.postid, comments: "yes"});
+          setTimeout(async () => {
+            await socket.emitWithAck("post:join", {id: commentData?.postid as string, comments: "yes"});
+          }, 1000);
+          socket.on("comment:deleted", deleteListener);
+          socket.on("comment:created", newListener);
           socket.on("comment:updated", listener);
           
         } catch {}
         
         await cacheEntryRemoved;
-        
+        if (commentData) {
+          const response = await socket.emitWithAck("post:leave", {id: commentData.postid});
+        };
+        socket.off("comment:deleted", deleteListener);
+        socket.off("comment:created", newListener);
         socket.off("comment:updated", listener);
       },
     }),
@@ -1234,7 +1275,6 @@ export const apiSlice = createApi({
             apiSlice.util.updateQueryData('getFeed', undefined, (draft) => {
               draft.pages.forEach(({feed}) => {
                 const possibleIndex = feed.findIndex((ele) => ele.id === post.id);
-                console.log(possibleIndex)
                 if (possibleIndex !== -1) {
                   if (action === "ADD") {
                     feed[possibleIndex].likes = [{id:"1"}];
@@ -1363,7 +1403,7 @@ export const apiSlice = createApi({
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const deleteListener = (data: CommentDeleteSocket) => {
-          if (data.parentid !== arg || data.superparentid !== arg) {
+          if (data.parentid !== arg && data.superparentid !== arg) {
             return;
           };
 
@@ -1390,7 +1430,8 @@ export const apiSlice = createApi({
           };
         };
         const newListener = (data: NewCommentSocket) => {
-          if (data.comment.commentid !== arg || data.superparentid !== arg) {
+          console.log(data)
+          if (data.comment.commentid !== arg && data.superparentid !== arg) {
             return;
           };
 
@@ -1643,4 +1684,5 @@ export const {
   useGetCommentQuery,
   useDeleteCommentMutation,
   useDeletePostMutation,
+  useChangeCommentLikeMutation,
 } = apiSlice;

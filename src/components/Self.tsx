@@ -78,7 +78,7 @@ export default function Self() {
       setIconOptions(false);
     }
   };
-
+  
   return (
     <main>
       {isLoading ? (

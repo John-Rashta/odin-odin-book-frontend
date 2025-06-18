@@ -7,6 +7,7 @@ import { ClickType } from "../../util/types";
 import MiniNotifications from "./MiniNotifications";
 import ClickWrapper from "./ClickWrapper";
 import NavMenu from "./NavMenu";
+import { socket } from "../../sockets/socket";
 
 export default function Header() {
     const [logoutUser] = useLogoutUserMutation();
@@ -107,6 +108,7 @@ export default function Header() {
                 <NavMenu />
                 <div onClick={() => {
                     logoutUser().unwrap().then(() => {
+                        socket.disconnect();
                         location.reload();
                     })
                 }}>

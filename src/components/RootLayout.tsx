@@ -55,7 +55,7 @@ export default function RootLayout() {
         if (data.user.id === myId || myId === "guest") {
           return;
         }
-
+        socket.connect();
         dispatch(setMyId(data.user.id));
         dispatch(setAuthState(true));
       }

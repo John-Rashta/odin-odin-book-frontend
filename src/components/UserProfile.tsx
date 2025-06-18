@@ -23,6 +23,9 @@ export default function UserProfile({info} : {info: UserInfo & UserExtra }) {
                 <div>
                     {formatRelative(new Date(info.joinedAt), new Date(), { locale })}
                 </div>
+                <div>
+                    {info.followerCount}
+                </div>
             </div>
             {
             (info.followers && info.followers.length > 0) ? <div>
