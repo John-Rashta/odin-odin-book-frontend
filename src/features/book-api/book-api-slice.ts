@@ -1169,7 +1169,6 @@ export const apiSlice = createApi({
           })
         };
         const newListener = (data: NewCommentSocket) => {
-          console.log(data)
           if (data.comment.commentid !== arg.id) {
             return;
           };
@@ -1430,7 +1429,6 @@ export const apiSlice = createApi({
           };
         };
         const newListener = (data: NewCommentSocket) => {
-          console.log(data)
           if (data.comment.commentid !== arg && data.superparentid !== arg) {
             return;
           };
