@@ -10,8 +10,45 @@ import Footer from "./Footer";
 import HomePage from "./HomePage";
 import { defaultPaths } from "../../util/globalValues";
 import { socket } from "../../sockets/socket";
-import { NewPostSocket, PostUpdateSocket } from "../../sockets/socketTypes";
+import { createGlobalStyle } from "styled-components";
+import { mainBackgroundColor } from "../../util/style";
 
+const GlobalStyle = createGlobalStyle`
+    *,
+    *::before,
+    *::after {
+    box-sizing: border-box;
+    }
+
+    * {
+        margin: 0px;
+    }
+
+    #root {
+        font-family: Times, "Times New Roman", Georgia, serif;
+        overflow: hidden;
+    }
+
+    #root,
+    body,
+    html {
+        height: 100%;
+    }
+
+
+    main,
+    #root,
+    body,
+    html {
+        background-color: ${mainBackgroundColor};
+    }
+
+    img:not(.textImage) {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+`;
 export default function RootLayout() {
   const authState = useSelector(selectAuthState);
   const dispatch = useDispatch();
@@ -19,36 +56,6 @@ export default function RootLayout() {
   const { pathname } = useLocation();
   const { data } = useGetSelfQuery();
   
-  useEffect(() => {
-    function onConnect() {
-      console.log("connected");
-    }
-
-    function onDisconnect() {
-      console.log("disconnected");
-    }
-
-    function newListener(data: NewPostSocket) {
-          console.log(data)
-    };
-
-    function updateListener(data: PostUpdateSocket) {
-          console.log(data)
-    };
-
-    socket.on("post:created", newListener);
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on("post:updated", updateListener);
-
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off("post:created", newListener);
-      socket.off("post:updated", updateListener);
-    };
-  }, []);
-
   useEffect(() => {
     const checkSession = function checkIfActiveSession() {
       if (data) {
@@ -66,6 +73,7 @@ export default function RootLayout() {
 
   return (
     <div>
+      <GlobalStyle />
       {authState ? <Header /> : <DefaultHeader />}
       {!authState && !defaultPaths.includes(pathname) ? (
         <HomePage />

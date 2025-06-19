@@ -7,13 +7,15 @@ import ClickWrapper from "./ClickWrapper";
 
 export default function SearchUsers() {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [searchValue, setSearchValue] = useState(searchParams.get("id") || "");
-    const { searchData, isLoading, error, isFetchingNextPage, hasNextPage, fetchNextPage } = useSearchUsersInfiniteQuery(searchValue !== "" ? searchValue : skipToken, {
+    const [searchValue, setSearchValue] = useState(searchParams.get("user") || "");
+    const { searchData, isLoading, error, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage } = useSearchUsersInfiniteQuery(searchValue !== "" ? searchValue : skipToken, {
         selectFromResult: result => ({
             ...result,
             searchData: result.data?.pages.map(({users}) => users).flat()
         })
     });
+
+    console.log(searchData)
 
     return (
         <main>
@@ -30,11 +32,7 @@ export default function SearchUsers() {
             </div>
             <div>
                 {
-                    isLoading ? <div>
-                        Searching...
-                    </div> : error ? <div>
-                        Error Searching!
-                    </div> : (searchData && searchData.length > 0 && searchValue !== "") ? <div>
+                     (searchData && searchData.length > 0 && searchValue !== "") ? <div>
                         <ClickWrapper>
                             {
                                 searchData.map((ele) => {

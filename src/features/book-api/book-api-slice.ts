@@ -1055,16 +1055,50 @@ export const apiSlice = createApi({
             }
           });
         };
+        const deleteListener = (data: CommentDeleteSocket) => {
+          if (data.postid !== arg.id) {
+            return;
+          };
+
+          if (data.superparentid || data.parentid) {
+            return;
+          };
+
+          
+          updateCachedData((draft) => {
+            draft.post.ownCommentsCount -= 1;
+          });
+          return; 
+        };
+        const newListener = (data: NewCommentSocket) => {
+          if (data.comment.postid !== arg.id) {
+            return;
+          };
+
+          if (data.superparentid || data.comment.commentid) {
+            return;
+          };
+          
+          updateCachedData((draft) => {
+            draft.post.ownCommentsCount += 1;
+          });
+          return;
+          
+        };
         try {
           await cacheDataLoaded;
           const response = await socket.emitWithAck("post:join", {id: arg.id, comments: "yes"});
           socket.on("post:updated", listener);
+          socket.on("comment:deleted", deleteListener);
+          socket.on("comment:created", newListener);
           
         } catch {}
         
         await cacheEntryRemoved;
         const response = await socket.emitWithAck("post:leave", {id: arg.id});
         socket.off("post:updated", listener);
+        socket.off("comment:deleted", deleteListener);
+        socket.off("comment:created", newListener);
       },
     }),
     getMyPosts: builder.infiniteQuery<{ posts: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] }, string,  InitialPageParam>({
@@ -1599,7 +1633,7 @@ export const apiSlice = createApi({
         socket.off("comment:updated", updateListener);
       },
     }),
-    getNotifications: builder.query<{ notifications: NotificationsInfo[] }, void>({
+    getNotifications: builder.query<{ notifications: NotificationsInfo[] }, UId>({
       query: () => ({
         url: `/notifications`,
       }),
@@ -1612,6 +1646,9 @@ export const apiSlice = createApi({
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const listener = (data: NotificationSocket | BasicId & NotificationSocket) => {
+          if ("id" in data  && arg.id === data.id) {
+            return;
+          };
           updateCachedData((draft) => {
               draft.notifications.unshift(data.notification);
           });

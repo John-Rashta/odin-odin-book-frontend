@@ -1,12 +1,13 @@
 import { NavLink } from "react-router-dom";
+import { StyledNavLink } from "../../util/style";
 
 export default function DefaultHeader() {
     return (
         <header>
-            <NavLink to={"/"}>Home</NavLink>
+            <StyledNavLink to={"/"}>Home</StyledNavLink>
             <div>
-                <NavLink to={"/login"}>Login</NavLink>
-                <NavLink to={"/signup"}>Sign Up</NavLink>
+                <StyledNavLink to={"/login"}>Login</StyledNavLink>
+                <StyledNavLink to={"/signup"}>Sign Up</StyledNavLink>
             </div>
         </header>
     )

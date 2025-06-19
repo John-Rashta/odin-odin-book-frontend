@@ -1,9 +1,12 @@
+import { useSelector } from "react-redux";
 import { useClearNotificationsMutation, useGetNotificationsQuery } from "../features/book-api/book-api-slice"
+import { selectMyId } from "../features/manager/manager-slice";
 import ClickWrapper from "./ClickWrapper";
 import MiniNotifications from "./MiniNotifications";
 
 export default function Notifications() {
-    const { notificationsData, isLoading, error} = useGetNotificationsQuery(undefined, {
+    const myId = useSelector(selectMyId);
+    const { notificationsData, isLoading, error} = useGetNotificationsQuery({id: myId}, {
         selectFromResult: (result) => ({
             ...result,
             notificationsData: result.data?.notifications

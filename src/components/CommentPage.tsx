@@ -5,10 +5,13 @@ import Comment from "./Comment";
 import CommentProfile from "./CommentProfile";
 import ClickWrapper from "./ClickWrapper";
 import CommentCreate from "./CommentCreate";
+import { useSelector } from "react-redux";
+import { selectMyId } from "../features/manager/manager-slice";
 
 export default function CommentPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
+    const myId = useSelector(selectMyId);
     const currentId = searchParams.get("id") || "";
     if (!isUUID(currentId)) {
         ///REDIRECT
@@ -39,7 +42,7 @@ export default function CommentPage() {
         </div> : commentData ? 
             <div>
                 <CommentProfile comment={commentData} />
-                <CommentCreate postid={commentData.postid} commentid={commentData.id} />
+                {isUUID(myId) && <CommentCreate postid={commentData.postid} commentid={commentData.id} />}
                 <div>
                         {
                             (commentsData && commentsData.length > 0) ? <div>

@@ -1,16 +1,22 @@
 import { useState } from "react";
 import { useGetNotificationsQuery, useLogoutUserMutation, useSearchUsersInfiniteQuery } from "../features/book-api/book-api-slice"
 import { skipToken } from "@reduxjs/toolkit/query";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import MiniUser from "./MiniUser";
 import { ClickType } from "../../util/types";
 import MiniNotifications from "./MiniNotifications";
 import ClickWrapper from "./ClickWrapper";
 import NavMenu from "./NavMenu";
 import { socket } from "../../sockets/socket";
+import { useSelector } from "react-redux";
+import { selectMyId } from "../features/manager/manager-slice";
+import styled from "styled-components";
+import { navMenuValue, StyledNavLink } from "../../util/style";
 
 export default function Header() {
     const [logoutUser] = useLogoutUserMutation();
+    const myId = useSelector(selectMyId);
+    const { pathname } = useLocation();
     const [searchValue, setSearchValue] = useState("");
     const [showNotifications, setShowNotifications] = useState(false);
     const { searchData } = useSearchUsersInfiniteQuery(searchValue !== "" ? searchValue : skipToken, {
@@ -19,7 +25,7 @@ export default function Header() {
              searchData: result.data?.pages.map(({users}) => users).flat()
         })
     });
-     const { notificationsData } = useGetNotificationsQuery(undefined, {
+     const { notificationsData } = useGetNotificationsQuery({id: myId}, {
         selectFromResult: (result) => ({
             ...result,
             notificationsData: result.data?.notifications
@@ -45,47 +51,49 @@ export default function Header() {
     return (
         <header>
             <nav>
-                <NavLink to={"/"}>Home</NavLink>
-                <div style={{position: "relative"}}>
-                    <form onSubmit={(e) => {
-                        e.preventDefault();
-                        navigate(`/search?user=${searchValue}`);
-                        return;
-                    }}>
-                        <input 
-                            type="text"
-                            name="searchBar"
-                            id="searchBar"
-                            value={searchValue}
-                            onChange={(e) => {
-                                setSearchValue(e.target.value);
-                            }}
-                        />
-                    </form>
-                    {
-                        (searchData && searchValue !== "") && (
-                            <div onClick={handleClick}>
-                                {
-                                    searchData.length > 0 ? searchData.map((ele) => {
-                                        return <MiniUser key={ele.id} user={ele} />
-                                    }) : <div>
-                                        No Result Found
-                                    </div>
-                                }
-                            </div>
-                        )
-                    }
-                </div>
+                <StyledNavLink to={"/"}>Home</StyledNavLink>
+                { pathname !== "/search"  &&
+                    <div style={{position: "relative"}}>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            navigate(`/search?user=${searchValue}`);
+                            return;
+                        }}>
+                            <input 
+                                type="text"
+                                name="searchBar"
+                                id="searchBar"
+                                value={searchValue}
+                                onChange={(e) => {
+                                    setSearchValue(e.target.value);
+                                }}
+                            />
+                        </form>
+                        {
+                            (searchData && searchValue !== "") && (
+                                <div onClick={handleClick}>
+                                    {
+                                        (searchData.length > 0) ? searchData.map((ele) => {
+                                            return <MiniUser key={ele.id} user={ele} />
+                                        }) : <div>
+                                            No Result Found
+                                        </div>
+                                    }
+                                </div>
+                            )
+                        }
+                    </div>
+                }
                 <div>
                     <button onClick={() => {
                         setShowNotifications(!showNotifications);
-                    }}>Notifications</button>
+                    }}>Notifications {notificationsData ? `${notificationsData.length}` : ""}</button>
                     {
                         (showNotifications && notificationsData && notificationsData.length > 0) && <div>
                             <ClickWrapper>
                                 {
                                     notificationsData.slice(0, 25).map((ele) => {
-                                    return <MiniNotifications notification={ele} />
+                                    return <MiniNotifications key={ele.id} notification={ele} />
                                     })
                                 }
                             </ClickWrapper>
@@ -98,13 +106,13 @@ export default function Header() {
                         </div>
                     }
                 </div>
-                <div className="extraOptions">
-                    <NavLink to={"/requests"}>Requests</NavLink>
-                    <NavLink to={"/followships"}>Followships</NavLink>
-                    <NavLink to={"/users"}>Users</NavLink>
-                    <NavLink to={"/myposts"}>MyPosts</NavLink>
-                    <NavLink to={"/profile"}>Profile</NavLink>
-                </div>
+                <StyledExtraGroup className="extraOptions">
+                    <StyledNavLink to={"/requests"}>Requests</StyledNavLink>
+                    <StyledNavLink to={"/followships"}>Followships</StyledNavLink>
+                    <StyledNavLink to={"/users"}>Users</StyledNavLink>
+                    <StyledNavLink to={"/myposts"}>MyPosts</StyledNavLink>
+                    <StyledNavLink to={"/profile"}>Profile</StyledNavLink>
+                </StyledExtraGroup>
                 <NavMenu />
                 <div onClick={() => {
                     logoutUser().unwrap().then(() => {
@@ -118,3 +126,12 @@ export default function Header() {
         </header>
     )
 };
+
+const StyledExtraGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  @media only screen and (max-width: ${navMenuValue}) {
+    display: none;
+  }
+`;

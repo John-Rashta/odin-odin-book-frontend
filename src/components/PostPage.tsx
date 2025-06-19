@@ -7,9 +7,12 @@ import { isUUID } from "validator";
 import PostEdit from "./PostEdit";
 import ClickWrapper from "./ClickWrapper";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectMyId } from "../features/manager/manager-slice";
 
 export default function PostPage() {
     const navigate = useNavigate();
+    const myId = useSelector(selectMyId);
     const [searchParams, setSearchParams] = useSearchParams();
     const currentId = searchParams.get("id") || "";
     if (!isUUID(currentId)) {
@@ -46,7 +49,7 @@ export default function PostPage() {
                     Failed Loading Post!
                 </div> : postData ? <>
                     <PostProfile post={postData} modalFunc={editFunction}/>
-                    <CommentCreate postid={postData.id} />
+                    {isUUID(myId) && <CommentCreate postid={postData.id} />}
                     {
                         commentsLoading ? <div>
                             Loading Comments!

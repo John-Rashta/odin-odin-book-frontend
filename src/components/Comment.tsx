@@ -80,10 +80,10 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                             </div>
                         </div>
                     </div>
-                    <button onClick={(e) => {
+                    {isUUID(myId) && <button onClick={(e) => {
                         e.stopPropagation()
                         setShowReply(true)
-                    }}>Reply</button>
+                    }}>Reply</button>}
                 </div>
             }
             {

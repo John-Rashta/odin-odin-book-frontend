@@ -1,11 +1,13 @@
 import { Ellipsis } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import styled from "styled-components";
+import { navMenuValue } from "../../util/style";
 
 export default function NavMenu() {
     const [openOptions, setOpenOptions] = useState(false);
     return (
-        <div>
+        <StyledDiv>
             <button onClick={() => {
                 setOpenOptions(!openOptions);
             }}>
@@ -22,6 +24,12 @@ export default function NavMenu() {
                     <NavLink to={"/profile"}>Profile</NavLink>
                 </nav>
             }
-        </div>
+        </StyledDiv>
     )
 };
+
+const StyledDiv = styled.div`
+  @media only screen and (min-width: ${navMenuValue}) {
+    display: none;
+  }
+`;
