@@ -36,7 +36,10 @@ export default function CommentProfile({comment} : {comment: FullCommentInfo & L
                         </div>
                     </div>
                     <div>
-                        {comment.content}
+                        <div>
+                            {comment.content}
+                        </div>
+                        {comment.image ? <img src={comment.image.url} alt="" /> : <></>}
                     </div>
                     <div>
                         <div>

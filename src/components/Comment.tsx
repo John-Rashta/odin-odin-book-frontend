@@ -46,7 +46,10 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                             </div>
                         </div>
                         <div>
-                            {comment.content}
+                            <div>
+                                {comment.content}
+                            </div>
+                            {comment.image ? <img src={comment.image.url} alt="" /> : <></>}
                         </div>
                         <div>
                             <div>

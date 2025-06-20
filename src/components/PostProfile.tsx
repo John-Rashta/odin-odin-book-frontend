@@ -24,7 +24,10 @@ export default function PostProfile({post, modalFunc} : {post: FullPostInfo & Li
             </div>
             <div>
                 <div>
-                    {post.content}
+                    <div>
+                        {post.content}
+                    </div>
+                    {post.image ? <img src={post.image.url} alt="" /> : <></>}
                 </div>
                 <div>
                     {post.likesCount}
