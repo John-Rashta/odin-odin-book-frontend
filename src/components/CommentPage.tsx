@@ -1,23 +1,18 @@
 import { useGetCommentCommentsInfiniteQuery, useGetCommentQuery } from "../features/book-api/book-api-slice";
 import { isUUID } from "validator";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import Comment from "./Comment";
 import CommentProfile from "./CommentProfile";
 import ClickWrapper from "./ClickWrapper";
 import CommentCreate from "./CommentCreate";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 export default function CommentPage() {
     const [searchParams, setSearchParams] = useSearchParams();
-    const navigate = useNavigate();
     const myId = useSelector(selectMyId);
     const currentId = searchParams.get("id") || "";
-    if (!isUUID(currentId)) {
-        ///REDIRECT
-        navigate("/");
-        return;
-    };
     const {commentData, isLoading, error } = useGetCommentQuery({id: currentId}, {
         selectFromResult: (result) => ({
             ...result,
@@ -25,7 +20,7 @@ export default function CommentPage() {
         })
     });
 
-    const {commentsData, isFetchingNextPage, hasNextPage, fetchNextPage  } = useGetCommentCommentsInfiniteQuery(currentId, {
+    const {commentsData, isFetchingNextPage, hasNextPage, fetchNextPage  } = useGetCommentCommentsInfiniteQuery(isUUID(currentId) ? currentId : skipToken, {
          selectFromResult: result => ({
             ...result,
             commentsData: result.data?.pages.map(({comments}) => comments).flat()
@@ -38,7 +33,7 @@ export default function CommentPage() {
             { isLoading ? <div>
             Loading Comment...
         </div> : error ? <div>
-            Failed Loading Comment!
+            Can't Find Comment.
         </div> : commentData ? 
             <div>
                 <CommentProfile comment={commentData} />

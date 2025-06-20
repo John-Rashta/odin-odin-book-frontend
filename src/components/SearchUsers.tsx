@@ -15,8 +15,6 @@ export default function SearchUsers() {
         })
     });
 
-    console.log(searchData)
-
     return (
         <main>
             <div>

@@ -3,6 +3,8 @@ import styled from "styled-components";
 
 const mainBackgroundColor = `rgb(255, 255, 255)`;
 const navMenuValue = `800px`;
+const headerPadding = `20px 10px`;
+const headerBackgroundColor = `rgb(202, 240, 160)`;
 
 const StyledNavLink = styled(NavLink)`
   border: solid transparent 2px;
@@ -22,4 +24,6 @@ export {
     mainBackgroundColor,
     navMenuValue,
     StyledNavLink,
+    headerBackgroundColor,
+    headerPadding,
 };

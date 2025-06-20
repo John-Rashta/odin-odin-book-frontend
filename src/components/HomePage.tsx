@@ -3,6 +3,7 @@ import { selectMyId } from "../features/manager/manager-slice"
 import { selectAuthState } from "../features/auth/auth-slice";
 import { isUUID } from "validator";
 import Feed from "./Feed";
+import styled from "styled-components";
 
 export default function HomePage() {
     const myId = useSelector(selectMyId);
@@ -11,12 +12,19 @@ export default function HomePage() {
         <>
             {
                 authState && isUUID(myId) ? <Feed /> :
-                authState && myId === "guest" ? <main>
+                authState && myId === "guest" ? <StyledMain>
                     guest page
-                </main> : <main>
+                </StyledMain> : <StyledMain>
                     Welcome to Odin Book!
-                </main>
+                </StyledMain>
             }
         </>
     )
 };
+
+const StyledMain = styled.main`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+`;

@@ -16,7 +16,7 @@ export default function CommentEdit({comment, changeEdit} : {comment: FullCommen
     };
     const target = event.target as HTMLFormElement;
     const content = target.textInput.value;
-    if (content === "" && !comment.image) {
+    if (content === "" || !content) {
         if (buttonRef.current) {
             buttonRef.current.disabled = false;
         };

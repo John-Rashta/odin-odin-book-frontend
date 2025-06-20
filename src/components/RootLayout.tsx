@@ -10,7 +10,7 @@ import Footer from "./Footer";
 import HomePage from "./HomePage";
 import { defaultPaths } from "../../util/globalValues";
 import { socket } from "../../sockets/socket";
-import { createGlobalStyle } from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import { mainBackgroundColor } from "../../util/style";
 
 const GlobalStyle = createGlobalStyle`
@@ -26,14 +26,13 @@ const GlobalStyle = createGlobalStyle`
 
     #root {
         font-family: Times, "Times New Roman", Georgia, serif;
-        overflow: hidden;
     }
 
+    html,
     #root,
-    body,
-    html {
-        height: 100%;
-    }
+    body {
+      height: 100%;
+    };
 
 
     main,
@@ -43,7 +42,7 @@ const GlobalStyle = createGlobalStyle`
         background-color: ${mainBackgroundColor};
     }
 
-    img:not(.textImage) {
+    img:not(.textImage, .profileImage) {
         width: 50px;
         height: 50px;
         border-radius: 50%;
@@ -72,7 +71,7 @@ export default function RootLayout() {
   }, [data]);
 
   return (
-    <div>
+    <StyledDiv>
       <GlobalStyle />
       {authState ? <Header /> : <DefaultHeader />}
       {!authState && !defaultPaths.includes(pathname) ? (
@@ -83,6 +82,13 @@ export default function RootLayout() {
         <Outlet />
       )}
       <Footer />
-    </div>
+    </StyledDiv>
   );
-}
+};
+
+const StyledDiv = styled.div`
+  min-height: 100%;
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+`;

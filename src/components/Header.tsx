@@ -11,7 +11,7 @@ import { socket } from "../../sockets/socket";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
 import styled from "styled-components";
-import { navMenuValue, StyledNavLink } from "../../util/style";
+import { headerBackgroundColor, headerPadding, navMenuValue, StyledNavLink } from "../../util/style";
 
 export default function Header() {
     const [logoutUser] = useLogoutUserMutation();
@@ -49,13 +49,14 @@ export default function Header() {
   };
 
     return (
-        <header>
-            <nav>
+        <StyledHeader>
+            <StyledNav>
                 <StyledNavLink to={"/"}>Home</StyledNavLink>
                 { pathname !== "/search"  &&
                     <div style={{position: "relative"}}>
                         <form onSubmit={(e) => {
                             e.preventDefault();
+                            setSearchValue("");
                             navigate(`/search?user=${searchValue}`);
                             return;
                         }}>
@@ -71,15 +72,15 @@ export default function Header() {
                         </form>
                         {
                             (searchData && searchValue !== "") && (
-                                <div onClick={handleClick}>
+                                <StyledSearchResult onClick={handleClick}>
                                     {
                                         (searchData.length > 0) ? searchData.map((ele) => {
                                             return <MiniUser key={ele.id} user={ele} />
-                                        }) : <div>
+                                        }) : <StyledNoResults>
                                             No Result Found
-                                        </div>
+                                        </StyledNoResults>
                                     }
-                                </div>
+                                </StyledSearchResult>
                             )
                         }
                     </div>
@@ -122,8 +123,8 @@ export default function Header() {
                 }}>
                     Logout
                 </div>
-            </nav>
-        </header>
+            </StyledNav>
+        </StyledHeader>
     )
 };
 
@@ -134,4 +135,32 @@ const StyledExtraGroup = styled.div`
   @media only screen and (max-width: ${navMenuValue}) {
     display: none;
   }
+`;
+
+const StyledHeader = styled.header`
+  background-color: ${headerBackgroundColor};
+  padding: ${headerPadding};
+  font-size: 1.3rem;
+`;
+
+const StyledNav = styled.nav`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+
+const StyledSearchResult = styled.div`
+  border: 1px solid black;
+  position: absolute;
+  background-color: rgb(255, 255, 255);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+  overflow: auto;
+`;
+
+const StyledNoResults = styled.div`
+  padding: 10px;
 `;

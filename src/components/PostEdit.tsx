@@ -30,7 +30,7 @@ export default function PostEdit({postid, closeModal} : {postid: string, closeMo
         };
         return;
     };
-    if (content === "" && !postData.image) {
+    if (content === "" || !content) {
         if (cancelRef.current) {
             cancelRef.current.disabled = false;
         };

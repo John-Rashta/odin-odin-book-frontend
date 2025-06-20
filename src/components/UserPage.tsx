@@ -8,19 +8,14 @@ import PostEdit from "./PostEdit";
 import { isUUID } from "validator";
 import ClickWrapper from "./ClickWrapper";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 export default function UserPage() {
-    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const currentId = searchParams.get("id") || "";
-    if (!isUUID(currentId)) {
-        ///REDIRECT
-        navigate("/");
-        return;
-    };
     const [showModal, setShowModal] = useState(false);
     const [editId, setEditId] = useState("");
-    const {postsData, error: postsError, isLoading: postsLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useGetUserPostsInfiniteQuery(currentId, {
+    const {postsData, error: postsError, isLoading: postsLoading, isFetchingNextPage, hasNextPage, fetchNextPage} = useGetUserPostsInfiniteQuery(isUUID(currentId) ? currentId : skipToken, {
         selectFromResult: result => ({
             ...result,
             postsData: result.data?.pages.map(({posts}) => posts).flat()
@@ -44,7 +39,7 @@ export default function UserPage() {
                 isLoading ? <div>
                     Loading User...
                 </div> : error ? <div>
-                    Failed Loading User!
+                    Can't Find User.
                 </div> : userData ? <>
                     <UserProfile info={userData} />
                     {

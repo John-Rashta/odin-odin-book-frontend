@@ -9,24 +9,19 @@ import ClickWrapper from "./ClickWrapper";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 export default function PostPage() {
-    const navigate = useNavigate();
     const myId = useSelector(selectMyId);
     const [searchParams, setSearchParams] = useSearchParams();
     const currentId = searchParams.get("id") || "";
-    if (!isUUID(currentId)) {
-        ///REDIRECT
-        navigate("/");
-        return;
-    };
     const { postData, isLoading, error } = useGetPostQuery({id: currentId}, {
          selectFromResult: result => ({
             ...result,
             postData: result.data?.post
         })
     });
-    const { commentsData, isLoading: commentsLoading, error: commentsError, isFetchingNextPage, hasNextPage, fetchNextPage } = useGetPostCommentsInfiniteQuery(currentId, {
+    const { commentsData, isLoading: commentsLoading, error: commentsError, isFetchingNextPage, hasNextPage, fetchNextPage } = useGetPostCommentsInfiniteQuery(isUUID(currentId) ? currentId : skipToken, {
          selectFromResult: result => ({
             ...result,
             commentsData: result.data?.pages.map(({comments}) => comments).flat()
@@ -46,7 +41,7 @@ export default function PostPage() {
                 isLoading ? <div>
                     Loading Post...
                 </div> : error ? <div>
-                    Failed Loading Post!
+                    Can't Find Post.
                 </div> : postData ? <>
                     <PostProfile post={postData} modalFunc={editFunction}/>
                     {isUUID(myId) && <CommentCreate postid={postData.id} />}

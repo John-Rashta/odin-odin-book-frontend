@@ -12,10 +12,6 @@ export default function Request({info} : {info: InfoType}) {
     const [acceptRequest] = useAcceptRequestMutation();
     const [deleteRequest] = useDeleteRequestMutation();
 
-    const generateOptions = function getRequestOptions() {
-
-    };
-
     return (
         <main>
             {

@@ -1,9 +1,12 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import { ButtonClickType, ModalStartFunction, SimpleFunctionType } from "../../util/types";
 import { useDeleteCommentMutation, useDeletePostMutation } from "../features/book-api/book-api-slice";
 
 export default function TextOptions({textId, editFunc, type, closeFunc} : {textId: string, editFunc: SimpleFunctionType | ModalStartFunction, type: "COMMENT" | "POST", closeFunc: SimpleFunctionType}) {
     const [ deletePost ] = useDeletePostMutation();
     const [ deleteComment ] = useDeleteCommentMutation();
+    const { pathname } = useLocation();
+    const navigate = useNavigate();
 
     const handleDelete = function handleDeletesInOptions(event: ButtonClickType) {
         event.stopPropagation();
@@ -13,7 +16,11 @@ export default function TextOptions({textId, editFunc, type, closeFunc} : {textI
 
         if (type === "POST") {
             deletePost({id: textId}).unwrap().then(() => {
-                closeFunc();
+                if (pathname === "/post") {
+                    navigate("/");
+                } else {
+                    closeFunc();
+                };
             }).catch((result) => {
                 if (result.data.message) {
                     console.log(result.data.message);
@@ -23,7 +30,11 @@ export default function TextOptions({textId, editFunc, type, closeFunc} : {textI
             return;
         } else if (type === "COMMENT") {
             deleteComment({id: textId}).unwrap().then(() => {
-                closeFunc();
+                if (pathname === "/comment") {
+                    navigate("/");
+                } else {
+                    closeFunc();
+                };
             }).catch((result) => {
                 if (result.data.message) {
                     console.log(result.data.message);
