@@ -18,7 +18,9 @@ export default function CommentProfile({comment} : {comment: FullCommentInfo & L
 
     return (
         <>
-    {showEdit ? <CommentEdit comment={comment} changeEdit={() =>  setShowEdit(false)} /> :
+    {showEdit ? <CommentEdit comment={comment} changeEdit={() =>  {
+        setShowEdit(false);
+    }} /> :
             <div>
                 <div className="clickOption userOption" data-userid={comment.senderid}>
                     <img src={comment.sender.customIcon?.url || comment.sender.icon.source} alt="" />

@@ -70,9 +70,11 @@ export default function PostEdit({postid, closeModal} : {postid: string, closeMo
           left: 0,
           width: "100vw",
           height: "100vh",
+          "zIndex": 5,
         }}>
           <div className="modalContainer" style={{
-            position: "absolute"
+            position: "absolute",
+            "zIndex": 6,
           }}>
             <form
               onSubmit={handleSubmit}

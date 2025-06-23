@@ -11,6 +11,9 @@ import TextOptions from "./TextOptions";
 import { Ellipsis } from "lucide-react";
 import CommentEdit from "./CommentEdit";
 import CommentCreate from "./CommentCreate";
+import CommentsDisplayButtons from "./CommentsDisplayButtons";
+import LoadMore from "./LoadMore";
+import LikeButton from "./LikeButton";
 
 export default function Comment({comment} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}) {
     const myId = useSelector(selectMyId);
@@ -28,7 +31,9 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
 
     return (
         <div>
-            { showEdit ? <CommentEdit comment={comment} changeEdit={() =>  setShowEdit(false)} /> :
+            { showEdit ? <CommentEdit comment={comment} changeEdit={() =>  {
+                setShowEdit(false);
+            }} /> :
                 <div className="clickOption commentOption" data-commentid={comment.id}>
                     <div className="userOption" data-userid={comment.senderid}>
                         <img src={comment.sender.customIcon?.url || comment.sender.icon.source} alt="" />
@@ -58,18 +63,13 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                             <div>
                                 {comment.likesCount > 0 ? comment.likesCount : ""}
                             </div>
-                            { isUUID(myId) &&
-                                <button 
-                                    {...((comment.likes && comment.likes.length > 0) ? {style: {backgroundColor: "black"}} : {})}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        ///e.currentTarget.disabled = true;
-                                        changeLike({id: comment.id, action: ((comment.likes && comment.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
-                                            ///e.currentTarget.disabled = false;
-                                        })
-                                    }}
-                                >L</button>
-                            }
+                            <LikeButton myId={myId} likesInfo={comment.likes} clickFunction={(e) => {
+                                e.stopPropagation();
+                                ///e.currentTarget.disabled = true;
+                                changeLike({id: comment.id, action: ((comment.likes && comment.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
+                                    ///e.currentTarget.disabled = false;
+                                })
+                            }} />
                             <div style={{position: "relative"}}>
                                 {
                                     myId === comment.senderid ? <Ellipsis onClick={(e) => {
@@ -92,19 +92,7 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
             {
                 showReply && <CommentCreate commentid={comment.id} postid={comment.postid} changeCreate={() =>  setShowReply(false)} />
             }
-            {
-            comment.ownCommentsCount > 0 && (showComments ? <button onClick={(e) =>  {
-                e.stopPropagation();
-                setShowComments(false);
-                }}>
-                Hide Comments
-            </button> : <button onClick={(e) =>  {
-                e.stopPropagation();
-                setShowComments(true);
-                }}>
-                Show Comments
-            </button>)
-            }
+            <CommentsDisplayButtons count={comment.ownCommentsCount} showing={showComments} setShow={setShowComments}/>
             {
                 (showComments && commentsData && commentsData.length > 0 ) && <div>
                     <div>
@@ -114,14 +102,7 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                             })
                         }
                     </div>
-                    {
-                        (!isFetchingNextPage && hasNextPage) ? <button onClick={(e) => {
-                            e.stopPropagation();
-                            fetchNextPage();
-                            }}>
-                            Load More
-                        </button> : <></>
-                    }
+                    <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
                 </div>
             }
 

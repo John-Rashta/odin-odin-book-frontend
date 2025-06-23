@@ -9,6 +9,7 @@ import { isUUID } from "validator";
 import ClickWrapper from "./ClickWrapper";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
+import BackButton from "./BackButton";
 
 export default function UserPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -41,6 +42,7 @@ export default function UserPage() {
                 </div> : error ? <div>
                     Can't Find User.
                 </div> : userData ? <>
+                    <BackButton />
                     <UserProfile info={userData} />
                     {
                         postsLoading ? <div>

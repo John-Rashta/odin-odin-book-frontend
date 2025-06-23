@@ -25,7 +25,15 @@ type MutationTriggerType<T, U> = TypedMutationTrigger<
   BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError>
 >;
 
+type SimpleButtonClickFunction = (e: ButtonClickType) => void;
+
+type SimpleBooleanFunction = (val: boolean) => void;
+
 type ModalStartFunction = (id: string) =>  void;
+
+type optionalIdArray = {
+  id: string
+}[] | undefined;
 
 export {
     requestTypes,
@@ -37,4 +45,7 @@ export {
     ClickType,
     MutationTriggerType,
     ModalStartFunction,
+    SimpleBooleanFunction,
+    SimpleButtonClickFunction,
+    optionalIdArray
 };

@@ -6,6 +6,9 @@ import { isUUID } from "validator";
 import { useState } from "react";
 import { Ellipsis } from "lucide-react";
 import UserOptions from "./UserOptions";
+import FollowOptions from "./FollowOptions";
+import ShowOptions from "./ShowOptions";
+import userEvent from "@testing-library/user-event";
 
 export default function User({user} : {user: UserFollowType & UserExtra | UserInfo & UserExtra }) {
     const myId = useSelector(selectMyId);
@@ -14,33 +17,17 @@ export default function User({user} : {user: UserFollowType & UserExtra | UserIn
     const [ makeRequest ] = useMakeRequestMutation();
     const [showOptions, setShowOptions] = useState(false);
 
+    const handleClick = function handleClickButton() {
+        setShowOptions(!showOptions);
+    };
+
     return (
         <div className="clickOption" data-userid={user.id}>
             <img className="userOption" data-userid={user.id} src={user.customIcon?.url || user.icon.source} alt="" />
             <div className="userOption" data-userid={user.id}>{user.username}</div>
-            {
-                (user.followers && user.followers.length > 0)? <div>
-                   <button onClick={() =>  stopFollowing({id: user.id})}>Stop Following</button>
-                </div> : (user.receivedRequests && user.receivedRequests.length > 0) ? <div>
-                    Pending Request <button onClick={() => {
-                        if (!user.receivedRequests) {
-                            return;
-                        }
-                        deleteRequest({id: user.receivedRequests[0].id, type: "CANCEL", userid: user.id})
-                        }}>X</button>
-                </div> : ((isUUID(myId) && myId !== user.id) && <div> 
-                        <button onClick={(e) => {
-                            e.stopPropagation();
-                            makeRequest({id: user.id, type: "FOLLOW"});
-                        }}>Request Follow</button>
-                     </div>) || <></>
-            }
+            <FollowOptions followers={user.followers} requests={user.receivedRequests} myId={myId} id={user.id}/>
             <div style={{position: "relative"}}>
-                {
-                    myId !== user.id ? <Ellipsis onClick={() => {
-                        setShowOptions(!showOptions)
-                    }} /> : <></>
-                }
+                <ShowOptions myId={myId} id={user.id} clickFunction={handleClick} />
                 {
                 showOptions && <UserOptions user={user}/>
                 }

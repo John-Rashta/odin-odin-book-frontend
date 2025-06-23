@@ -1240,35 +1240,6 @@ export const apiSlice = createApi({
         method: "PUT",
         body: {content},
       }),
-      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
-        try {
-          const { data: { comment } } = await queryFulfilled;
-          let patchResult;
-          if (comment.commentid) {
-            patchResult = dispatch(
-              apiSlice.util.updateQueryData('getCommentComments', comment.commentid, (draft) => {
-                draft.pages.forEach(({comments}) => {
-                  const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
-                  if (possibleIndex !== -1) {
-                    Object.assign(comments[possibleIndex], comment);
-                  };
-                });
-              }),
-            );
-          } else {
-              patchResult = dispatch(
-              apiSlice.util.updateQueryData('getPostComments', comment.postid, (draft) => {
-                draft.pages.forEach(({comments}) => {
-                  const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
-                   if (possibleIndex !== -1) {
-                    Object.assign(comments[possibleIndex], comment);
-                  };
-                })
-              }),
-            )
-          }
-        } catch {}
-      },
       invalidatesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
     }),
     deleteComment: builder.mutation<UId & {postid: string, parentid?: string}, UId>({

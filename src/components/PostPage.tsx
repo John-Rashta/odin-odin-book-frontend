@@ -10,6 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
 import { skipToken } from "@reduxjs/toolkit/query";
+import BackButton from "./BackButton";
 
 export default function PostPage() {
     const myId = useSelector(selectMyId);
@@ -43,6 +44,7 @@ export default function PostPage() {
                 </div> : error ? <div>
                     Can't Find Post.
                 </div> : postData ? <>
+                    <BackButton />
                     <PostProfile post={postData} modalFunc={editFunction}/>
                     {isUUID(myId) && <CommentCreate postid={postData.id} />}
                     {

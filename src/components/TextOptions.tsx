@@ -51,14 +51,8 @@ export default function TextOptions({textId, editFunc, type, closeFunc} : {textI
         const currentTarget = event.currentTarget;
         currentTarget.disabled = true;
 
-        if (type === "POST") {
-            editFunc(textId);
-            closeFunc();
-            return;
-        } else if (type === "COMMENT") {
-            editFunc(textId);
-        };
-
+        editFunc(textId);
+        closeFunc();
     };
 
     return (
