@@ -6,6 +6,7 @@ import PostEdit from "./PostEdit";
 import { useState } from "react";
 import { isUUID } from "validator";
 import ClickWrapper from "./ClickWrapper";
+import LoadMore from "./LoadMore";
 
 export default function YourPosts() {
     const myId = useSelector(selectMyId);
@@ -38,14 +39,7 @@ export default function YourPosts() {
                             })
                         }
                     </ClickWrapper>
-                        {
-                            (!isFetchingNextPage && hasNextPage) ? <button onClick={(e) => {
-                                e.stopPropagation();
-                                fetchNextPage();
-                                }}>
-                                Load More
-                            </button> : <></>
-                        }
+                    <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
                 </div> : <div>
                     No Posts Yet!
                 </div>

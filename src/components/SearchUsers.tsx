@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useSearchUsersInfiniteQuery } from "../features/book-api/book-api-slice";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import User from "./User";
 import ClickWrapper from "./ClickWrapper";
+import LoadMore from "./LoadMore";
 
 export default function SearchUsers() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -38,11 +39,7 @@ export default function SearchUsers() {
                                 })
                             }
                         </ClickWrapper>
-                            {
-                                (!isFetchingNextPage && hasNextPage) ? <button onClick={() => fetchNextPage()}>
-                                    Load More
-                                </button> : <></>
-                            }
+                        <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
                     </div> : <div>
                         Try Searching!
                     </div>

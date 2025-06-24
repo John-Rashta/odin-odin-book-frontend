@@ -1,23 +1,18 @@
 import { useSelector } from "react-redux";
 import { UserExtra, UserFollowType, UserInfo } from "../../util/interfaces";
 import { selectMyId } from "../features/manager/manager-slice";
-import { useDeleteRequestMutation, useMakeRequestMutation, useStopFollowMutation } from "../features/book-api/book-api-slice";
-import { isUUID } from "validator";
 import { useState } from "react";
-import { Ellipsis } from "lucide-react";
 import UserOptions from "./UserOptions";
 import FollowOptions from "./FollowOptions";
 import ShowOptions from "./ShowOptions";
-import userEvent from "@testing-library/user-event";
+import { ButtonClickType } from "../../util/types";
 
 export default function User({user} : {user: UserFollowType & UserExtra | UserInfo & UserExtra }) {
     const myId = useSelector(selectMyId);
-    const [ deleteRequest ] = useDeleteRequestMutation();
-    const [ stopFollowing ] = useStopFollowMutation();
-    const [ makeRequest ] = useMakeRequestMutation();
     const [showOptions, setShowOptions] = useState(false);
 
-    const handleClick = function handleClickButton() {
+    const handleClick = function handleClickButton(e: ButtonClickType) {
+        e.stopPropagation();
         setShowOptions(!showOptions);
     };
 

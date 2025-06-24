@@ -7,6 +7,7 @@ import isAscii from "validator/lib/isAscii";
 import isAlphanumeric from "validator/lib/isAlphanumeric";
 import { setAuthState } from "../features/auth/auth-slice";
 import { socket } from "../../sockets/socket";
+import styled from "styled-components";
 
 export default function Login() {
   const [loginUser] = useLoginUserMutation();
@@ -39,18 +40,40 @@ export default function Login() {
 
   return (
     <main>
-      <div>
-        <form onSubmit={handleForm}>
+      <StyledContainer>
+        <StyledForm onSubmit={handleForm}>
           {wrongInputs ? (
-            <div>Username or Password wrong!</div>
+            <StyledWrongInput>Username or Password wrong!</StyledWrongInput>
           ) : null}
           <label htmlFor="username">Username:</label>
-          <input type="text" name="username" id="username" required />
+          <StyledInput type="text" name="username" id="username" required />
           <label htmlFor="password">Password:</label>
-          <input type="password" name="password" id="password" required />
-          <button type="submit">Login</button>
-        </form>
-      </div>
+          <StyledInput type="password" name="password" id="password" required />
+          <StyledButton type="submit">Login</StyledButton>
+        </StyledForm>
+      </StyledContainer>
     </main>
   );
-}
+};
+
+const StyledContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+`;
+
+const StyledForm = styled.form`
+`;
+
+const StyledInput = styled.input`
+
+`;
+
+const StyledWrongInput = styled.div`
+
+`;
+
+const StyledButton = styled.button`
+
+`;

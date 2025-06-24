@@ -3,6 +3,7 @@ import { useGetFollowersInfiniteQuery, useGetFollowsInfiniteQuery } from "../fea
 import { skipToken } from "@reduxjs/toolkit/query";
 import User from "./User";
 import ClickWrapper from "./ClickWrapper";
+import LoadMore from "./LoadMore";
 
 export default function Followships() {
     const [selectedType, setSelectedType] = useState("FOLLOWS");
@@ -40,14 +41,7 @@ export default function Followships() {
                                 })
                             }
                             </ClickWrapper>
-                            {
-                                (!isFetchingFollowerNext && hasNextFollower) ? <button onClick={(e) => {
-                                    e.stopPropagation();
-                                    fetchNextFollower();
-                                    }}>
-                                    Load More
-                                </button> : <></>
-                            }
+                            <LoadMore isFetchingNextPage={isFetchingFollowerNext} hasNextPage={hasNextFollower} fetchNextPage={fetchNextFollower} />
                         </div> : <div>
                             No Followers Yet!
                         </div>
@@ -64,14 +58,7 @@ export default function Followships() {
                                 })
                             }
                             </ClickWrapper>
-                            {
-                                (!isFetchingFollowNext && hasNextFollow) ? <button onClick={(e) => {
-                                    e.stopPropagation();
-                                    fetchNextFollow();
-                                    }}>
-                                    Load More
-                                </button> : <></>
-                            }
+                            <LoadMore isFetchingNextPage={isFetchingFollowNext} hasNextPage={hasNextFollow} fetchNextPage={fetchNextFollow} />
                         </div> : <div>
                             No Follows Yet!
                         </div>

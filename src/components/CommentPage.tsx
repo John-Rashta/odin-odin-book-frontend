@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import BackButton from "./BackButton";
+import LoadMore from "./LoadMore";
 
 export default function CommentPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -50,14 +51,7 @@ export default function CommentPage() {
                                         })
                                     }
                                 </ClickWrapper>
-                                 {
-                                    (!isFetchingNextPage && hasNextPage) ? <button onClick={(e) =>{
-                                        e.stopPropagation();
-                                        fetchNextPage();
-                                        }}>
-                                        Load More
-                                    </button> : <></>
-                                }
+                                <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
                             </div> : <></>
                         }
                 </div>

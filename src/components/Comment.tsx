@@ -8,12 +8,13 @@ import { isUUID } from "validator";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
 import TextOptions from "./TextOptions";
-import { Ellipsis } from "lucide-react";
 import CommentEdit from "./CommentEdit";
 import CommentCreate from "./CommentCreate";
 import CommentsDisplayButtons from "./CommentsDisplayButtons";
 import LoadMore from "./LoadMore";
 import LikeButton from "./LikeButton";
+import ShowOptions from "./ShowOptions";
+import { ButtonClickType } from "../../util/types";
 
 export default function Comment({comment} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}) {
     const myId = useSelector(selectMyId);
@@ -28,6 +29,11 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
             commentsData: result.data?.pages.map(({comments}) => comments).flat()
         })
     });
+
+    const handleClick = function handleClickButton(e: ButtonClickType) {
+        e.stopPropagation();
+        setShowOptions(!showOptions);
+    };
 
     return (
         <div>
@@ -71,12 +77,7 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                                 })
                             }} />
                             <div style={{position: "relative"}}>
-                                {
-                                    myId === comment.senderid ? <Ellipsis onClick={(e) => {
-                                        e.stopPropagation();
-                                        setShowOptions(!showOptions);
-                                    }} /> : <></>
-                                }
+                                <ShowOptions myId={myId} id={comment.senderid} clickFunction={handleClick}  />
                                 {
                                 showOptions && <TextOptions textId={comment.id} type="COMMENT" editFunc={() =>  setShowEdit(true)} closeFunc={() => setShowOptions(false)} />
                                 }

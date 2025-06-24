@@ -6,11 +6,12 @@ import { useState } from "react";
 import { isUUID } from "validator";
 import PostEdit from "./PostEdit";
 import ClickWrapper from "./ClickWrapper";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import BackButton from "./BackButton";
+import LoadMore from "./LoadMore";
 
 export default function PostPage() {
     const myId = useSelector(selectMyId);
@@ -60,14 +61,7 @@ export default function PostPage() {
                                     })
                                 }
                             </ClickWrapper>
-                            {
-                                (!isFetchingNextPage && hasNextPage) ? <button onClick={(e) => {
-                                    e.stopPropagation();
-                                    fetchNextPage();
-                                    }}>
-                                    Load More
-                                </button> : <></>
-                            }
+                            <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
                         </div> : <div>
 
                         </div>

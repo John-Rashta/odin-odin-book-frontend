@@ -1,5 +1,6 @@
 import { useGetUsersInfiniteQuery } from "../features/book-api/book-api-slice";
 import ClickWrapper from "./ClickWrapper";
+import LoadMore from "./LoadMore";
 import User from "./User";
 
 export default function Users() {
@@ -22,14 +23,7 @@ export default function Users() {
                         return <User key={ele.id} user={ele} />
                     })}
                 </ClickWrapper>
-                {
-                    (!isFetchingNextPage && hasNextPage) ? <button onClick={(e) => {
-                        e.stopPropagation();
-                        fetchNextPage();
-                        }}>
-                        Load More
-                    </button> : <></>
-                }
+                <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage}  fetchNextPage={fetchNextPage}/>
             </div> : <div>
                 No Users Yet!
             </div>}

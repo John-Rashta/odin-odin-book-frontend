@@ -5,6 +5,7 @@ import PostCreate from "./PostCreate";
 import { isUUID } from "validator";
 import PostEdit from "./PostEdit";
 import ClickWrapper from "./ClickWrapper";
+import LoadMore from "./LoadMore";
 
 export default function Feed() {
     const { postsData, isFetchingNextPage, error, isLoading, hasNextPage, fetchNextPage } = useGetFeedInfiniteQuery(undefined, {
@@ -37,14 +38,7 @@ export default function Feed() {
                         })
                     }
                     </ClickWrapper>
-                    {
-                        (!isFetchingNextPage && hasNextPage) ? <button onClick={(e) => {
-                            e.stopPropagation();
-                            fetchNextPage();
-                            }}>
-                            Load More
-                        </button> : <></>
-                    }
+                    <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
                 </div> : <div>
                     No Feed Yet!
                 </div>

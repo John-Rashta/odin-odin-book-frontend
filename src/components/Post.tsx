@@ -5,15 +5,22 @@ import { FullPostInfo, Likes, OwnCommentsCount, YourLike } from "../../util/inte
 import { isUUID } from "validator";
 import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
-import { ModalStartFunction } from "../../util/types";
+import { ButtonClickType, ModalStartFunction } from "../../util/types";
 import { useState } from "react";
 import { Ellipsis } from "lucide-react";
 import TextOptions from "./TextOptions";
+import ShowOptions from "./ShowOptions";
+import LikeButton from "./LikeButton";
 
 export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & YourLike & OwnCommentsCount, modalFunc?: ModalStartFunction}) {
     const myId = useSelector(selectMyId);
     const [ changeLike ] = useChangePostLikeMutation();
     const [showOptions, setShowOptions] = useState(false);
+
+    const handleClick = function handleClickingButton(e: ButtonClickType) {
+        e.stopPropagation();
+        setShowOptions(!showOptions);
+    };
     
     return (
         <div className="clickOption postOption" data-postid={info.id}>
@@ -47,25 +54,15 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
                     <div>
                         {info.likesCount}
                     </div>
-                    { isUUID(myId) &&
-                    <button 
-                        {...((info.likes && info.likes.length > 0) ? {style: {backgroundColor: "black"}} : {})}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            ///e.currentTarget.disabled = true;
-                            changeLike({id: info.id, action: ((info.likes && info.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
-                                ///e.currentTarget.disabled = false;
-                            })
-                        }}
-                    >L</button>
-                    }
+                    <LikeButton myId={myId} likesInfo={info.likes} clickFunction={(e) => {
+                         e.stopPropagation();
+                        ///e.currentTarget.disabled = true;
+                        changeLike({id: info.id, action: ((info.likes && info.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
+                        ///e.currentTarget.disabled = false;
+                        })
+                    }}/>
                     <div style={{position: "relative"}}>
-                        {
-                            myId === info.creatorid ? <Ellipsis onClick={(e) => {
-                                e.stopPropagation();
-                                setShowOptions(!showOptions);
-                            }} /> : <></>
-                        }
+                        <ShowOptions myId={myId} id={info.creatorid} clickFunction={handleClick} />
                         {
                         (showOptions && typeof modalFunc === "function") && <TextOptions textId={info.id} type="POST" editFunc={modalFunc} closeFunc={() => setShowOptions(false)} />
                         }
