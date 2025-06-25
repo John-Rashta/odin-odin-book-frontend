@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { isAscii } from "validator";
 import PasswordConfirm from "./PasswordConfirm";
+import { ExtraForm, SignupWrongInput, StyledButton, StyledContainer, StyledDivFlex, StyledInput, StyledLabel } from "../../util/style";
+import styled from "styled-components";
 
 export default function PasswordEdit() {
   const [updatePw] = useUpdateMeMutation();
@@ -41,22 +43,27 @@ export default function PasswordEdit() {
   };
   return (
     <main>
-      <div>
-        <form onSubmit={handleSubmit}>
+      <StyledContainer>
+        <ExtraForm onSubmit={handleSubmit}>
           {wrongInputs && (
-            <div>Invalid Password!</div>
+            <StyledWrongPass>Invalid Password!</StyledWrongPass>
           )}
-          <div>
-            <label htmlFor="oldPassword">Current Password:</label>
-            <input type="password" id="oldPassword" name="oldPassword" />
-          </div>
+          <StyledDivFlex>
+            <StyledLabel htmlFor="oldPassword">Current Password:</StyledLabel>
+            <StyledInput type="password" id="oldPassword" name="oldPassword" />
+          </StyledDivFlex>
           <PasswordConfirm
             passwordInfo={pwState}
             confirmPasswordInfo={confirmPwState}
           />
-          <button type="submit">Change Password</button>
-        </form>
-      </div>
+          <StyledButton type="submit">Change Password</StyledButton>
+        </ExtraForm>
+      </StyledContainer>
     </main>
   );
-}
+};
+
+
+const StyledWrongPass = styled(SignupWrongInput)`
+  left: 130px;
+`;

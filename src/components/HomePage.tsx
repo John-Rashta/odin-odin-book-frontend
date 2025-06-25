@@ -12,11 +12,11 @@ export default function HomePage() {
         <>
             {
                 authState && isUUID(myId) ? <Feed /> :
-                authState && myId === "guest" ? <StyledMain>
+                authState && myId === "guest" ? <BareBonesMain>
                     guest page
-                </StyledMain> : <StyledMain>
+                </BareBonesMain> : <BareBonesMain>
                     Welcome to Odin Book!
-                </StyledMain>
+                </BareBonesMain>
             }
         </>
     )
@@ -27,4 +27,8 @@ const StyledMain = styled.main`
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
+`;
+
+const BareBonesMain = styled(StyledMain)`
+    font-size: 1.5rem;
 `;

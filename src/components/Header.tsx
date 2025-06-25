@@ -11,7 +11,7 @@ import { socket } from "../../sockets/socket";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
 import styled from "styled-components";
-import { headerBackgroundColor, headerPadding, navMenuValue, StyledNavLink } from "../../util/style";
+import { headerBackgroundColor, headerBorderBottom, headerPadding, navMenuValue, StyledNavLink } from "../../util/style";
 
 export default function Header() {
     const [logoutUser] = useLogoutUserMutation();
@@ -119,7 +119,7 @@ export default function Header() {
                     logoutUser().unwrap().then(() => {
                         socket.disconnect();
                         location.reload();
-                    })
+                    }).catch()
                 }}>
                     Logout
                 </div>
@@ -141,6 +141,7 @@ const StyledHeader = styled.header`
   background-color: ${headerBackgroundColor};
   padding: ${headerPadding};
   font-size: 1.3rem;
+  border-bottom: ${headerBorderBottom};
 `;
 
 const StyledNav = styled.nav`

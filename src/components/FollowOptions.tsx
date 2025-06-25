@@ -8,7 +8,7 @@ export default function FollowOptions({myId, id, followers, requests} : {myId: s
     const [ makeRequest ] = useMakeRequestMutation();
     return (
         <>
-            {
+            {(isUUID(myId) && myId !== id) && (
                 (followers && followers.length > 0)? <div>
                     <button onClick={() =>  stopFollowing({id: id})}>Stop Following</button>
                 </div> : (requests && requests.length > 0) ? <div>
@@ -18,12 +18,13 @@ export default function FollowOptions({myId, id, followers, requests} : {myId: s
                         }
                         deleteRequest({id: requests[0].id, type: "CANCEL", userid: id})
                         }}>X</button>
-                </div> : ((isUUID(myId) && myId !== id) && <div> 
+                </div> : <div> 
                         <button onClick={(e) => {
                             e.stopPropagation();
                             makeRequest({id: id, type: "FOLLOW"});
                         }}>Request Follow</button>
-                        </div>)
+                        </div>
+                )
             }
         </>
     )

@@ -1,8 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { ButtonClickType, ModalStartFunction, SimpleFunctionType } from "../../util/types";
 import { useDeleteCommentMutation, useDeletePostMutation } from "../features/book-api/book-api-slice";
+import React from "react";
 
-export default function TextOptions({textId, editFunc, type, closeFunc} : {textId: string, editFunc: SimpleFunctionType | ModalStartFunction, type: "COMMENT" | "POST", closeFunc: SimpleFunctionType}) {
+export default function TextOptions({textId, editFunc, type, closeFunc, styleStuff} : {textId: string, editFunc: SimpleFunctionType | ModalStartFunction, type: "COMMENT" | "POST", closeFunc: SimpleFunctionType, styleStuff?: React.CSSProperties}) {
     const [ deletePost ] = useDeletePostMutation();
     const [ deleteComment ] = useDeleteCommentMutation();
     const { pathname } = useLocation();
@@ -56,7 +57,7 @@ export default function TextOptions({textId, editFunc, type, closeFunc} : {textI
     };
 
     return (
-        <div style={{position: "absolute"}}>
+        <div style={{position: "absolute", zIndex: 3, ...styleStuff}}>
             <button onClick={handleEdit}>
                 Edit
             </button>

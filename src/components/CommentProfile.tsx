@@ -64,12 +64,11 @@ export default function CommentProfile({comment} : {comment: FullCommentInfo & L
                                 ///e.currentTarget.disabled = false;
                             })
                         }} />
-                        <div>
-                            <ShowOptions myId={myId} id={comment.senderid} clickFunction={handleClick} />
-                            {
-                            showOptions && <TextOptions textId={comment.id} type="COMMENT" editFunc={() =>  setShowEdit(true)} closeFunc={() => setShowOptions(false)} />
-                            }
-                        </div>
+                        <ShowOptions myId={myId} id={comment.senderid} textStuff={{
+                            textId: comment.id,
+                            type: "COMMENT",
+                            editFunc: () =>  setShowEdit(true),
+                        }} />
                     </div>
                 </div>
             </div>

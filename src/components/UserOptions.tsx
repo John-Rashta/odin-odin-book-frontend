@@ -2,13 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { UserExtra, UserFollowType, UserInfo } from "../../util/interfaces";
 import { useDeleteRequestMutation, useMakeRequestMutation, useStopFollowMutation } from "../features/book-api/book-api-slice";
 
-export default function UserOptions({user} : {user: UserFollowType & UserExtra | UserInfo & UserExtra }) {
+export default function UserOptions({user, styleStuff} : {user: UserFollowType & UserExtra | UserInfo & UserExtra, styleStuff?: React.CSSProperties }) {
     const navigate = useNavigate();
     const [ stopFollowing ] = useStopFollowMutation();
     const [ deleteRequest ] = useDeleteRequestMutation();
     const [ makeRequest ] = useMakeRequestMutation();
     return (
-        <div style={{position: "absolute"}}>
+        <div style={{position: "absolute", zIndex: 3,  ...styleStuff}}>
             <button onClick={() => {
                 navigate(`/user?id=${user.id}`);
             }}>

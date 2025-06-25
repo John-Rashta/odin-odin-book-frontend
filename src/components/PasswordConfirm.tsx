@@ -1,4 +1,6 @@
+import styled from "styled-components";
 import { PwInfo } from "../../util/interfaces";
+import { StyledDivFlex, StyledInput, StyledLabel } from "../../util/style";
 
 export default function PasswordConfirm({
   passwordInfo,
@@ -8,14 +10,14 @@ export default function PasswordConfirm({
   confirmPasswordInfo: PwInfo;
 }) {
   return (
-    <div>
+    <StyledPassContainer>
       {confirmPasswordInfo.checkValue !== "" &&
       confirmPasswordInfo.checkValue !== passwordInfo.checkValue ? (
-        <div>Passwords don't match!</div>
+        <StyledNoMatch>Passwords don't match!</StyledNoMatch>
       ) : null}
-      <div>
-        <label htmlFor="password">Password:</label>
-        <input
+      <StyledDivFlex>
+        <StyledLabel htmlFor="password">Password:</StyledLabel>
+        <StyledInput
           type="password"
           name="password"
           id="password"
@@ -25,10 +27,10 @@ export default function PasswordConfirm({
           }}
           required
         />
-      </div>
-      <div>
-        <label htmlFor="confirmPassword">Confirm Password:</label>
-        <input
+      </StyledDivFlex>
+      <StyledDivFlex>
+        <StyledLabel htmlFor="confirmPassword">Confirm Password:</StyledLabel>
+        <StyledInput
           type="password"
           name="confirmPassword"
           id="confirmPassword"
@@ -38,7 +40,21 @@ export default function PasswordConfirm({
           }}
           required
         />
-      </div>
-    </div>
+      </StyledDivFlex>
+    </StyledPassContainer>
   );
-}
+};
+
+const StyledPassContainer = styled(StyledDivFlex)`
+  gap: 10px;
+  position: relative;
+`;
+
+const StyledNoMatch = styled.div`
+  position: absolute;
+  top: -23px;
+  left: 85px;
+  font-size: 1rem;
+  color: rgb(190, 3, 3);
+  font-weight: bold;
+`;

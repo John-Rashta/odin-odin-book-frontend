@@ -61,12 +61,13 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
                         ///e.currentTarget.disabled = false;
                         })
                     }}/>
-                    <div style={{position: "relative"}}>
-                        <ShowOptions myId={myId} id={info.creatorid} clickFunction={handleClick} />
-                        {
-                        (showOptions && typeof modalFunc === "function") && <TextOptions textId={info.id} type="POST" editFunc={modalFunc} closeFunc={() => setShowOptions(false)} />
-                        }
-                    </div>
+                    {
+                        typeof modalFunc === "function" && <ShowOptions myId={myId} id={info.creatorid} textStuff={{
+                            textId: info.id,
+                            type: "POST",
+                            editFunc: modalFunc
+                        }} />
+                    }
                 </div>
 
             </div>

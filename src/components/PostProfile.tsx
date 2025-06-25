@@ -55,9 +55,12 @@ export default function PostProfile({post, modalFunc} : {post: FullPostInfo & Li
                     ///e.currentTarget.disabled = false;
                     })
                 }} />
-                <ShowOptions myId={myId} id={post.creatorid} clickFunction={handleClick} />
                 {
-                (showOptions && typeof modalFunc === "function") && <TextOptions textId={post.id} type="POST" editFunc={modalFunc} closeFunc={() => setShowOptions(false)} />
+                  typeof modalFunc === "function" &&  <ShowOptions myId={myId} id={post.creatorid} textStuff={{
+                    textId: post.id,
+                    type: "POST",
+                    editFunc: modalFunc,
+                }} />
                 }
             </div>
         </div>

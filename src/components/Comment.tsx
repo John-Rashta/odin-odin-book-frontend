@@ -76,12 +76,11 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                                     ///e.currentTarget.disabled = false;
                                 })
                             }} />
-                            <div style={{position: "relative"}}>
-                                <ShowOptions myId={myId} id={comment.senderid} clickFunction={handleClick}  />
-                                {
-                                showOptions && <TextOptions textId={comment.id} type="COMMENT" editFunc={() =>  setShowEdit(true)} closeFunc={() => setShowOptions(false)} />
-                                }
-                            </div>
+                            <ShowOptions myId={myId} id={comment.senderid} textStuff={{
+                                textId: comment.id,
+                                type: "COMMENT",
+                                editFunc: () =>  setShowEdit(true)
+                            }}  />
                         </div>
                     </div>
                     {isUUID(myId) && <button onClick={(e) => {

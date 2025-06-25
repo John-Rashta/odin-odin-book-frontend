@@ -8,6 +8,7 @@ import isAlphanumeric from "validator/lib/isAlphanumeric";
 import { setAuthState } from "../features/auth/auth-slice";
 import { socket } from "../../sockets/socket";
 import styled from "styled-components";
+import { StyledButton, StyledContainer, StyledForm, StyledInput, StyledLabel, StyledWrongInput } from "../../util/style";
 
 export default function Login() {
   const [loginUser] = useLoginUserMutation();
@@ -45,9 +46,9 @@ export default function Login() {
           {wrongInputs ? (
             <StyledWrongInput>Username or Password wrong!</StyledWrongInput>
           ) : null}
-          <label htmlFor="username">Username:</label>
+          <StyledLabel htmlFor="username">Username:</StyledLabel>
           <StyledInput type="text" name="username" id="username" required />
-          <label htmlFor="password">Password:</label>
+          <StyledLabel htmlFor="password">Password:</StyledLabel>
           <StyledInput type="password" name="password" id="password" required />
           <StyledButton type="submit">Login</StyledButton>
         </StyledForm>
@@ -55,25 +56,3 @@ export default function Login() {
     </main>
   );
 };
-
-const StyledContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-`;
-
-const StyledForm = styled.form`
-`;
-
-const StyledInput = styled.input`
-
-`;
-
-const StyledWrongInput = styled.div`
-
-`;
-
-const StyledButton = styled.button`
-
-`;
