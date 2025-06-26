@@ -14,7 +14,7 @@ export default function NavMenu() {
                 <Ellipsis />
             </button>
             {
-                openOptions && <nav onClick={() => {
+                openOptions && <StyledNav onClick={() => {
                     setOpenOptions(false);
                 }}>
                     <NavLink to={"/requests"}>Requests</NavLink>
@@ -22,7 +22,7 @@ export default function NavMenu() {
                     <NavLink to={"/users"}>Users</NavLink>
                     <NavLink to={"/myposts"}>MyPosts</NavLink>
                     <NavLink to={"/profile"}>Profile</NavLink>
-                </nav>
+                </StyledNav>
             }
         </StyledDiv>
     )
@@ -31,5 +31,13 @@ export default function NavMenu() {
 const StyledDiv = styled.div`
   @media only screen and (min-width: ${navMenuValue}) {
     display: none;
-  }
+  };
+  position: relative;
+`;
+
+const StyledNav = styled.nav`
+    position: absolute;
+    right: 0;
+    display: flex;
+    flex-direction: column;
 `;

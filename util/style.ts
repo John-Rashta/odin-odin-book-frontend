@@ -1,8 +1,8 @@
 import { NavLink } from "react-router-dom";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 const mainBackgroundColor = `rgb(255, 255, 255)`;
-const navMenuValue = `800px`;
+const navMenuValue = `950px`;
 const headerPadding = `20px 10px`;
 const headerBackgroundColor = `rgb(216, 241, 250)`;
 const headerBorderBottom = `2px solid black`;
@@ -79,6 +79,49 @@ const SignupWrongInput = styled(StyledWrongInput)`
   left: 90px;
 `;
 
+const StyledErrorMessage = styled.div`
+  align-self: center;
+  font-size: 1.4rem;
+`;
+
+const StylesReturn = css`
+  display: flex;
+  gap: 20px;
+  box-shadow: 0 -1px 0 black;
+  justify-content: space-between;
+  padding: 20px;
+`;
+
+const StyledReturn = styled.div`
+  ${StylesReturn}
+`;
+
+const StyledMain = styled.main`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
+
+const StyledDefaultContainer = styled.div`
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    max-width: 700px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 50px;
+    padding-top: 50px;
+`;
+
+const StyledMainContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
+
+
 export {
     mainBackgroundColor,
     navMenuValue,
@@ -95,4 +138,10 @@ export {
     StyledDivFlex,
     ExtraForm,
     SignupWrongInput,
+    StyledErrorMessage,
+    StyledReturn,
+    StyledDefaultContainer,
+    StyledMain,
+    StyledMainContainer,
+    StylesReturn,
 };

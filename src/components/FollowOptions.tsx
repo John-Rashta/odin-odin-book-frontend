@@ -1,6 +1,7 @@
 import { isUUID } from "validator";
 import { optionalIdArray } from "../../util/types";
 import { useDeleteRequestMutation, useMakeRequestMutation, useStopFollowMutation } from "../features/book-api/book-api-slice";
+import styled from "styled-components";
 
 export default function FollowOptions({myId, id, followers, requests} : {myId: string, id: string, followers: optionalIdArray, requests: optionalIdArray}) {
     const [ deleteRequest ] = useDeleteRequestMutation();
@@ -9,23 +10,53 @@ export default function FollowOptions({myId, id, followers, requests} : {myId: s
     return (
         <>
             {(isUUID(myId) && myId !== id) && (
-                (followers && followers.length > 0)? <div>
-                    <button onClick={() =>  stopFollowing({id: id})}>Stop Following</button>
-                </div> : (requests && requests.length > 0) ? <div>
-                    Pending Request <button onClick={() => {
+                (followers && followers.length > 0)? 
+                    <StyledFollowButtons onClick={() =>  stopFollowing({id: id})}>Stop Following</StyledFollowButtons>
+                 : (requests && requests.length > 0) ? <StyledRequest>
+                    Pending Request <StyledRequestButton onClick={() => {
                         if (!requests) {
                             return;
                         }
                         deleteRequest({id: requests[0].id, type: "CANCEL", userid: id})
-                        }}>X</button>
-                </div> : <div> 
-                        <button onClick={(e) => {
+                        }}>X</StyledRequestButton>
+                </StyledRequest> :  
+                        <StyledFollowButtons onClick={(e) => {
                             e.stopPropagation();
                             makeRequest({id: id, type: "FOLLOW"});
-                        }}>Request Follow</button>
-                        </div>
+                        }}>Request Follow</StyledFollowButtons>
+                        
                 )
             }
         </>
     )
-}
+};
+
+const StyledFollowButtons = styled.button`
+    padding: 5px 10px;
+    border-radius: 10px;
+    border: 1px solid black;
+    font-size: 0.9rem;
+    background-color: rgb(255, 255, 255);
+    &:hover {
+        background-color: rgb(109, 209, 255);
+    };
+`;
+
+const StyledRequest = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px;
+    font-size: 1.1rem;
+`;
+
+const StyledRequestButton = styled.button`
+    background-color: rgb(255, 255, 255);
+    padding: 5px 10px;
+    border-radius: 50%;
+    border: 1px solid black;
+    font-weight: bold;
+    &:hover {
+        background-color: rgb(255, 87, 75);
+    };
+`;

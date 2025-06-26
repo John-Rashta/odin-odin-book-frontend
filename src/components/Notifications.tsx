@@ -3,6 +3,8 @@ import { useClearNotificationsMutation, useGetNotificationsQuery } from "../feat
 import { selectMyId } from "../features/manager/manager-slice";
 import ClickWrapper from "./ClickWrapper";
 import MiniNotifications from "./MiniNotifications";
+import { StyledDefaultContainer, StyledErrorMessage, StyledMain, StyledMainContainer, StylesReturn } from "../../util/style";
+import styled from "styled-components";
 
 export default function Notifications() {
     const myId = useSelector(selectMyId);
@@ -15,30 +17,60 @@ export default function Notifications() {
 
     const [ clearNotifications ] = useClearNotificationsMutation();
     return (
-        <main>
+        <StyledMain>
+            <StyledDefaultContainer>
             {
-                isLoading ? <div>
+                isLoading ? <StyledErrorMessage>
                     Loading Notifications...
-                </div> : error ? <div>
+                </StyledErrorMessage> : error ? <StyledErrorMessage>
                     Failed Loading Notifications!
-                </div> : (notificationsData && notificationsData.length > 0) ? <div>
+                </StyledErrorMessage> : (notificationsData && notificationsData.length > 0) ? <StyledNotificationsContainer>
+                    <div>
+                        <StyledClearButton onClick={(e) => {
+                            e.stopPropagation();
+                            clearNotifications();
+                        }}>Clear Notifications</StyledClearButton>
+                    </div>
                     <ClickWrapper>
                         {
                             notificationsData.map((ele) => {
-                                return <MiniNotifications key={ele.id} notification={ele} />
+                                return <StyledNotifications key={ele.id} notification={ele} />
                             })
                         }
                     </ClickWrapper>
-                    <div>
-                        <button onClick={(e) => {
-                            e.stopPropagation();
-                            clearNotifications();
-                        }}>Clear Notifications</button>
-                    </div>
-                </div> : <div>
+                </StyledNotificationsContainer> : <StyledErrorMessage>
                     No Notifications Yet!
-                </div>
+                </StyledErrorMessage>
             }
-        </main>
+            </StyledDefaultContainer>
+        </StyledMain>
     )
 };
+
+const StyledNotificationsContainer = styled(StyledMainContainer)`
+    gap: 40px;
+`;
+
+const StyledClearButton = styled.button`
+    font-size: 1rem;
+    padding: 5px 10px;
+    background-color: rgb(143, 222, 241);
+    border: 1px solid black;
+    &:hover {
+        background-color: rgb(1, 204, 255);
+    }
+`;
+
+const StyledNotifications = styled(MiniNotifications)`
+    ${StylesReturn}
+    align-items: center;
+    div > button {
+        padding: 5px 10px;
+        background-color: rgb(255, 148, 148);
+        font-weight: bold;
+    };
+
+    &:hover {
+        background-color: rgb(147, 216, 233);
+    };
+`;

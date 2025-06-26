@@ -2,6 +2,8 @@ import { useGetReceivedRequestsQuery, useGetSentRequestsQuery } from "../feature
 import { useState } from "react";
 import Request from "./Request";
 import { skipToken } from "@reduxjs/toolkit/query";
+import styled from "styled-components";
+import { StyledErrorMessage, StyledMain, StyledDefaultContainer, StyledMainContainer } from "../../util/style";
 
 export default function Requests() {
     const [selectedType, setSelectedType] = useState("RECEIVED");
@@ -19,41 +21,66 @@ export default function Requests() {
     });
 
     return (
-        <main>
-            <div>
-                <button onClick={() =>  setSelectedType("RECEIVED")}>Received</button>
-                <button onClick={() =>  setSelectedType("SENT")}>Sent</button>
-            </div>
-            <div>
-                {
-                    (selectedType === "SENT" && (
-                        sentLoading ? <div>
-                            Loading Sent Requests...
-                        </div> : sentError ? <div>
-                            Failed Loading Sent Requests!
-                        </div> : (sent && sent.length > 0) ? <div>
-                            {sent.map((ele) => {
-                                return <Request key={ele.id} info={ele} />
-                            })}
-                        </div> : <div>
-                            No Sent Requests Yet!
-                        </div>
-                    ) || (
-                        receivedLoading ? <div>
-                            Loading Requests...
-                        </div> : receivedError ? <div>
-                            Failed Loading Requests!
-                        </div> : (received && received.length > 0) ? <div>
-                            {received.map((ele) => {
-                                return <Request key={ele.id} info={ele} />
-                            })}
-                        </div> : <div>
-                            No Requests Yet!
-                        </div>
-                    ))
-                }
-            </div>
-        </main>
+        <StyledMain>
+            <StyledDefaultContainer>
+                <StyledButtonsContainer>
+                    <StyledClickButton
+                    $trueType="RECEIVED"
+                    $currentType={selectedType}
+                    onClick={() =>  setSelectedType("RECEIVED")}>Received</StyledClickButton>
+                    <StyledClickButton
+                    $trueType="SENT"
+                    $currentType={selectedType}
+                    onClick={() =>  setSelectedType("SENT")}>Sent</StyledClickButton>
+                </StyledButtonsContainer>
+                <StyledMainContainer>
+                    {
+                        (selectedType === "SENT" && (
+                            sentLoading ? <StyledErrorMessage>
+                                Loading Sent Requests...
+                            </StyledErrorMessage> : sentError ? <StyledErrorMessage>
+                                Failed Loading Sent Requests!
+                            </StyledErrorMessage> : (sent && sent.length > 0) ?
+                                sent.map((ele) => {
+                                    return <Request key={ele.id} info={ele} />
+                                })
+                            : <StyledErrorMessage>
+                                No Sent Requests Yet!
+                            </StyledErrorMessage>
+                        ) || (
+                            receivedLoading ? <StyledErrorMessage>
+                                Loading Requests...
+                            </StyledErrorMessage> : receivedError ? <StyledErrorMessage>
+                                Failed Loading Requests!
+                            </StyledErrorMessage> : (received && received.length > 0) ? 
+                                received.map((ele) => {
+                                    return <Request key={ele.id} info={ele} />
+                                })
+                            : <StyledErrorMessage>
+                                No Requests Yet!
+                            </StyledErrorMessage>
+                        ))
+                    }
+                </StyledMainContainer>
+            </StyledDefaultContainer>
+        </StyledMain>
     )
 
 };
+
+const StyledButtonsContainer = styled.div`
+    display: flex;
+    gap: 10px;
+`;
+
+const StyledClickButton = styled.button<{
+  $currentType?: string;
+  $trueType?: string;
+}>`
+  background-color: ${(props) =>
+    (props.$currentType === props.$trueType && "rgb(51, 163, 255)") ||
+    "rgb(219, 245, 252)"};
+  padding: 10px 20px;
+  font-weight: bold;
+  font-size: 1rem;
+`;

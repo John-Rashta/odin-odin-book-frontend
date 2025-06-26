@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import TextOptions from "./TextOptions";
 import UserOptions from "./UserOptions";
 import { isUUID } from "validator";
+import styled from "styled-components";
 
 interface TextInterface {
     textId: string,
@@ -28,18 +29,15 @@ export default function ShowOptions({myId, id, textStuff, userStuff} : {myId: st
             return;
         };
         const rect = parent.getBoundingClientRect();
-        console.log(rect)
-        console.log(window.innerHeight)
         if (rect.top + 42 > window.innerHeight) {
-            console.log("hello")
             setOptionsStyle({
-                right: 0,
+                right: 40,
                 bottom: rect.height,
             });
         } else {
             setOptionsStyle({
                 top: 0, 
-                right: 0,
+                right: 40,
             });
         }
     };
@@ -52,8 +50,8 @@ export default function ShowOptions({myId, id, textStuff, userStuff} : {myId: st
         <>
             {isUUID(myId) && 
                 ((myId !== id && userStuff || myId === id && textStuff) &&
-                    <div className="optionsContainer" style={{position: "relative"}}>
-                        <button onClick={handleClick}> <Ellipsis /> </button>
+                    <StyledContainer className="optionsContainer" style={{position: "relative"}}>
+                        <StyledButton onClick={handleClick}> <Ellipsis/> </StyledButton>
                         {showOptions &&
                             (
                                 textStuff ? 
@@ -63,8 +61,23 @@ export default function ShowOptions({myId, id, textStuff, userStuff} : {myId: st
                                 <></>
                             )
                         }
-                    </div>)
+                    </StyledContainer>)
             }
         </>
     )
 };
+
+const StyledButton = styled.button`
+    height: 30px;
+    border: 0 solid black;
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    &:hover {
+        background-color: rgb(167, 227, 255);
+    }
+`;
+
+const StyledContainer = styled.div`
+    align-self: start;
+`;

@@ -2,13 +2,14 @@ import { formatRelative } from "date-fns";
 import { NotificationsInfo } from "../../util/interfaces";
 import { locale } from "../../util/helpers";
 import { useClearNotificationMutation } from "../features/book-api/book-api-slice";
+import styled from "styled-components";
 
 ///TODO LINKS
-export default function MiniNotifications({notification} : { notification: NotificationsInfo}) {
+export default function MiniNotifications({notification, className} : { notification: NotificationsInfo, className?: string}) {
     const [ clearNotification ] = useClearNotificationMutation();
     return (
         <div
-        className={`clickOption ${ 
+        className={`clickOption ${className || ""} ${ 
             notification.type === "COMMENT" ? "commentOption" :
             notification.type === "POST" ? "postOption" :
             notification.type === "USER" ? "userOption" :
@@ -25,15 +26,30 @@ export default function MiniNotifications({notification} : { notification: Notif
             <div>
                 {notification.content}
             </div>
-            <div>
-                {formatRelative(new Date(notification.createdAt), new Date(), { locale })}
-            </div>
-            <button onClick={(e) => {
-                e.stopPropagation();
-                clearNotification({id: notification.id});
-            }}>
-                X
-            </button>
+            <StyledDateButton>
+                <div>
+                    {formatRelative(new Date(notification.createdAt), new Date(), { locale })}
+                </div>
+                <StyledButton onClick={(e) => {
+                    e.stopPropagation();
+                    clearNotification({id: notification.id});
+                }}>
+                    X
+                </StyledButton>
+            </StyledDateButton>
         </div>
     )
 };
+
+const StyledDateButton = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 20px;
+`;
+
+const StyledButton = styled.button`
+    &:hover {
+        background-color: rgb(204, 41, 41);
+        color: white;
+    };
+`;

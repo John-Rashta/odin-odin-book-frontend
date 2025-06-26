@@ -1,3 +1,5 @@
+import styled from "styled-components";
+import { StyledDefaultContainer, StyledErrorMessage, StyledMain, StyledMainContainer } from "../../util/style";
 import { useGetUsersInfiniteQuery } from "../features/book-api/book-api-slice";
 import ClickWrapper from "./ClickWrapper";
 import LoadMore from "./LoadMore";
@@ -12,21 +14,33 @@ export default function Users() {
     });
 
     return (
-        <main>
-            {isLoading ? <div>
-                Loading Users...
-            </div> : error ? <div>
-                Failed Loading Users...
-            </div> : (usersData && usersData.length > 0) ? <div>
-                <ClickWrapper>
-                    {usersData.map((ele) => {
-                        return <User key={ele.id} user={ele} />
-                    })}
-                </ClickWrapper>
-                <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage}  fetchNextPage={fetchNextPage}/>
-            </div> : <div>
-                No Users Yet!
-            </div>}
-        </main>
+        <StyledMain>
+            <StyledDefaultContainer>
+                {
+                    isLoading ? <StyledErrorMessage>
+                        Loading Users...
+                    </StyledErrorMessage> : error ? <StyledErrorMessage>
+                        Failed Loading Users...
+                    </StyledErrorMessage> : (usersData && usersData.length > 0) ? <StyledUsersContainer>
+                        <StyledWrapper>
+                            {usersData.map((ele) => {
+                                return <User key={ele.id} user={ele} />
+                            })}
+                        </StyledWrapper>
+                        <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage}  fetchNextPage={fetchNextPage}/>
+                    </StyledUsersContainer> : <StyledErrorMessage>
+                        No Users Yet!
+                    </StyledErrorMessage>
+                }
+            </StyledDefaultContainer>
+        </StyledMain>
     )
 };
+
+const StyledUsersContainer = styled(StyledMainContainer)`
+    width: 100%;
+`;
+
+const StyledWrapper = styled(ClickWrapper)`
+    width: 100%;
+`;

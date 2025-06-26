@@ -2,9 +2,9 @@ import React from "react";
 import { ClickType } from "../../util/types";
 import { useNavigate } from "react-router-dom";
 
-export default function ClickWrapper(props: React.ComponentPropsWithoutRef<"div">) {
+export default function ClickWrapper(props: React.ComponentPropsWithoutRef<"div"> & {className?: string}) {
     const navigate = useNavigate();
-    const { children, ...restProps} = props;
+    const { children, className, ...restProps} = props;
     const handleClick = function handleClickingToRedirect(event: ClickType) {
         event.stopPropagation();
         event.preventDefault();
@@ -45,7 +45,7 @@ export default function ClickWrapper(props: React.ComponentPropsWithoutRef<"div"
     };
 
     return (
-        <div onClick={handleClick} {...restProps}>
+        <div className={className} onClick={handleClick} {...restProps}>
             {children}
         </div>
     )

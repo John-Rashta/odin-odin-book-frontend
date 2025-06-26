@@ -90,7 +90,7 @@ export default function Header() {
                         setShowNotifications(!showNotifications);
                     }}>Notifications {notificationsData ? `${notificationsData.length}` : ""}</button>
                     {
-                        (showNotifications && notificationsData && notificationsData.length > 0) && <div>
+                        ((showNotifications && notificationsData && notificationsData.length > 0) && <div>
                             <ClickWrapper>
                                 {
                                     notificationsData.slice(0, 25).map((ele) => {
@@ -104,7 +104,17 @@ export default function Header() {
                             }}>
                                 View All
                             </button>
-                        </div>
+                        </div>) || (showNotifications && <div>
+                            <div>
+                                No Notifications
+                            </div>
+                            <button onClick={() => {
+                                navigate("/notifications");
+                                setShowNotifications(false);
+                            }}>
+                                View All
+                            </button>
+                        </div>)
                     }
                 </div>
                 <StyledExtraGroup className="extraOptions">

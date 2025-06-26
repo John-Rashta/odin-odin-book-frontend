@@ -5,6 +5,8 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import User from "./User";
 import ClickWrapper from "./ClickWrapper";
 import LoadMore from "./LoadMore";
+import { StyledDefaultContainer, StyledErrorMessage, StyledMain } from "../../util/style";
+import styled from "styled-components";
 
 export default function SearchUsers() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -17,34 +19,53 @@ export default function SearchUsers() {
     });
 
     return (
-        <main>
-            <div>
-                <input 
+        <StyledMain>
+            <StyledDefaultContainer>
+                <StyledInput 
                     type="text"
                     name="searchInput"
                     id="searchInput"
+                    placeholder="Username or ID"
                     value={searchValue}
                     onChange={(e) => {
                         setSearchValue(e.target.value);
                     }}
                 />
-            </div>
-            <div>
-                {
-                     (searchData && searchData.length > 0 && searchValue !== "") ? <div>
-                        <ClickWrapper>
-                            {
-                                searchData.map((ele) => {
-                                    return <User key={ele.id} user={ele} />
-                                })
-                            }
-                        </ClickWrapper>
-                        <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
-                    </div> : <div>
-                        Try Searching!
-                    </div>
-                }
-            </div>
-        </main>
+                <StyledMainStuff>
+                    {
+                        (searchData && searchData.length > 0 && searchValue !== "") ? <>
+                            <StyledWrapper>
+                                {
+                                    searchData.map((ele) => {
+                                        return <User key={ele.id} user={ele} />
+                                    })
+                                }
+                            </StyledWrapper>
+                            <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
+                        </> : <ExtraErrorMessage>
+                            Try Searching!
+                        </ExtraErrorMessage>
+                    }
+                </StyledMainStuff>
+            </StyledDefaultContainer>
+        </StyledMain>
     )
 };
+
+const StyledMainStuff = styled.div`
+    width: 100%;
+`;
+
+const StyledWrapper = styled(ClickWrapper)`
+    width: 100%;
+`;
+
+const ExtraErrorMessage = styled(StyledErrorMessage)`
+    text-align: center;
+`;
+
+const StyledInput = styled.input`
+    width: 50%;
+    padding: 10px;
+    font-size: 1.1rem;
+`;

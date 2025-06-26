@@ -15,6 +15,7 @@ import LoadMore from "./LoadMore";
 import LikeButton from "./LikeButton";
 import ShowOptions from "./ShowOptions";
 import { ButtonClickType } from "../../util/types";
+import ClickWrapper from "./ClickWrapper";
 
 export default function Comment({comment} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}) {
     const myId = useSelector(selectMyId);
@@ -95,13 +96,13 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
             <CommentsDisplayButtons count={comment.ownCommentsCount} showing={showComments} setShow={setShowComments}/>
             {
                 (showComments && commentsData && commentsData.length > 0 ) && <div>
-                    <div>
+                    <ClickWrapper>
                         {
                             commentsData.map((ele) => {
                                 return <Comment key={ele.id} comment={ele} />
                             })
                         }
-                    </div>
+                    </ClickWrapper>
                     <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
                 </div>
             }
