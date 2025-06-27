@@ -4,6 +4,8 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import User from "./User";
 import ClickWrapper from "./ClickWrapper";
 import LoadMore from "./LoadMore";
+import { StyledDefaultContainer, StyledMain, StyledErrorMessage, StyledMainContainer, StyledClickButton } from "../../util/style";
+import styled from "styled-components";
 
 export default function Followships() {
     const [selectedType, setSelectedType] = useState("FOLLOWS");
@@ -21,52 +23,77 @@ export default function Followships() {
     });
 
     return (
-        <main>
-            <div>
-                <button onClick={() =>  setSelectedType("FOLLOWS")}>Follows</button>
-                <button onClick={() => setSelectedType("FOLLOWERS")}>Followers</button>
-            </div>
-            <div>
-                {
-                    selectedType === "FOLLOWERS" && (
-                        followersLoading ? <div>
-                            Loading Followers...
-                        </div> : followersError ? <div>
-                            Failed Loading Followers!
-                        </div> : (followersData && followersData.length > 0) ? <div>
-                            <ClickWrapper>
-                            {
-                                followersData.map((ele) => {
-                                return <User key={ele.id} user={ele} />
-                                })
-                            }
-                            </ClickWrapper>
-                            <LoadMore isFetchingNextPage={isFetchingFollowerNext} hasNextPage={hasNextFollower} fetchNextPage={fetchNextFollower} />
-                        </div> : <div>
-                            No Followers Yet!
-                        </div>
-                     ) || (
-                        followsLoading ? <div>
-                            Loading Follows...
-                        </div> : followsError ? <div>
-                            Failed Loading Follows!
-                        </div> : (followsData && followsData.length > 0) ? <div>
-                            <ClickWrapper>
-                            {
-                                followsData.map((ele) => {
+        <StyledMain>
+            <StyledDefaultContainer>
+                <StyledButtonsContainer>
+                    <StyledButtons
+                        $trueType="FOLLOWS"
+                        $currentType={selectedType}
+                        onClick={() =>  setSelectedType("FOLLOWS")}>Follows</StyledButtons>
+                    <StyledButtons
+                        $trueType="FOLLOWERS"
+                        $currentType={selectedType}
+                        onClick={() => setSelectedType("FOLLOWERS")}>Followers</StyledButtons>
+                </StyledButtonsContainer>
+                <StyledContainer>
+                    {
+                        selectedType === "FOLLOWERS" && (
+                            followersLoading ? <StyledErrorMessage>
+                                Loading Followers...
+                            </StyledErrorMessage> : followersError ? <StyledErrorMessage>
+                                Failed Loading Followers!
+                            </StyledErrorMessage> : (followersData && followersData.length > 0) ? <StyledContainer>
+                                <StyledWrapper>
+                                {
+                                    followersData.map((ele) => {
                                     return <User key={ele.id} user={ele} />
-                                })
-                            }
-                            </ClickWrapper>
-                            <LoadMore isFetchingNextPage={isFetchingFollowNext} hasNextPage={hasNextFollow} fetchNextPage={fetchNextFollow} />
-                        </div> : <div>
-                            No Follows Yet!
-                        </div>
+                                    })
+                                }
+                                </StyledWrapper>
+                                <LoadMore isFetchingNextPage={isFetchingFollowerNext} hasNextPage={hasNextFollower} fetchNextPage={fetchNextFollower} />
+                            </StyledContainer> : <StyledErrorMessage>
+                                No Followers Yet!
+                            </StyledErrorMessage>
+                        ) || (
+                            followsLoading ? <StyledErrorMessage>
+                                Loading Follows...
+                            </StyledErrorMessage> : followsError ? <StyledErrorMessage>
+                                Failed Loading Follows!
+                            </StyledErrorMessage> : (followsData && followsData.length > 0) ? <StyledContainer>
+                                <StyledWrapper>
+                                {
+                                    followsData.map((ele) => {
+                                        return <User key={ele.id} user={ele} />
+                                    })
+                                }
+                                </StyledWrapper>
+                                <LoadMore isFetchingNextPage={isFetchingFollowNext} hasNextPage={hasNextFollow} fetchNextPage={fetchNextFollow} />
+                            </StyledContainer> : <StyledErrorMessage>
+                                No Follows Yet!
+                            </StyledErrorMessage>
 
-                     )
-                }
-            </div>
-        </main>
+                        )
+                    }
+                </StyledContainer>
+            </StyledDefaultContainer>
+        </StyledMain>
     )
 
 };
+
+const StyledButtonsContainer = styled.div`
+    display: flex;
+    gap: 15px;
+`;
+
+const StyledButtons = styled(StyledClickButton)`
+
+`;
+
+const StyledContainer = styled(StyledMainContainer)`
+    width: 100%;
+`;
+
+const StyledWrapper = styled(ClickWrapper)`
+    width: 100%;
+`;

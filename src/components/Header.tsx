@@ -60,7 +60,7 @@ export default function Header() {
                             navigate(`/search?user=${searchValue}`);
                             return;
                         }}>
-                            <input 
+                            <StyledInput 
                                 type="text"
                                 name="searchBar"
                                 id="searchBar"
@@ -77,7 +77,7 @@ export default function Header() {
                                         (searchData.length > 0) ? searchData.map((ele) => {
                                             return <MiniUser key={ele.id} user={ele} />
                                         }) : <StyledNoResults>
-                                            No Result Found
+                                            No Results Found
                                         </StyledNoResults>
                                     }
                                 </StyledSearchResult>
@@ -85,38 +85,38 @@ export default function Header() {
                         }
                     </div>
                 }
-                <div>
-                    <button onClick={() => {
+                <StyledNotificationsMain>
+                    <StyledNotificationsButton onClick={() => {
                         setShowNotifications(!showNotifications);
-                    }}>Notifications {notificationsData ? `${notificationsData.length}` : ""}</button>
+                    }}>Notifications {notificationsData ? `${notificationsData.length}` : ""}</StyledNotificationsButton>
                     {
-                        ((showNotifications && notificationsData && notificationsData.length > 0) && <div>
-                            <ClickWrapper>
+                        ((showNotifications && notificationsData && notificationsData.length > 0) && <StyledNotificationsContainer>
+                            <StyledWrapper>
                                 {
                                     notificationsData.slice(0, 25).map((ele) => {
-                                    return <MiniNotifications key={ele.id} notification={ele} />
+                                    return <StyledNotification key={ele.id} notification={ele} />
                                     })
                                 }
-                            </ClickWrapper>
-                            <button onClick={() => {
+                            </StyledWrapper>
+                            <StyledViewButton onClick={() => {
                                 navigate("/notifications");
                                 setShowNotifications(false);
                             }}>
                                 View All
-                            </button>
-                        </div>) || (showNotifications && <div>
-                            <div>
+                            </StyledViewButton>
+                        </StyledNotificationsContainer>) || (showNotifications && <StyledNotificationsContainer>
+                            <StyledEmptyNotificationsText>
                                 No Notifications
-                            </div>
-                            <button onClick={() => {
+                            </StyledEmptyNotificationsText>
+                            <StyledViewButton onClick={() => {
                                 navigate("/notifications");
                                 setShowNotifications(false);
                             }}>
                                 View All
-                            </button>
-                        </div>)
+                            </StyledViewButton>
+                        </StyledNotificationsContainer>)
                     }
-                </div>
+                </StyledNotificationsMain>
                 <StyledExtraGroup className="extraOptions">
                     <StyledNavLink to={"/requests"}>Requests</StyledNavLink>
                     <StyledNavLink to={"/followships"}>Followships</StyledNavLink>
@@ -174,4 +174,77 @@ const StyledSearchResult = styled.div`
 
 const StyledNoResults = styled.div`
   padding: 10px;
+`;
+
+const StyledInput = styled.input`
+  padding: 7px;
+  background-color: rgb(255, 255, 255);
+  border: 1px solid black;
+  font-size: 1rem;
+`;
+
+const StyledNotificationsContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid black;
+    font-size: 1rem;
+    position: absolute;
+    right: 0;
+    z-index: 15;
+    padding: 8px;
+    max-width: 250px;
+    width: 210px;
+    max-height: 400px;
+    background-color: rgb(183, 223, 255);
+`;
+
+const StyledNotificationsMain = styled.div`
+    position: relative;
+`;
+
+const StyledNotificationsButton = styled.button`
+    padding: 5px;
+    font-size: 1.2rem;
+    font-family: Times, "Times New Roman";
+    background-color: rgb(190, 218, 255);
+    &:hover {
+        opacity: 0.8;
+    };
+`;
+
+const StyledNotification = styled(MiniNotifications)`
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    div > div {
+        font-size: 0.9rem;
+    };
+    border-bottom: 1px solid black;
+    padding: 5px;
+    &:hover {
+        background-color: rgb(196, 233, 255);
+    };
+    div > button {
+        background-color: rgb(255, 197, 197);
+    };
+`;
+
+const StyledWrapper = styled(ClickWrapper)`
+    overflow: auto;
+    max-height: 300px;
+`;
+
+const StyledViewButton = styled.button`
+    padding: 5px 10px;
+    background-color: rgb(196, 241, 255);
+    border: 1px solid black;
+    &:hover {
+        opacity: 0.8;
+    };
+`;
+
+const StyledEmptyNotificationsText = styled.div`
+    font-size: 1.1rem;
 `;

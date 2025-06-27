@@ -12,8 +12,8 @@ export default function User({user} : {user: UserFollowType & UserExtra | UserIn
     return (
         <StyledUser className="clickOption" data-userid={user.id}>
             <StyledStart>
-                <img className="userOption" data-userid={user.id} src={user.customIcon?.url || user.icon.source} alt="" />
-                <div className="userOption" data-userid={user.id}>{user.username}</div>
+                <StyledImage className="userOption" data-userid={user.id} src={user.customIcon?.url || user.icon.source} alt="" />
+                <StyledUsername className="userOption" data-userid={user.id}>{user.username}</StyledUsername>
             </StyledStart>
             <FollowOptions followers={user.followers} requests={user.receivedRequests} myId={myId} id={user.id}/>
             <ShowOptions myId={myId} id={user.id} userStuff={{user}}  />
@@ -42,4 +42,18 @@ const StyledStart = styled.div`
     align-items: center;
     gap: 10px;
     
+`;
+
+const StyledUsername = styled.div`
+    cursor: pointer;
+    &:hover {
+        text-decoration-line: underline;
+    };
+`;
+
+const StyledImage = styled.img`
+    cursor: pointer;
+    &:hover {
+        opacity: 0.9;
+    };
 `;

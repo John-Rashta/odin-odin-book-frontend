@@ -3,7 +3,7 @@ import { useState } from "react";
 import Request from "./Request";
 import { skipToken } from "@reduxjs/toolkit/query";
 import styled from "styled-components";
-import { StyledErrorMessage, StyledMain, StyledDefaultContainer, StyledMainContainer } from "../../util/style";
+import { StyledErrorMessage, StyledMain, StyledDefaultContainer, StyledMainContainer, StyledClickButton } from "../../util/style";
 
 export default function Requests() {
     const [selectedType, setSelectedType] = useState("RECEIVED");
@@ -71,16 +71,4 @@ export default function Requests() {
 const StyledButtonsContainer = styled.div`
     display: flex;
     gap: 10px;
-`;
-
-const StyledClickButton = styled.button<{
-  $currentType?: string;
-  $trueType?: string;
-}>`
-  background-color: ${(props) =>
-    (props.$currentType === props.$trueType && "rgb(51, 163, 255)") ||
-    "rgb(219, 245, 252)"};
-  padding: 10px 20px;
-  font-weight: bold;
-  font-size: 1rem;
 `;

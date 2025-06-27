@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 import styled, { css } from "styled-components";
 
 const mainBackgroundColor = `rgb(255, 255, 255)`;
-const navMenuValue = `950px`;
+const navMenuValue = `1010px`;
 const headerPadding = `20px 10px`;
 const headerBackgroundColor = `rgb(216, 241, 250)`;
 const headerBorderBottom = `2px solid black`;
@@ -121,6 +121,18 @@ const StyledMainContainer = styled.div`
     align-items: center;
 `;
 
+const StyledClickButton = styled.button<{
+  $currentType?: string;
+  $trueType?: string;
+}>`
+  background-color: ${(props) =>
+    (props.$currentType === props.$trueType && "rgb(51, 163, 255)") ||
+    "rgb(219, 245, 252)"};
+  padding: 10px 20px;
+  font-weight: bold;
+  font-size: 1rem;
+`;
+
 
 export {
     mainBackgroundColor,
@@ -144,4 +156,5 @@ export {
     StyledMain,
     StyledMainContainer,
     StylesReturn,
+    StyledClickButton,
 };

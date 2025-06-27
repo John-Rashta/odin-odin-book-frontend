@@ -7,21 +7,23 @@ import { navMenuValue } from "../../util/style";
 export default function NavMenu() {
     const [openOptions, setOpenOptions] = useState(false);
     return (
-        <StyledDiv>
-            <button onClick={() => {
+        <StyledDiv
+        >
+            <StyledButton onClick={(e) => {
                 setOpenOptions(!openOptions);
             }}>
                 <Ellipsis />
-            </button>
+            </StyledButton>
             {
-                openOptions && <StyledNav onClick={() => {
-                    setOpenOptions(false);
+                openOptions && <StyledNav
+                    onClick={() => {
+                        setOpenOptions(false);
                 }}>
-                    <NavLink to={"/requests"}>Requests</NavLink>
-                    <NavLink to={"/followships"}>Followships</NavLink>
-                    <NavLink to={"/users"}>Users</NavLink>
-                    <NavLink to={"/myposts"}>MyPosts</NavLink>
-                    <NavLink to={"/profile"}>Profile</NavLink>
+                    <StyledNavLink to={"/requests"}>Requests</StyledNavLink>
+                    <StyledNavLink to={"/followships"}>Followships</StyledNavLink>
+                    <StyledNavLink to={"/users"}>Users</StyledNavLink>
+                    <StyledNavLink to={"/myposts"}>MyPosts</StyledNavLink>
+                    <StyledNavLink to={"/profile"}>Profile</StyledNavLink>
                 </StyledNav>
             }
         </StyledDiv>
@@ -40,4 +42,25 @@ const StyledNav = styled.nav`
     right: 0;
     display: flex;
     flex-direction: column;
+    z-index: 15;
+    background-color: rgb(154, 215, 255);
+    border: 1px solid black;
+    gap: 2px;
+    max-width: 250px;
+    width: 150px;
+`;
+
+const StyledButton = styled.button`
+    background-color: rgb(255, 255, 255);
+    border: 1px solid black;
+    &:hover {
+        background-color: rgb(174, 207, 255);
+    };
+`;
+
+const StyledNavLink = styled(NavLink)`
+    &:hover {
+        background-color: rgb(255, 255, 255);
+    };
+    padding: 10px;
 `;

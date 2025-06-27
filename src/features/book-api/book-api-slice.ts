@@ -1170,7 +1170,6 @@ export const apiSlice = createApi({
         url: `/posts/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, arg) => [{type:"PostInfo", id: arg.id}],
     }),
      getComment: builder.query<{ comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike }, UId>({
       query: ({ id }) => ({
