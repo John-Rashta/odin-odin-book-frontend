@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useCreatePostMutation } from "../features/book-api/book-api-slice";
 import { Image } from "lucide-react";
 import { FormType } from "../../util/types";
+import styled from "styled-components";
+import ExpandableTextarea from "./ExpandableTextarea";
 
 export default function PostCreate() {
     const [ createPost ] = useCreatePostMutation();
@@ -38,8 +40,8 @@ export default function PostCreate() {
     newForm.append("content", content);
 
     createPost(newForm);
-    setTextValue("");
     target.reset();
+    setTextValue("");
   };
 
     return (
@@ -49,12 +51,10 @@ export default function PostCreate() {
                 onSubmit={handleClick}
                 onClick={(e) => e.stopPropagation()}
                 >
-                <input
-                    type="text"
-                    id="textInput"
-                    name="textInput"
-                    value={textValue}
-                    onChange={(e) => setTextValue(e.target.value)}
+                <StyledTextarea
+                  textValue={textValue}
+                  setTextValue={setTextValue}
+                  names="textInput"
                 />
                 <div>
                     {invalidSize && (
@@ -70,3 +70,9 @@ export default function PostCreate() {
         </div>
     )
 };
+
+const StyledTextarea = styled(ExpandableTextarea)`
+  width: 70%;
+  max-width: 70%;
+  min-height: 60px;
+`;

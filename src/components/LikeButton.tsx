@@ -1,14 +1,15 @@
 import { isUUID } from "validator";
-import { optionalIdArray, SimpleButtonClickFunction } from "../../util/types";
+import { optionalIdArray, SvgClickFunction } from "../../util/types";
+import { ThumbsUp } from "lucide-react";
 
-export default function LikeButton({myId, likesInfo, clickFunction} : {myId: string, likesInfo: optionalIdArray, clickFunction: SimpleButtonClickFunction }) {
+export default function LikeButton({myId, likesInfo, clickFunction} : {myId: string, likesInfo: optionalIdArray, clickFunction: SvgClickFunction }) {
     return (
         <>
              { isUUID(myId) &&
-                <button 
-                    {...((likesInfo && likesInfo.length > 0) ? {style: {backgroundColor: "black"}} : {})}
+                <ThumbsUp 
+                    {...((likesInfo && likesInfo.length > 0) ? {fill: "black"} : {})}
                     onClick={clickFunction}
-                >L</button>
+                />
             }
         </>
     )

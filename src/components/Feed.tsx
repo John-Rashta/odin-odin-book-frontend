@@ -6,6 +6,7 @@ import { isUUID } from "validator";
 import PostEdit from "./PostEdit";
 import ClickWrapper from "./ClickWrapper";
 import LoadMore from "./LoadMore";
+import { StyledDefaultContainer, StyledErrorMessage, StyledMain } from "../../util/style";
 
 export default function Feed() {
     const { postsData, isFetchingNextPage, error, isLoading, hasNextPage, fetchNextPage } = useGetFeedInfiniteQuery(undefined, {
@@ -23,14 +24,15 @@ export default function Feed() {
     };
 
     return (
-        <main>
+        <StyledMain>
+            <StyledDefaultContainer>
             <PostCreate />
             {
-                isLoading ? <div>
+                isLoading ? <StyledErrorMessage>
                     Loading Feed...
-                </div> : error ? <div>
+                </StyledErrorMessage> : error ? <StyledErrorMessage>
                     Failed Loading Feed!
-                </div> : (postsData && postsData.length > 0) ? <div>
+                </StyledErrorMessage> : (postsData && postsData.length > 0) ? <div>
                     <ClickWrapper>
                     {
                         postsData.map((ele) => {
@@ -39,13 +41,14 @@ export default function Feed() {
                     }
                     </ClickWrapper>
                     <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
-                </div> : <div>
+                </div> : <StyledErrorMessage>
                     No Feed Yet!
-                </div>
+                </StyledErrorMessage>
             }
              {
                 (showModal && isUUID(editId)) && <PostEdit postid={editId} closeModal={() => setShowModal(false)} />
             }
-        </main>
+            </StyledDefaultContainer>
+        </StyledMain>
     )
 };
