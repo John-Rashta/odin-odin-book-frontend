@@ -125,14 +125,14 @@ export default function Header() {
                     <StyledNavLink to={"/profile"}>Profile</StyledNavLink>
                 </StyledExtraGroup>
                 <NavMenu />
-                <div onClick={() => {
+                <StyledLogout onClick={() => {
                     logoutUser().unwrap().then(() => {
                         socket.disconnect();
                         location.reload();
                     }).catch()
                 }}>
                     Logout
-                </div>
+                </StyledLogout>
             </StyledNav>
         </StyledHeader>
     )
@@ -247,4 +247,8 @@ const StyledViewButton = styled.button`
 
 const StyledEmptyNotificationsText = styled.div`
     font-size: 1.1rem;
+`;
+
+const StyledLogout = styled.div`
+    cursor: pointer;
 `;

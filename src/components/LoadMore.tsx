@@ -1,10 +1,10 @@
 import { SimpleFunctionType } from "../../util/types";
 
-export default function LoadMore({isFetchingNextPage, hasNextPage, fetchNextPage} : {isFetchingNextPage: boolean, hasNextPage: boolean, fetchNextPage: SimpleFunctionType}) {
+export default function LoadMore({isFetchingNextPage, hasNextPage, fetchNextPage, className} : {isFetchingNextPage: boolean, hasNextPage: boolean, fetchNextPage: SimpleFunctionType, className?: string}) {
     return (
         <>
             {
-                (!isFetchingNextPage && hasNextPage) && <button onClick={(e) => {
+                (!isFetchingNextPage && hasNextPage) && <button className={className} onClick={(e) => {
                     e.stopPropagation();
                     fetchNextPage();
                     }}>

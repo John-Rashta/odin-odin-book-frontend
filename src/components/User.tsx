@@ -4,6 +4,7 @@ import { selectMyId } from "../features/manager/manager-slice";
 import FollowOptions from "./FollowOptions";
 import ShowOptions from "./ShowOptions";
 import styled from "styled-components";
+import { StyledImage, StyledUsername } from "../../util/style";
 
 
 export default function User({user} : {user: UserFollowType & UserExtra | UserInfo & UserExtra }) {
@@ -26,7 +27,7 @@ const StyledUser = styled.div`
     justify-content: space-between;
     width: 100%;
     align-items: center;
-    margin-bottom: -1px;
+    margin-top: -1px;
     border-bottom: solid 1px black;
     border-top: solid 1px black;
     padding: 15px;
@@ -42,18 +43,4 @@ const StyledStart = styled.div`
     align-items: center;
     gap: 10px;
     
-`;
-
-const StyledUsername = styled.div`
-    cursor: pointer;
-    &:hover {
-        text-decoration-line: underline;
-    };
-`;
-
-const StyledImage = styled.img`
-    cursor: pointer;
-    &:hover {
-        opacity: 0.9;
-    };
 `;

@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ButtonClickType } from "../../util/types";
 
-export default function BackButton() {
+export default function BackButton({className} : {className?: string}) {
     const navigate = useNavigate();
     const location  = useLocation();
     location.key
@@ -15,7 +15,7 @@ export default function BackButton() {
     };
 
     return (
-        <button onClick={handleClick}>
+        <button onClick={handleClick} className={className}>
             <ArrowLeft />
         </button>
     )

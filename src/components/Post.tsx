@@ -7,11 +7,12 @@ import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
 import { ButtonClickType, ModalStartFunction } from "../../util/types";
 import { useState } from "react";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, MessageSquare } from "lucide-react";
 import TextOptions from "./TextOptions";
 import ShowOptions from "./ShowOptions";
 import LikeButton from "./LikeButton";
 import styled from "styled-components";
+import { StyledImage, StyledMessageImage, StyledUsername } from "../../util/style";
 
 export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & YourLike & OwnCommentsCount, modalFunc?: ModalStartFunction}) {
     const myId = useSelector(selectMyId);
@@ -26,22 +27,22 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
     return (
         <StyledContainer className="clickOption postOption" data-postid={info.id}>
             <div>
-                <img className="userOption" data-userid={info.creator.id} src={info.creator.customIcon?.url || info.creator.icon.source} alt="" />
+                <StyledImage className="userOption" data-userid={info.creator.id} src={info.creator.customIcon?.url || info.creator.icon.source} alt="" />
             </div>
-            <div>
+            <MainContainer>
                 <TopContainer>
                     <TopLeftContainer>
-                        <div className="userOption" data-userid={info.creator.id}>
+                        <StyledUser className="userOption" data-userid={info.creator.id}>
                         {info.creator.username}
-                        </div>
-                        <div>
+                        </StyledUser>   
+                        <TimeContainer>
                             {formatRelative(new Date(info.createdAt), new Date(), { locale })}
-                        </div>
+                        </TimeContainer>
                     </TopLeftContainer>
                     <TopRightContainer>
-                        <div>
+                        <StyledEdited>
                             {info.edited? "Edited" : ""}
-                        </div>
+                        </StyledEdited>
                         {
                         typeof modalFunc === "function" && <ShowOptions myId={myId} id={info.creatorid} textStuff={{
                             textId: info.id,
@@ -52,19 +53,22 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
                     </TopRightContainer>
                 </TopContainer>
                 <div>
-                    <div {...{style: {whiteSpace: "pre-line"}}}>
+                    <StyledContent>
                         {info.content}
-                    </div>
-                    {info.image ? <img src={info.image.url} alt="" /> : <></>}
+                    </StyledContent>
+                    {info.image ? <StyledMessageImage className="messageImage" src={info.image.url} alt="" /> : <></>}
                 </div>
                 <BottomContainer>
-                    <div>
-                        {info.ownCommentsCount}
-                    </div>
+                    <StyledBottomLeft>
+                        <StyledCounts>
+                            {info.ownCommentsCount}
+                        </StyledCounts>
+                        <MessageSquare />
+                    </StyledBottomLeft>
                     <BottomRightContainer>
-                        <div>
+                        <StyledCounts>
                             {info.likesCount}
-                        </div>
+                        </StyledCounts>
                         <LikeButton myId={myId} likesInfo={info.likes} clickFunction={(e) => {
                             e.stopPropagation();
                             ///e.currentTarget.disabled = true;
@@ -75,7 +79,7 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
                     </BottomRightContainer>
                 </BottomContainer>
 
-            </div>
+            </MainContainer>
         </StyledContainer>
     )
 };
@@ -83,6 +87,14 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
 const StyledContainer = styled.div`
     display: flex;
     gap: 10px;
+    width: 100%;
+    padding: 5px;
+    margin-top: -1px;
+    border-bottom: solid 1px black;
+    border-top: solid 1px black;
+    &:hover {
+        background-color: rgb(228, 245, 255);
+    }
 `;
 
 const TopLeftContainer = styled.div`
@@ -92,6 +104,7 @@ const TopLeftContainer = styled.div`
 
 const TopRightContainer = styled.div`
     display: flex;
+    gap: 3px;
 `;
 
 const TopContainer = styled.div`
@@ -108,4 +121,37 @@ const BottomContainer = styled.div`
 const BottomRightContainer = styled.div`
     display: flex;
     align-items: center;
+    gap: 5px;
+`;
+
+const MainContainer = styled.div`
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+`;
+
+const TimeContainer = styled.div`
+    font-size: 0.8rem;
+`;
+
+const StyledUser = styled(StyledUsername)`
+    color: rgb(32, 136, 255);
+`;
+
+const StyledEdited = styled.div`
+    font-size: 0.8rem;
+`;
+
+const StyledCounts = styled.div`
+ font-size: 0.9rem;
+`;
+
+const StyledBottomLeft = styled.div`
+    display: flex;
+    gap: 5px;
+`;
+
+const StyledContent = styled.div`
+    white-space: pre-line;
 `;

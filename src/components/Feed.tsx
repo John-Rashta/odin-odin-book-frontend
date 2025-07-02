@@ -6,7 +6,8 @@ import { isUUID } from "validator";
 import PostEdit from "./PostEdit";
 import ClickWrapper from "./ClickWrapper";
 import LoadMore from "./LoadMore";
-import { StyledDefaultContainer, StyledErrorMessage, StyledMain } from "../../util/style";
+import { StyledDefaultContainer, StyledErrorMessage, StyledLoadCSS, StyledMain, StyledMainContainer } from "../../util/style";
+import styled from "styled-components";
 
 export default function Feed() {
     const { postsData, isFetchingNextPage, error, isLoading, hasNextPage, fetchNextPage } = useGetFeedInfiniteQuery(undefined, {
@@ -32,16 +33,16 @@ export default function Feed() {
                     Loading Feed...
                 </StyledErrorMessage> : error ? <StyledErrorMessage>
                     Failed Loading Feed!
-                </StyledErrorMessage> : (postsData && postsData.length > 0) ? <div>
-                    <ClickWrapper>
+                </StyledErrorMessage> : (postsData && postsData.length > 0) ? <StyledPostsContainer>
+                    <StyledWrapper>
                     {
                         postsData.map((ele) => {
                             return <Post key={ele.id} info={ele} modalFunc={editFunction} />
                         })
                     }
-                    </ClickWrapper>
-                    <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
-                </div> : <StyledErrorMessage>
+                    </StyledWrapper>
+                    <StyledLoad isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
+                </StyledPostsContainer> : <StyledErrorMessage>
                     No Feed Yet!
                 </StyledErrorMessage>
             }
@@ -52,3 +53,15 @@ export default function Feed() {
         </StyledMain>
     )
 };
+
+const StyledPostsContainer = styled(StyledMainContainer)`
+    width: 100%;
+`;
+
+const StyledWrapper = styled(ClickWrapper)`
+    width: 100%;
+`;
+
+const StyledLoad = styled(LoadMore)`
+    ${StyledLoadCSS}
+`;

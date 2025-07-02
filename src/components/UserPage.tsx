@@ -11,6 +11,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import BackButton from "./BackButton";
 import LoadMore from "./LoadMore";
+import { StyledDefaultContainer, StyledErrorMessage, StyledLoadCSS, StyledMain, StyledMainContainer } from "../../util/style";
+import styled from "styled-components";
 
 export default function UserPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -36,38 +38,67 @@ export default function UserPage() {
     };
 
     return (
-        <main>
+        <StyledMain>
+            <StyledDefault>
             {
-                isLoading ? <div>
+                isLoading ? <StyledErrorMessage>
                     Loading User...
-                </div> : error ? <div>
+                </StyledErrorMessage> : error ? <StyledErrorMessage>
                     Can't Find User.
-                </div> : userData ? <>
-                    <BackButton />
+                </StyledErrorMessage> : userData ? <>
+                    <StyledBack />
                     <UserProfile info={userData} />
                     {
-                        postsLoading ? <div>
+                        postsLoading ? <StyledErrorMessage>
                             Loading Posts...
-                        </div> : error ? <div>
+                        </StyledErrorMessage> : error ? <StyledErrorMessage>
                             Failed Loading Posts!
-                        </div> : (postsData && postsData.length > 0) ? <div>
-                            <ClickWrapper>
+                        </StyledErrorMessage> : (postsData && postsData.length > 0) ? <StyledPostsContainer>
+                            <StyledWrapper>
                                 {postsData.map((ele) => {
                                     return <Post key={ele.id} info={ele} modalFunc={editFunction}/>
                                 })}
-                            </ClickWrapper>
-                            <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
-                        </div> : <div>
+                            </StyledWrapper>
+                            <StyledLoad isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
+                        </StyledPostsContainer> : <StyledErrorMessage>
                             No Posts Yet!
-                        </div>
+                        </StyledErrorMessage>
                     }
-                </> : <div>
+                </> : <StyledErrorMessage>
                     No User Yet!
-                </div>
+                </StyledErrorMessage>
             }
-        {
-            (showModal && isUUID(editId)) && <PostEdit postid={editId} closeModal={() => setShowModal(false)} />
-        }
-        </main>
+            {
+                (showModal && isUUID(editId)) && <PostEdit postid={editId} closeModal={() => setShowModal(false)} />
+            }
+            </StyledDefault>
+        </StyledMain>
     )
 };
+
+const StyledPostsContainer = styled(StyledMainContainer)`
+    width: 100%;
+`;
+
+const StyledDefault = styled(StyledDefaultContainer)`
+    gap: 10px;
+    padding-top: 0px;
+`;
+
+const StyledWrapper = styled(ClickWrapper)`
+    width: 100%;
+`;
+
+const StyledLoad = styled(LoadMore)`
+    ${StyledLoadCSS}
+`;
+
+const StyledBack = styled(BackButton)`
+    align-self: start;
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+    &:hover {
+       background-color: rgb(121, 192, 255);
+    }
+`;

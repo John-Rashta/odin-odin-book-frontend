@@ -42,7 +42,7 @@ const GlobalStyle = createGlobalStyle`
         background-color: ${mainBackgroundColor};
     }
 
-    img:not(.textImage, .profileImage) {
+    img:not(.textImage, .profileImage, .messageImage) {
         width: 50px;
         height: 50px;
         border-radius: 50%;

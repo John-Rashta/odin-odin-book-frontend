@@ -45,7 +45,7 @@ export default function PostCreate() {
   };
 
     return (
-        <div>
+        <FormContainer>
             <form
                 style={{ position: "relative" }}
                 onSubmit={handleClick}
@@ -56,23 +56,71 @@ export default function PostCreate() {
                   setTextValue={setTextValue}
                   names="textInput"
                 />
-                <div>
-                    {invalidSize && (
-                    <div>File Too Big!(Max 5MB)</div>
-                    )}
-                    <label htmlFor="fileInput">
-                    <Image />
-                    </label>
-                    <input type="file" id="fileInput" name="fileInput" />
-                </div>
-                <button type="submit">Send</button>
+                <StyledBottom>
+                  <StyledFileDiv>
+                      {invalidSize && (
+                      <StyledFileError>File Too Big!(Max 5MB)</StyledFileError>
+                      )}
+                      <StyledLabel htmlFor="fileInput">
+                        <Image />
+                      </StyledLabel>
+                      <StyledInputFile type="file" id="fileInput" name="fileInput" />
+                  </StyledFileDiv>
+                  <StyledButton type="submit">Send</StyledButton>
+                </StyledBottom>
             </form>
-        </div>
+        </FormContainer>
     )
 };
 
 const StyledTextarea = styled(ExpandableTextarea)`
-  width: 70%;
-  max-width: 70%;
+  width: 100%;
+  max-width: 100%;
   min-height: 60px;
+`;
+
+const FormContainer = styled.div`
+  width: 70%;
+`;
+
+const StyledInputFile = styled.input`
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+`;
+
+const StyledLabel = styled.label`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+`;
+
+const StyledFileDiv = styled.div`
+  position: relative;
+  display: flex;
+`;
+
+const StyledFileError = styled.div`
+  position: absolute;
+  bottom: 120%;
+  right: -65px;
+  width: 150px;
+  text-align: center;
+  color: rgb(206, 0, 0);
+`;
+
+const StyledBottom = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+const StyledButton = styled.button`
+  background-color: rgb(223, 242, 255);
+  &:hover {
+    background-color: rgb(178, 224, 255);
+  };
+  border-radius: 5px;
 `;

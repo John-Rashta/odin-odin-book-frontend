@@ -491,6 +491,7 @@ export const apiSlice = createApi({
               if (possibleIndex !== -1) {
                 if (data.type ===  "content" && data.content) {
                 posts[possibleIndex].content = data.content;
+                posts[possibleIndex].edited = true;
                 } else if (data.type === "likes" && data.likes !== undefined) {
                   posts[possibleIndex].likesCount = data.likes;
                 }
@@ -566,6 +567,7 @@ export const apiSlice = createApi({
               if (possibleIndex !== -1) {
                 if (data.type ===  "content" && data.content) {
                   feed[possibleIndex].content = data.content;
+                  feed[possibleIndex].edited = true;
                 } else if (data.type === "likes" && data.likes !== undefined) {
                   feed[possibleIndex].likesCount = data.likes;
                 };
@@ -1050,6 +1052,7 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
               if (data.type ===  "content" && data.content) {
               draft.post.content = data.content;
+              draft.post.edited = true;
             } else if (data.type === "likes" && data.likes !== undefined) {
               draft.post.likesCount = data.likes;
             }
@@ -1140,6 +1143,7 @@ export const apiSlice = createApi({
               if (possibleIndex !== -1) {
                 if (data.type ===  "content" && data.content) {
                   posts[possibleIndex].content = data.content;
+                  posts[possibleIndex].edited = true;
                 } else if (data.type === "likes" && data.likes !==  undefined) {
                   posts[possibleIndex].likesCount = data.likes;
                 };

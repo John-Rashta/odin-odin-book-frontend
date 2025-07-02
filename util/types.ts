@@ -17,6 +17,7 @@ type InitialPageParam = {
 type FormType = React.FormEvent<HTMLFormElement>;
 
 type SimpleFunctionType = () =>  void;
+type SvgClick = React.MouseEvent<SVGSVGElement, MouseEvent>;
 type ButtonClickType = React.MouseEvent<HTMLButtonElement, MouseEvent>;
 type ClickType = React.MouseEvent<HTMLDivElement, MouseEvent>;
 type MutationTriggerType<T, U> = TypedMutationTrigger<
@@ -25,6 +26,8 @@ type MutationTriggerType<T, U> = TypedMutationTrigger<
   BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError>
 >;
 
+type SimpleClickFunction = (e: ClickType) =>  void;
+type SvgClickFunction  = (e: SvgClick) => void;
 type SimpleButtonClickFunction = (e: ButtonClickType) => void;
 
 type SimpleBooleanFunction = (val: boolean) => void;
@@ -47,5 +50,7 @@ export {
     ModalStartFunction,
     SimpleBooleanFunction,
     SimpleButtonClickFunction,
-    optionalIdArray
+    optionalIdArray,
+    SimpleClickFunction,
+    SvgClickFunction,
 };

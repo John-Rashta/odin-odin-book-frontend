@@ -133,6 +133,36 @@ const StyledClickButton = styled.button<{
   font-size: 1rem;
 `;
 
+const StyledUsername = styled.div`
+    cursor: pointer;
+    &:hover {
+        text-decoration-line: underline;
+    };
+`;
+
+const StyledImage = styled.img`
+    cursor: pointer;
+    &:hover {
+        opacity: 0.9;
+    };
+`;
+
+const StyledMessageImage = styled.img`
+  max-width: 50%;
+  height: auto;
+  object-fit: contain;
+`;
+
+const StyledLoadCSS = css`
+    padding: 5px 15px;
+    background-color: rgb(195, 214, 255);
+    border: 1px solid black;
+    &:hover {
+        background-color: rgb(150, 184, 255);
+    };
+    font-weight: bold;
+    margin: 15px;
+`;
 
 export {
     mainBackgroundColor,
@@ -157,4 +187,8 @@ export {
     StyledMainContainer,
     StylesReturn,
     StyledClickButton,
+    StyledImage,
+    StyledUsername,
+    StyledMessageImage,
+    StyledLoadCSS,
 };
