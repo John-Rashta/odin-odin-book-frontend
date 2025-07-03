@@ -2,8 +2,11 @@ import { useRef, useState } from "react";
 import { FullCommentInfo, Likes, OwnCommentsCount, YourLike } from "../../util/interfaces";
 import { FormType, SimpleFunctionType } from "../../util/types";
 import { useUpdateCommentMutation } from "../features/book-api/book-api-slice";
+import ExpandableTextarea from "./ExpandableTextarea";
+import styled from "styled-components";
+import { StyledCancel, StyledConfirm } from "../../util/style";
 
-export default function CommentEdit({comment, changeEdit} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike, changeEdit: SimpleFunctionType}) {
+export default function CommentEdit({comment, changeEdit, className} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike, changeEdit: SimpleFunctionType, className?: string}) {
     const [ updateComment ] = useUpdateCommentMutation();
     const [ textValue, setTextValue ] = useState(comment.content);
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -39,26 +42,34 @@ export default function CommentEdit({comment, changeEdit} : {comment: FullCommen
   };
 
     return (
-        <div>
             <form
+                className={className}
                 style={{ position: "relative" }}
                 onSubmit={handleSubmit}
                 onClick={(e) => e.stopPropagation()}
                 >
-                <input
-                    type="text"
-                    id="textInput"
-                    name="textInput"
-                    value={textValue}
-                    onChange={(e) => setTextValue(e.target.value)}
+                <StyledText
+                    names="textInput"
+                    textValue={textValue}
+                    setTextValue={setTextValue}
                 />
-                <button ref={buttonRef} onClick={(e) => {
-                    e.stopPropagation()
-                    changeEdit()}} type="button">
-                    Cancel
-                </button>
-                <button type="submit">Confirm</button>
+                <StyledButtonsContainer>
+                    <StyledCancel ref={buttonRef} onClick={(e) => {
+                        e.stopPropagation()
+                        changeEdit()}} type="button">
+                        Cancel
+                    </StyledCancel>
+                    <StyledConfirm type="submit">Confirm</StyledConfirm>
+                </StyledButtonsContainer>
             </form>
-        </div>
     )
 };
+
+const StyledButtonsContainer = styled.div`
+    display: flex;
+    gap: 10px;
+`;
+
+const StyledText = styled(ExpandableTextarea)`
+    width: min(100%, 700px);
+`;

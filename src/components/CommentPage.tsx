@@ -10,6 +10,8 @@ import { selectMyId } from "../features/manager/manager-slice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import BackButton from "./BackButton";
 import LoadMore from "./LoadMore";
+import styled from "styled-components";
+import { StyledBackCSS, StyledDefaultContainer, StyledErrorMessage, StyledLoadCSS, StyledMain, StyledMainContainer } from "../../util/style";
 
 export default function CommentPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -31,35 +33,70 @@ export default function CommentPage() {
 
 
     return (
-        <main>
-            { isLoading ? <div>
+        <StyledMain>
+            <StyledDefault>
+            { isLoading ? <StyledErrorMessage>
             Loading Comment...
-        </div> : error ? <div>
+        </StyledErrorMessage> : error ? <StyledErrorMessage>
             Can't Find Comment.
-        </div> : commentData ? 
-            <div>
-                <BackButton />
+        </StyledErrorMessage> : commentData ? 
+            <>
+                <StyledBack />
                 <CommentProfile comment={commentData} />
-                {isUUID(myId) && <CommentCreate postid={commentData.postid} commentid={commentData.id} />}
-                <div>
-                        {
-                            (commentsData && commentsData.length > 0) ? <div>
-                                <ClickWrapper>
-                                    {
-                                        commentsData.map((ele) => {
-                                            return <Comment key={ele.id} comment={ele} />
-                                        })
-                                    }
-                                </ClickWrapper>
-                                <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
-                            </div> : <></>
-                        }
-                </div>
-
-            </div> : <div>
-
-            </div>
+                {isUUID(myId) && <StyledForm postid={commentData.postid} commentid={commentData.id} />}
+                {
+                    (commentsData && commentsData.length > 0) ? <StyledCommentsContainer>
+                        <StyledWrapper>
+                            {
+                                commentsData.map((ele) => {
+                                    return <Comment key={ele.id} comment={ele} />
+                                })
+                            }
+                        </StyledWrapper>
+                        <StyledLoad isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
+                    </StyledCommentsContainer> : <></>
+                }
+            </> : <StyledErrorMessage>
+                    No Comment Found!
+            </StyledErrorMessage>
             }
-        </main>
+            </StyledDefault>
+        </StyledMain>
     )
-}
+};
+
+const StyledDefault = styled(StyledDefaultContainer)`
+    max-width: min(100%, 1200px);
+    background-color: rgb(187, 236, 255);
+    padding-top: 0px;
+`;
+
+const StyledWrapper = styled(ClickWrapper)`
+    width: 100%;
+    background-color: rgb(255, 255, 255);
+`;
+
+const StyledCommentsContainer = styled(StyledMainContainer)`
+    width: 100%;
+`;
+
+const StyledBack = styled(BackButton)`
+    ${StyledBackCSS}
+`;
+
+const StyledForm = styled(CommentCreate)`
+    width: 100%;
+    display: flex;
+    form {
+        width: 70%;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    };
+`;
+
+const StyledLoad = styled(LoadMore)`
+    ${StyledLoadCSS}
+`;

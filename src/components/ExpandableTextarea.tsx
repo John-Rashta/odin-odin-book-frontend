@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import styled from "styled-components";
 
-export default function ExpandableTextarea({names, className, textValue, setTextValue} : {names: string, textValue: string, setTextValue: React.Dispatch<React.SetStateAction<string>>, className?: string}) {
+export default function ExpandableTextarea({names, className, textValue, setTextValue, placeName} : {names: string, textValue: string, setTextValue: React.Dispatch<React.SetStateAction<string>>, className?: string, placeName?:string}) {
     const textRef = useRef<HTMLTextAreaElement>(null);
     useEffect(() => {
         if (!textRef || !textRef.current) {
@@ -21,6 +21,7 @@ export default function ExpandableTextarea({names, className, textValue, setText
         id={names}
         ref={textRef}
         value={textValue}
+        {...(typeof placeName === "string" ? {placeholder: placeName} : {})}
         onChange={(e) =>  setTextValue(e.target.value)}
         ></StyledTextarea>
     )

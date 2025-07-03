@@ -16,6 +16,9 @@ import LikeButton from "./LikeButton";
 import ShowOptions from "./ShowOptions";
 import { ButtonClickType } from "../../util/types";
 import ClickWrapper from "./ClickWrapper";
+import styled from "styled-components";
+import { MessageSquare } from "lucide-react";
+import { StyledContent, StyledFlex, StyledImage, StyledLoadCSS, StyledMessageImage, StyledUserBlue } from "../../util/style";
 
 export default function Comment({comment} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}) {
     const myId = useSelector(selectMyId);
@@ -37,76 +40,168 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
     };
 
     return (
-        <div>
-            { showEdit ? <CommentEdit comment={comment} changeEdit={() =>  {
-                setShowEdit(false);
-            }} /> :
-                <div className="clickOption commentOption" data-commentid={comment.id}>
+        <StyledComment>
+                <StyledMainComment className="clickOption commentOption" data-commentid={comment.id}>
                     <div className="userOption" data-userid={comment.senderid}>
-                        <img src={comment.sender.customIcon?.url || comment.sender.icon.source} alt="" />
+                        <StyledImage src={comment.sender.customIcon?.url || comment.sender.icon.source} alt="" />
                     </div>
-                    <div>
-                        <div>
-                            <div className="userOption" data-userid={comment.senderid}>
-                                {comment.sender.username}
-                            </div>
+                    <StyledMainStuff>
+                        { showEdit ? <CommentEdit comment={comment} changeEdit={() =>  {
+                        setShowEdit(false);
+                        }} /> :
+                        <StyledMainStuff>
+                            <StyledTop>
+                                <StyledFlex>
+                                    <StyledUserBlue className="userOption" data-userid={comment.senderid}>
+                                        {comment.sender.username}
+                                    </StyledUserBlue>
+                                    <StyledEdited>
+                                        {formatRelative(new Date(comment.sentAt), new Date(), { locale })}
+                                    </StyledEdited>
+                                </StyledFlex>
+                                <StyledFlex>
+                                    <StyledEdited>
+                                        {comment.edited ? "Edited" : ""}
+                                    </StyledEdited>
+                                    <ShowOptions myId={myId} id={comment.senderid} textStuff={{
+                                    textId: comment.id,
+                                    type: "COMMENT",
+                                    editFunc: () =>  setShowEdit(true)
+                                    }}  />
+                                </StyledFlex>
+                            </StyledTop>
                             <div>
-                                {formatRelative(new Date(comment.sentAt), new Date(), { locale })}
+                                <StyledContent>
+                                    {comment.content}
+                                </StyledContent>
+                                {comment.image ? <StyledMessageImage className="messageImage" src={comment.image.url} alt="" /> : <></>}
                             </div>
-                            <div>
-                                {comment.edited ? "Edited" : ""}
-                            </div>
-                        </div>
-                        <div>
-                            <div>
-                                {comment.content}
-                            </div>
-                            {comment.image ? <img src={comment.image.url} alt="" /> : <></>}
-                        </div>
-                        <div>
-                            <div>
-                                {comment.ownCommentsCount > 0 ? comment.ownCommentsCount : ""}
-                            </div>
-                            <div>
-                                {comment.likesCount > 0 ? comment.likesCount : ""}
-                            </div>
-                            <LikeButton myId={myId} likesInfo={comment.likes} clickFunction={(e) => {
-                                e.stopPropagation();
-                                ///e.currentTarget.disabled = true;
-                                changeLike({id: comment.id, action: ((comment.likes && comment.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
-                                    ///e.currentTarget.disabled = false;
-                                })
-                            }} />
-                            <ShowOptions myId={myId} id={comment.senderid} textStuff={{
-                                textId: comment.id,
-                                type: "COMMENT",
-                                editFunc: () =>  setShowEdit(true)
-                            }}  />
-                        </div>
-                    </div>
-                    {isUUID(myId) && <button onClick={(e) => {
-                        e.stopPropagation()
-                        setShowReply(true)
-                    }}>Reply</button>}
-                </div>
-            }
-            {
-                showReply && <CommentCreate commentid={comment.id} postid={comment.postid} changeCreate={() =>  setShowReply(false)} />
-            }
-            <CommentsDisplayButtons count={comment.ownCommentsCount} showing={showComments} setShow={setShowComments}/>
-            {
-                (showComments && commentsData && commentsData.length > 0 ) && <div>
-                    <ClickWrapper>
-                        {
-                            commentsData.map((ele) => {
-                                return <Comment key={ele.id} comment={ele} />
-                            })
-                        }
-                    </ClickWrapper>
-                    <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
-                </div>
-            }
-
-        </div>
+                            <StyledBottom>
+                                <StyledBottomLeft>
+                                    {comment.ownCommentsCount > 0 ? <>
+                                        <StyledCounts>
+                                            {comment.ownCommentsCount}
+                                        </StyledCounts>
+                                        <MessageSquare/>
+                                    </> 
+                                    : " "}
+                                </StyledBottomLeft>
+                                <StyledBottomRight>
+                                    <StyledLikes>
+                                        {comment.likesCount > 0 ? comment.likesCount : " "}
+                                    </StyledLikes>
+                                    <LikeButton myId={myId} likesInfo={comment.likes} clickFunction={(e) => {
+                                        e.stopPropagation();
+                                        ///e.currentTarget.disabled = true;
+                                        changeLike({id: comment.id, action: ((comment.likes && comment.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
+                                            ///e.currentTarget.disabled = false;
+                                        })
+                                    }} />
+                                </StyledBottomRight>
+                                {isUUID(myId) && <StyledReply onClick={(e) => {
+                                e.stopPropagation()
+                                setShowReply(true)
+                                }}>Reply</StyledReply>}
+                            </StyledBottom>
+                        </StyledMainStuff>}
+                        <StyledExtraBottom>
+                            {
+                                showReply && <CommentCreate commentid={comment.id} postid={comment.postid} changeCreate={() =>  setShowReply(false)} />
+                            }
+                            <CommentsDisplayButtons count={comment.ownCommentsCount} showing={showComments} setShow={setShowComments}/>
+                            {
+                                (showComments && commentsData && commentsData.length > 0 ) && <div>
+                                    <ClickWrapper>
+                                        {
+                                            commentsData.map((ele) => {
+                                                return <Comment key={ele.id} comment={ele} />
+                                            })
+                                        }
+                                    </ClickWrapper>
+                                    <StyledLoad isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
+                                </div>
+                            }
+                        </StyledExtraBottom>
+                    </StyledMainStuff>
+                </StyledMainComment>
+        </StyledComment>
     )
 };
+
+const StyledComment = styled.div`
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 5px 0px;
+    margin-top: -1px;
+    border-bottom: solid 1px black;
+    border-top: solid 1px black;
+`;
+
+const StyledMainComment = styled.div`
+    display: flex;
+    gap: 10px;
+    width: 100%;
+`;
+
+const StyledTop = styled(StyledFlex)`
+    gap: 0px;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+const StyledMainStuff = styled.div`
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+`;
+
+const StyledBottomLeft = styled(StyledFlex)`
+    width: 37px;
+`;
+const StyledBottomRight = styled(StyledFlex)`
+`;
+
+const StyledBottom = styled(StyledFlex)`
+    gap: 10px;
+`;
+
+const StyledLikes = styled.div`
+    width: 8px;
+    font-size: 0.9rem;
+`;
+
+const StyledEdited = styled.div`
+    font-size: 0.8rem;
+    align-self: center;
+`;
+
+const StyledCounts = styled.div`
+    font-size: 0.9rem;
+`;
+
+const StyledReply = styled.button`
+    background-color: rgb(231, 250, 255);
+    border: 1px solid black;
+    font-weight: bold;
+    &:hover {
+        background-color: rgb(187, 240, 255);
+    };
+`;
+
+const StyledExtraBottom = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    button:is(.displayOption) {
+        align-self: start;
+    };
+`;
+
+const StyledLoad = styled(LoadMore)`
+    $${StyledLoadCSS};
+    align-self: center;
+`;

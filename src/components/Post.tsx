@@ -12,7 +12,7 @@ import TextOptions from "./TextOptions";
 import ShowOptions from "./ShowOptions";
 import LikeButton from "./LikeButton";
 import styled from "styled-components";
-import { StyledImage, StyledMessageImage, StyledUsername } from "../../util/style";
+import { StyledImage, StyledMessageImage, StyledUserBlue, StyledContent } from "../../util/style";
 
 export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & YourLike & OwnCommentsCount, modalFunc?: ModalStartFunction}) {
     const myId = useSelector(selectMyId);
@@ -32,9 +32,9 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
             <MainContainer>
                 <TopContainer>
                     <TopLeftContainer>
-                        <StyledUser className="userOption" data-userid={info.creator.id}>
+                        <StyledUserBlue className="userOption" data-userid={info.creator.id}>
                         {info.creator.username}
-                        </StyledUser>   
+                        </StyledUserBlue>   
                         <TimeContainer>
                             {formatRelative(new Date(info.createdAt), new Date(), { locale })}
                         </TimeContainer>
@@ -135,10 +135,6 @@ const TimeContainer = styled.div`
     font-size: 0.8rem;
 `;
 
-const StyledUser = styled(StyledUsername)`
-    color: rgb(32, 136, 255);
-`;
-
 const StyledEdited = styled.div`
     font-size: 0.8rem;
 `;
@@ -150,8 +146,4 @@ const StyledCounts = styled.div`
 const StyledBottomLeft = styled.div`
     display: flex;
     gap: 5px;
-`;
-
-const StyledContent = styled.div`
-    white-space: pre-line;
 `;

@@ -2,8 +2,11 @@ import { useState } from "react";
 import { useCreateCommentMutation } from "../features/book-api/book-api-slice";
 import { FormType, SimpleFunctionType } from "../../util/types";
 import { Image } from "lucide-react";
+import ExpandableTextarea from "./ExpandableTextarea";
+import styled from "styled-components";
+import { StyledCancel, StyledConfirm } from "../../util/style";
 
-export default function CommentCreate({postid, commentid, changeCreate} : {postid: string, commentid?: string, changeCreate?: SimpleFunctionType}) {
+export default function CommentCreate({postid, commentid, changeCreate, className, placeName} : {postid: string, commentid?: string, changeCreate?: SimpleFunctionType, className?:string, placeName?:string}) {
     const [ createComment ] = useCreateCommentMutation();
     const [ textValue, setTextValue ] = useState("");
     const [ invalidSize, setInvalidSize ] = useState(false);
@@ -52,38 +55,90 @@ export default function CommentCreate({postid, commentid, changeCreate} : {posti
   };
 
     return (
-        <div>
+        <FormContainer className={className}>
             <form
                 style={{ position: "relative" }}
                 onSubmit={handleClick}
                 onClick={(e) => e.stopPropagation()}
                 >
-                <input
-                    type="text"
-                    id="textInput"
-                    name="textInput"
-                    value={textValue}
-                    onChange={(e) => setTextValue(e.target.value)}
+                <StyledText
+                names="textInput"
+                textValue={textValue}
+                setTextValue={setTextValue}
+                {...(typeof placeName === "string" ? {placeName: placeName} : {})}
                 />
-                <div>
-                    {invalidSize && (
-                    <div>File Too Big!(Max 5MB)</div>
-                    )}
-                    <label htmlFor="fileInput">
-                    <Image />
-                    </label>
-                    <input type="file" id="fileInput" name="fileInput" />
-                </div>
-                {
-                    typeof changeCreate === "function" ? <button type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      changeCreate();
-                    }}
-                    >Cancel</button> : <></>
-                }
-                <button type="submit">Send</button>
+                <StyledBottom>
+                  <StyledFileDiv>
+                      {invalidSize && (
+                      <StyledFileError>File Too Big!(Max 5MB)</StyledFileError>
+                      )}
+                      <StyledLabel htmlFor="fileInput">
+                        <Image />
+                      </StyledLabel>
+                      <StyledInputFile type="file" id="fileInput" name="fileInput" />
+                  </StyledFileDiv>
+                  <StyledButtonsContainer>
+                      {
+                        typeof changeCreate === "function" ? <StyledCancel type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          changeCreate();
+                        }}
+                        >Cancel</StyledCancel> : <></>
+                    }
+                    <StyledConfirm type="submit">Send</StyledConfirm>
+                  </StyledButtonsContainer>
+                </StyledBottom>
             </form>
-        </div>
+        </FormContainer>
     )
 };
+
+const StyledText = styled(ExpandableTextarea)`
+    width: min(100%, 700px);
+`;
+
+const StyledFileError = styled.div`
+  position: absolute;
+  bottom: -50%;
+  right:  -150px;
+  width: 150px;
+  text-align: center;
+  color: rgb(206, 0, 0);
+`;
+
+const StyledInputFile = styled.input`
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+`;
+
+const StyledLabel = styled.label`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+`;
+
+
+const StyledFileDiv = styled.div`
+  position: relative;
+  display: flex;
+`;
+
+const FormContainer = styled.div`
+  width: 70%;
+`;
+
+const StyledBottom = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: min(100%, 700px);
+`;
+
+const StyledButtonsContainer = styled.div`
+  display: flex;
+  gap: 5px;
+`;

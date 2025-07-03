@@ -11,7 +11,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import BackButton from "./BackButton";
 import LoadMore from "./LoadMore";
-import { StyledDefaultContainer, StyledErrorMessage, StyledLoadCSS, StyledMain, StyledMainContainer } from "../../util/style";
+import { StyledBackCSS, StyledDefaultContainer, StyledErrorMessage, StyledLoadCSS, StyledMain, StyledMainContainer } from "../../util/style";
 import styled from "styled-components";
 
 export default function UserPage() {
@@ -65,7 +65,7 @@ export default function UserPage() {
                         </StyledErrorMessage>
                     }
                 </> : <StyledErrorMessage>
-                    No User Yet!
+                    No User Found!
                 </StyledErrorMessage>
             }
             {
@@ -94,11 +94,5 @@ const StyledLoad = styled(LoadMore)`
 `;
 
 const StyledBack = styled(BackButton)`
-    align-self: start;
-    border: none;
-    cursor: pointer;
-    background-color: transparent;
-    &:hover {
-       background-color: rgb(121, 192, 255);
-    }
+    ${StyledBackCSS}
 `;

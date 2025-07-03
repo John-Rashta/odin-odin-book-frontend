@@ -4,65 +4,139 @@ import { selectMyId } from "../features/manager/manager-slice";
 import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
 import { useChangePostLikeMutation } from "../features/book-api/book-api-slice";
-import { ButtonClickType, ModalStartFunction } from "../../util/types";
+import { ButtonClickType, ClickType, ModalStartFunction } from "../../util/types";
 import { useState } from "react";
 import TextOptions from "./TextOptions";
 import ShowOptions from "./ShowOptions";
 import LikeButton from "./LikeButton";
 import ClickWrapper from "./ClickWrapper";
+import { useNavigate } from "react-router-dom";
+import { StyledDivFlex, StyledImage, StyledMessageImage, StyledUserBlue, StyledFlex, StyledContent } from "../../util/style";
+import { MessageSquare } from "lucide-react";
+import styled from "styled-components";
 
 export default function PostProfile({post, modalFunc} : {post: FullPostInfo & Likes & YourLike & OwnCommentsCount, modalFunc?: ModalStartFunction}) {
     const myId = useSelector(selectMyId);
     const [ changeLike ] = useChangePostLikeMutation();
     const [showOptions, setShowOptions] = useState(false);
+    const navigate = useNavigate();
 
     const handleClick = function handleClickingButton(e: ButtonClickType) {
         e.stopPropagation();
         setShowOptions(!showOptions);
     };
 
+    const handleUserClick = function handleClickUser(e: ClickType) {
+        e.stopPropagation();
+        navigate(`/user?id=${post.creator.id}`);
+    };
+
     return (
-        <div>
-            <ClickWrapper>
-                <img className="clickOption userOption" data-userid={post.creator.id} src={post.creator.customIcon?.url || post.creator.icon.source} alt="" />
-                <div className="clickOption userOption" data-userid={post.creator.id}>
-                    {post.creator.username}
-                </div>
-            </ClickWrapper>
+        <StyledContainer>
             <div>
-                <div>
-                    <div>
-                        {post.content}
-                    </div>
-                    {post.image ? <img src={post.image.url} alt="" /> : <></>}
-                </div>
-                <div>
-                    {post.likesCount}
-                </div>
-                <div>
-                    {post.ownCommentsCount}
-                </div>
-                <div>
-                    {post.edited ? "Edited" : ""}
-                </div>
-                <div>
-                   {formatRelative(new Date(post.createdAt), new Date(), { locale })}
-                </div>
-                <LikeButton myId={myId} likesInfo={post.likes} clickFunction={(e) => {
-                    e.stopPropagation();
-                    ///e.currentTarget.disabled = true;
-                    changeLike({id: post.id, action: ((post.likes && post.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
-                    ///e.currentTarget.disabled = false;
-                    })
-                }} />
-                {
-                  typeof modalFunc === "function" &&  <ShowOptions myId={myId} id={post.creatorid} textStuff={{
-                    textId: post.id,
-                    type: "POST",
-                    editFunc: modalFunc,
-                }} />
-                }
+                <StyledPostImage onClick={handleUserClick} src={post.creator.customIcon?.url || post.creator.icon.source} alt="" />
             </div>
-        </div>
+            <StyledMainStuff>
+                <StyledTopContainer>
+                    <StyledFlex>
+                        <StyledUserBlue onClick={handleUserClick}>
+                            {post.creator.username}
+                        </StyledUserBlue>
+                        <StyledEdited>
+                            {formatRelative(new Date(post.createdAt), new Date(), { locale })}
+                        </StyledEdited>
+                    </StyledFlex>
+                    <StyledTopRight>
+                        <StyledEdited>
+                            {post.edited ? "Edited" : ""}
+                        </StyledEdited>
+                        {
+                        typeof modalFunc === "function" &&  <ShowOptions myId={myId} id={post.creatorid} textStuff={{
+                            textId: post.id,
+                            type: "POST",
+                            editFunc: modalFunc,
+                        }} />
+                        }
+                    </StyledTopRight>
+                </StyledTopContainer>
+                <div>
+                    <StyledContent>
+                        {post.content}
+                    </StyledContent>
+                    {post.image ? <StyledMessageImage className="messageImage" src={post.image.url} alt="" /> : <></>}
+                </div>
+                <BottomContainer>
+                    <StyledFlex>
+                        <StyledCounts>
+                            {post.ownCommentsCount}
+                        </StyledCounts>
+                        <MessageSquare/>
+                    </StyledFlex>
+                    <BottomRightContainer>
+                        <StyledCounts>
+                            {post.likesCount}
+                        </StyledCounts>
+                        <LikeButton myId={myId} likesInfo={post.likes} clickFunction={(e) => {
+                            e.stopPropagation();
+                            ///e.currentTarget.disabled = true;
+                            changeLike({id: post.id, action: ((post.likes && post.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
+                            ///e.currentTarget.disabled = false;
+                            })
+                        }} />
+                    </BottomRightContainer>
+                </BottomContainer>
+            </StyledMainStuff>
+        </StyledContainer>
     )
 };
+
+const StyledContainer = styled.div`
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 700px;
+    padding: 5px;
+    font-size: 1.1rem;
+    background-color: rgb(255, 255, 255);
+    border: 1px solid black;
+`;
+
+const StyledTopRight = styled(StyledFlex)`
+    gap: 3px;
+`;
+
+const StyledTopContainer = styled(StyledFlex)`
+    gap: 10px;
+    justify-content: space-between;
+    align-items:center;
+`;
+
+const StyledMainStuff = styled(StyledDivFlex)`
+    flex-grow: 1;
+    gap: 30px;
+`;
+
+const StyledEdited = styled.div`
+    font-size: 0.8rem;
+    align-self: center;
+`;
+
+const BottomContainer = styled(StyledFlex)`
+    justify-content: space-between;
+    gap: 0px;
+`;
+
+const StyledCounts = styled.div`
+ font-size: 0.9rem;
+`;
+
+const BottomRightContainer = styled(StyledFlex)`
+    align-items: center;
+`;
+
+const StyledPostImage = styled(StyledImage)`
+    width: 60px !important;
+    height: 60px !important;
+`;
+
+

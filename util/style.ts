@@ -164,6 +164,45 @@ const StyledLoadCSS = css`
     margin: 15px;
 `;
 
+const StyledBackCSS = css`
+    align-self: start;
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+    &:hover {
+       background-color: rgb(121, 192, 255);
+    };
+`;
+
+const StyledUserBlue = styled(StyledUsername)`
+    color: rgb(32, 136, 255);
+`;
+
+const StyledFlex = styled.div`
+    display: flex;
+    gap: 5px;
+`;
+
+const StyledContent = styled.div`
+    white-space: pre-line;
+`;
+
+const StyledCancel = styled.button`
+    background-color: rgb(166, 237, 255);
+    border-radius: 20px;
+    &:hover {
+        background-color: rgb(128, 229, 255);
+    };
+`;
+
+const StyledConfirm = styled.button`
+    background-color: rgb(193, 222, 255);
+    border-radius: 20px;
+    &:hover {
+        background-color: rgb(155, 202, 255);
+    };
+`;
+
 export {
     mainBackgroundColor,
     navMenuValue,
@@ -191,4 +230,10 @@ export {
     StyledUsername,
     StyledMessageImage,
     StyledLoadCSS,
+    StyledBackCSS,
+    StyledUserBlue,
+    StyledFlex,
+    StyledContent,
+    StyledCancel,
+    StyledConfirm,
 };

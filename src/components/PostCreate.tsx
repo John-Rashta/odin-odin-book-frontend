@@ -105,8 +105,8 @@ const StyledFileDiv = styled.div`
 
 const StyledFileError = styled.div`
   position: absolute;
-  bottom: 120%;
-  right: -65px;
+  bottom: -50%;
+  right:  -150px;
   width: 150px;
   text-align: center;
   color: rgb(206, 0, 0);
