@@ -4,10 +4,10 @@ import { FormType, SimpleFunctionType } from "../../util/types";
 import { Image } from "lucide-react";
 import ExpandableTextarea from "./ExpandableTextarea";
 import styled from "styled-components";
-import { StyledCancel, StyledConfirm } from "../../util/style";
+import { StyledCancel, StyledConfirm, StyledFileDiv, StyledFileLabel, StyledFlex, StyledInputFile } from "../../util/style";
 
 export default function CommentCreate({postid, commentid, changeCreate, className, placeName} : {postid: string, commentid?: string, changeCreate?: SimpleFunctionType, className?:string, placeName?:string}) {
-    const [ createComment ] = useCreateCommentMutation();
+    const [ createComment, {isLoading} ] = useCreateCommentMutation();
     const [ textValue, setTextValue ] = useState("");
     const [ invalidSize, setInvalidSize ] = useState(false);
 
@@ -70,24 +70,27 @@ export default function CommentCreate({postid, commentid, changeCreate, classNam
                 <StyledBottom>
                   <StyledFileDiv>
                       {invalidSize && (
-                      <StyledFileError>File Too Big!(Max 5MB)</StyledFileError>
+                      <StyledFileError>File Too Big! (Max 5MB)</StyledFileError>
                       )}
-                      <StyledLabel htmlFor="fileInput">
+                      <StyledFileLabel htmlFor="fileInput">
                         <Image />
-                      </StyledLabel>
+                      </StyledFileLabel>
                       <StyledInputFile type="file" id="fileInput" name="fileInput" />
                   </StyledFileDiv>
-                  <StyledButtonsContainer>
+                  <StyledFlex>
                       {
                         typeof changeCreate === "function" ? <StyledCancel type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          changeCreate();
+                          if (!isLoading) {
+                            changeCreate();
+                            return;
+                          }
                         }}
                         >Cancel</StyledCancel> : <></>
                     }
                     <StyledConfirm type="submit">Send</StyledConfirm>
-                  </StyledButtonsContainer>
+                  </StyledFlex>
                 </StyledBottom>
             </form>
         </FormContainer>
@@ -107,27 +110,6 @@ const StyledFileError = styled.div`
   color: rgb(206, 0, 0);
 `;
 
-const StyledInputFile = styled.input`
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-`;
-
-const StyledLabel = styled.label`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-`;
-
-
-const StyledFileDiv = styled.div`
-  position: relative;
-  display: flex;
-`;
-
 const FormContainer = styled.div`
   width: 70%;
 `;
@@ -136,9 +118,4 @@ const StyledBottom = styled.div`
   display: flex;
   justify-content: space-between;
   width: min(100%, 700px);
-`;
-
-const StyledButtonsContainer = styled.div`
-  display: flex;
-  gap: 5px;
 `;

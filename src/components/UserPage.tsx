@@ -68,10 +68,10 @@ export default function UserPage() {
                     No User Found!
                 </StyledErrorMessage>
             }
+            </StyledDefault>
             {
                 (showModal && isUUID(editId)) && <PostEdit postid={editId} closeModal={() => setShowModal(false)} />
             }
-            </StyledDefault>
         </StyledMain>
     )
 };

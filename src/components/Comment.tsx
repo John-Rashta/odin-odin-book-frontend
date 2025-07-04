@@ -18,9 +18,9 @@ import { ButtonClickType } from "../../util/types";
 import ClickWrapper from "./ClickWrapper";
 import styled from "styled-components";
 import { MessageSquare } from "lucide-react";
-import { StyledContent, StyledFlex, StyledImage, StyledLoadCSS, StyledMessageImage, StyledUserBlue } from "../../util/style";
+import { StyledContent, StyledCounts, StyledEdited, StyledFlex, StyledImage, StyledLoadCSS, StyledMessageImage, StyledUserBlue } from "../../util/style";
 
-export default function Comment({comment} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}) {
+export default function Comment({comment, depth = 0} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike, depth?: number}) {
     const myId = useSelector(selectMyId);
     const [showComments, setShowComments] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
@@ -55,14 +55,14 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                                     <StyledUserBlue className="userOption" data-userid={comment.senderid}>
                                         {comment.sender.username}
                                     </StyledUserBlue>
-                                    <StyledEdited>
+                                    <StyledEditedDiv>
                                         {formatRelative(new Date(comment.sentAt), new Date(), { locale })}
-                                    </StyledEdited>
+                                    </StyledEditedDiv>
                                 </StyledFlex>
                                 <StyledFlex>
-                                    <StyledEdited>
+                                    <StyledEditedDiv>
                                         {comment.edited ? "Edited" : ""}
-                                    </StyledEdited>
+                                    </StyledEditedDiv>
                                     <ShowOptions myId={myId} id={comment.senderid} textStuff={{
                                     textId: comment.id,
                                     type: "COMMENT",
@@ -108,13 +108,13 @@ export default function Comment({comment} : {comment: FullCommentInfo & Likes & 
                             {
                                 showReply && <CommentCreate commentid={comment.id} postid={comment.postid} changeCreate={() =>  setShowReply(false)} />
                             }
-                            <CommentsDisplayButtons count={comment.ownCommentsCount} showing={showComments} setShow={setShowComments}/>
+                            <CommentsDisplayButtons depth={depth} id={comment.id} count={comment.ownCommentsCount} showing={showComments} setShow={setShowComments}/>
                             {
                                 (showComments && commentsData && commentsData.length > 0 ) && <div>
                                     <ClickWrapper>
                                         {
                                             commentsData.map((ele) => {
-                                                return <Comment key={ele.id} comment={ele} />
+                                                return <Comment depth={depth + 1} key={ele.id} comment={ele} />
                                             })
                                         }
                                     </ClickWrapper>
@@ -169,18 +169,12 @@ const StyledBottom = styled(StyledFlex)`
     gap: 10px;
 `;
 
-const StyledLikes = styled.div`
+const StyledLikes = styled(StyledCounts)`
     width: 8px;
-    font-size: 0.9rem;
 `;
 
-const StyledEdited = styled.div`
-    font-size: 0.8rem;
+const StyledEditedDiv = styled(StyledEdited)`
     align-self: center;
-`;
-
-const StyledCounts = styled.div`
-    font-size: 0.9rem;
 `;
 
 const StyledReply = styled.button`

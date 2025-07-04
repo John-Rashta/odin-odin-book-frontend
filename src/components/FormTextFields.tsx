@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ReturnMessage, UserInfo } from "../../util/interfaces";
 import { FormType, MutationTriggerType } from "../../util/types";
+import ExpandableTextarea from "./ExpandableTextarea";
 
 type FieldNameOptions = "username" | "aboutMe";
 
@@ -19,6 +20,7 @@ export default function FormTextFields({
 }) {
   const [showEdit, setShowEdit] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [textValue, setTextValue] = useState(myData[fieldname] || "");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = function handleClickingEditSubmit(event: FormType) {
@@ -56,11 +58,11 @@ export default function FormTextFields({
           {showError && <div>{errorMessage}</div>}
           <label htmlFor={fieldname}></label>
           {area ? (
-            <textarea
-              name={fieldname}
-              id={fieldname}
-              defaultValue={myData[fieldname] || ""}
-            ></textarea>
+            <ExpandableTextarea
+              names={fieldname}
+              textValue={textValue}
+              setTextValue={setTextValue}
+            ></ExpandableTextarea>
           ) : (
             <input
               type="text"

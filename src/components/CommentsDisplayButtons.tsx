@@ -1,7 +1,9 @@
 import styled from "styled-components";
 import { SimpleBooleanFunction } from "../../util/types";
+import { useNavigate } from "react-router-dom";
 
-export default function CommentsDisplayButtons({count, showing, setShow} : {count: number, showing: Boolean, setShow: SimpleBooleanFunction}) {
+export default function CommentsDisplayButtons({count, showing, setShow, depth, id} : {count: number, showing: Boolean, setShow: SimpleBooleanFunction, depth: number, id: string}) {
+    const navigate = useNavigate();
     return (
         <>
         {
@@ -12,7 +14,12 @@ export default function CommentsDisplayButtons({count, showing, setShow} : {coun
                 Hide Comments
             </StyledButtons> : <StyledButtons className="displayOption" onClick={(e) =>  {
                 e.stopPropagation();
-                setShow(true);
+                if (depth >= 3) {
+                    navigate(`/comment?id=${id}`);
+                    return;
+                } else {
+                    setShow(true);
+                }
                 }}>
                 Show Comments
             </StyledButtons>)

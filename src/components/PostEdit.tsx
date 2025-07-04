@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { FormType, SimpleFunctionType } from "../../util/types";
 import { useGetPostQuery, useUpdatePostMutation } from "../features/book-api/book-api-slice";
+import styled from "styled-components";
+import ExpandableTextarea from "./ExpandableTextarea";
+import { StyledCancel, StyledConfirm } from "../../util/style";
 
 export default function PostEdit({postid, closeModal} : {postid: string, closeModal: SimpleFunctionType}) {
-  const [updatePost] = useUpdatePostMutation();
+  const [updatePost, {isLoading}] = useUpdatePostMutation();
   const [textValue, setTextValue] = useState("");
   const { postData } = useGetPostQuery(
     {id: postid},
@@ -15,6 +18,19 @@ export default function PostEdit({postid, closeModal} : {postid: string, closeMo
     },
   );
   const cancelRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const  addKeyCheck = function addEscToCancel(e: KeyboardEvent) {
+      if (e.key === "Escape" && !isLoading) {
+        closeModal();
+        return;
+      };
+    };
+    window.addEventListener("keydown", addKeyCheck);
+    return () => {
+      window.removeEventListener("keydown", addKeyCheck);
+    }
+  }, []);
 
   const handleSubmit = function handleSubmitingEdit(event: FormType) {
     event.preventDefault();
@@ -64,37 +80,78 @@ export default function PostEdit({postid, closeModal} : {postid: string, closeMo
   return (
     <>
       {postData && (
-        <div className="modalBackground" style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          "zIndex": 5,
-        }}>
-          <div className="modalContainer" style={{
-            position: "absolute",
-            "zIndex": 6,
-          }}>
-            <form
+        <StyledBackground className="modalBackground"
+        onClick={(e) => {
+          const target = e.target as HTMLDivElement;
+          if (!target.closest(".modalContainer") && !isLoading) {
+            closeModal();
+            return;
+          };
+        }}
+        >
+          <StyledDiv className="modalContainer">
+            <StyledForm
               onSubmit={handleSubmit}
               onClick={(e) => e.stopPropagation()}
             >
-              <input
-                type="text"
-                name="editInput"
-                id="editInput"
-                onChange={(e) => setTextValue(e.target.value)}
-                value={textValue}
+              <StyledTextarea
+                names="editInput"
+                textValue={textValue}
+                setTextValue={setTextValue}
               />
-              <button ref={cancelRef} onClick={() => closeModal()} type="button">
-                Cancel
-              </button>
-              <button type="submit">Confirm</button>
-            </form>
-          </div>
-        </div>
+              <StyledButtonsContainer>
+                <StyledCancel ref={cancelRef} onClick={() => {
+                  if(!isLoading) {
+                    closeModal();
+                    return;
+                  };
+                  }} type="button">
+                  Cancel
+                </StyledCancel>
+                <StyledConfirm type="submit">Confirm</StyledConfirm>
+              </StyledButtonsContainer>
+            </StyledForm>
+          </StyledDiv>
+        </StyledBackground>
       )}
     </>
   );
 };
+
+const StyledBackground = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 50;
+  background-color: rgba(184, 233, 255, 0.74);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const StyledTextarea = styled(ExpandableTextarea)`
+  flex-grow: 1;
+  min-height: 60px;
+`;
+
+const StyledDiv = styled.div`
+  width: min(100%, 500px);
+  padding: 15px;
+  background-color: rgb(232, 255, 253);
+  border: solid 1px black;
+`;
+
+const StyledButtonsContainer = styled.div`
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 3px;
+`;
+
+const StyledForm = styled.form`
+  display: flex;
+  flex-direction: column;
+`;

@@ -12,7 +12,7 @@ import TextOptions from "./TextOptions";
 import ShowOptions from "./ShowOptions";
 import LikeButton from "./LikeButton";
 import styled from "styled-components";
-import { StyledImage, StyledMessageImage, StyledUserBlue, StyledContent } from "../../util/style";
+import { StyledImage, StyledMessageImage, StyledUserBlue, StyledContent, StyledFlex, StyledCounts, StyledEdited } from "../../util/style";
 
 export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & YourLike & OwnCommentsCount, modalFunc?: ModalStartFunction}) {
     const myId = useSelector(selectMyId);
@@ -31,14 +31,14 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
             </div>
             <MainContainer>
                 <TopContainer>
-                    <TopLeftContainer>
+                    <StyledFlex>
                         <StyledUserBlue className="userOption" data-userid={info.creator.id}>
                         {info.creator.username}
                         </StyledUserBlue>   
-                        <TimeContainer>
+                        <StyledEdited>
                             {formatRelative(new Date(info.createdAt), new Date(), { locale })}
-                        </TimeContainer>
-                    </TopLeftContainer>
+                        </StyledEdited>
+                    </StyledFlex>
                     <TopRightContainer>
                         <StyledEdited>
                             {info.edited? "Edited" : ""}
@@ -59,12 +59,12 @@ export default function Post({info, modalFunc} : {info: FullPostInfo & Likes & Y
                     {info.image ? <StyledMessageImage className="messageImage" src={info.image.url} alt="" /> : <></>}
                 </div>
                 <BottomContainer>
-                    <StyledBottomLeft>
+                    <StyledFlex>
                         <StyledCounts>
                             {info.ownCommentsCount}
                         </StyledCounts>
                         <MessageSquare />
-                    </StyledBottomLeft>
+                    </StyledFlex>
                     <BottomRightContainer>
                         <StyledCounts>
                             {info.likesCount}
@@ -97,11 +97,6 @@ const StyledContainer = styled.div`
     }
 `;
 
-const TopLeftContainer = styled.div`
-    display: flex;
-    gap: 5px;
-`;
-
 const TopRightContainer = styled.div`
     display: flex;
     gap: 3px;
@@ -118,10 +113,8 @@ const BottomContainer = styled.div`
     justify-content: space-between;
 `;
 
-const BottomRightContainer = styled.div`
-    display: flex;
+const BottomRightContainer = styled(StyledFlex)`
     align-items: center;
-    gap: 5px;
 `;
 
 const MainContainer = styled.div`
@@ -129,21 +122,4 @@ const MainContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 10px;
-`;
-
-const TimeContainer = styled.div`
-    font-size: 0.8rem;
-`;
-
-const StyledEdited = styled.div`
-    font-size: 0.8rem;
-`;
-
-const StyledCounts = styled.div`
- font-size: 0.9rem;
-`;
-
-const StyledBottomLeft = styled.div`
-    display: flex;
-    gap: 5px;
 `;

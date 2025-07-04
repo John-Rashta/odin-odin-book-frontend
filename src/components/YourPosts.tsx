@@ -7,6 +7,8 @@ import { useState } from "react";
 import { isUUID } from "validator";
 import ClickWrapper from "./ClickWrapper";
 import LoadMore from "./LoadMore";
+import { StyledDefaultContainer, StyledErrorMessage, StyledLoadCSS, StyledMain, StyledMainContainer } from "../../util/style";
+import styled from "styled-components";
 
 export default function YourPosts() {
     const myId = useSelector(selectMyId);
@@ -25,28 +27,42 @@ export default function YourPosts() {
     };
 
     return (
-        <main>
+        <StyledMain>
+            <StyledDefaultContainer>
             {
-                isLoading ? <div>
+                isLoading ? <StyledErrorMessage>
                     Loading Your Posts...
-                </div> : error ? <div>
+                </StyledErrorMessage> : error ? <StyledErrorMessage>
                     Failed Loading Posts!
-                </div> : (postsData && postsData.length > 0 ) ? <div>
-                    <ClickWrapper>
+                </StyledErrorMessage> : (postsData && postsData.length > 0 ) ? <StyledPostsContainer>
+                    <StyledWrapper>
                         {
                             postsData.map((ele) => {
                                 return <Post key={ele.id} info={ele} modalFunc={editFunction} />
                             })
                         }
-                    </ClickWrapper>
-                    <LoadMore isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
-                </div> : <div>
+                    </StyledWrapper>
+                    <StyledLoad isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
+                </StyledPostsContainer> : <StyledErrorMessage>
                     No Posts Yet!
-                </div>
+                </StyledErrorMessage>
             }
+            </StyledDefaultContainer>
             {
                 (showModal && isUUID(editId)) && <PostEdit postid={editId} closeModal={() => setShowModal(false)} />
             }
-        </main>
+        </StyledMain>
     )
 };
+
+const StyledLoad = styled(LoadMore)`
+    ${StyledLoadCSS}
+`;
+
+const StyledWrapper = styled(ClickWrapper)`
+    width: 100%;
+`;
+
+const StyledPostsContainer = styled(StyledMainContainer)`
+    width: 100%;
+`;

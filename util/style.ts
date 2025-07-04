@@ -203,6 +203,35 @@ const StyledConfirm = styled.button`
     };
 `;
 
+const StyledEdited = styled.div`
+    font-size: 0.8rem;
+`;
+
+const StyledCounts = styled.div`
+ font-size: 0.9rem;
+`;
+
+const StyledInputFile = styled.input`
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+`;
+
+const StyledFileLabel = styled.label`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+`;
+
+
+const StyledFileDiv = styled.div`
+  position: relative;
+  display: flex;
+`;
+
 export {
     mainBackgroundColor,
     navMenuValue,
@@ -236,4 +265,9 @@ export {
     StyledContent,
     StyledCancel,
     StyledConfirm,
+    StyledCounts,
+    StyledEdited,
+    StyledFileDiv,
+    StyledFileLabel,
+    StyledInputFile,
 };

@@ -46,10 +46,10 @@ export default function Feed() {
                     No Feed Yet!
                 </StyledErrorMessage>
             }
-             {
+            </StyledDefaultContainer>
+            {
                 (showModal && isUUID(editId)) && <PostEdit postid={editId} closeModal={() => setShowModal(false)} />
             }
-            </StyledDefaultContainer>
         </StyledMain>
     )
 };

@@ -11,7 +11,7 @@ import ShowOptions from "./ShowOptions";
 import LikeButton from "./LikeButton";
 import ClickWrapper from "./ClickWrapper";
 import { useNavigate } from "react-router-dom";
-import { StyledDivFlex, StyledImage, StyledMessageImage, StyledUserBlue, StyledFlex, StyledContent } from "../../util/style";
+import { StyledDivFlex, StyledImage, StyledMessageImage, StyledUserBlue, StyledFlex, StyledContent, StyledEdited, StyledCounts } from "../../util/style";
 import { MessageSquare } from "lucide-react";
 import styled from "styled-components";
 
@@ -42,14 +42,14 @@ export default function PostProfile({post, modalFunc} : {post: FullPostInfo & Li
                         <StyledUserBlue onClick={handleUserClick}>
                             {post.creator.username}
                         </StyledUserBlue>
-                        <StyledEdited>
+                        <StyledEditedDiv>
                             {formatRelative(new Date(post.createdAt), new Date(), { locale })}
-                        </StyledEdited>
+                        </StyledEditedDiv>
                     </StyledFlex>
                     <StyledTopRight>
-                        <StyledEdited>
+                        <StyledEditedDiv>
                             {post.edited ? "Edited" : ""}
-                        </StyledEdited>
+                        </StyledEditedDiv>
                         {
                         typeof modalFunc === "function" &&  <ShowOptions myId={myId} id={post.creatorid} textStuff={{
                             textId: post.id,
@@ -116,18 +116,13 @@ const StyledMainStuff = styled(StyledDivFlex)`
     gap: 30px;
 `;
 
-const StyledEdited = styled.div`
-    font-size: 0.8rem;
+const StyledEditedDiv = styled(StyledEdited)`
     align-self: center;
 `;
 
 const BottomContainer = styled(StyledFlex)`
     justify-content: space-between;
     gap: 0px;
-`;
-
-const StyledCounts = styled.div`
- font-size: 0.9rem;
 `;
 
 const BottomRightContainer = styled(StyledFlex)`

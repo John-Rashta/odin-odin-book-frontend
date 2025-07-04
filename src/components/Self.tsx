@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { ButtonClickType, ClickType, FormType } from "../../util/types";
 import { format } from "date-fns";
 import FormTextFields from "./FormTextFields";
+import { StyledDefaultContainer, StyledErrorMessage, StyledFileDiv, StyledFileLabel, StyledFlex, StyledInputFile, StyledMain } from "../../util/style";
+import styled from "styled-components";
 
 export default function Self() {
     const { data, error, isLoading } = useGetSelfQuery();
@@ -80,51 +82,54 @@ export default function Self() {
   };
   
   return (
-    <main>
+    <StyledMain>
+      <StyledDefaultContainer>
       {isLoading ? (
-        <div>Loading...</div>
+        <StyledErrorMessage>Loading...</StyledErrorMessage>
       ) : error ? (
-        <div>Error Loading!</div>
+        <StyledErrorMessage>Error Loading!</StyledErrorMessage>
       ) : data && data.user ? (
         <>
-          <div>
-            <img
+          <TopContainer>
+            <ProfileImage
+              className="profileImage"
               src={data.user.customIcon?.url || data.user.icon.source}
               alt=""
             />
-            <div>
+            <TopRight>
               <form
                 onSubmit={handleSubmitImage}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div>
-                  <div>
-                    <label htmlFor="imageInput">
-                      Choose image for icon(max 5MB)
-                    </label>
-                    <input
+                <StyledFormDiv>
+                  <StyledFileDiv>
+                    <StyledLabelStuff htmlFor="imageInput">
+                      Choose image for icon (max 5MB)
+                    </StyledLabelStuff>
+                    <StyledInputFile
                       type="file"
                       id="imageInput"
                       name="imageInput"
                       accept=".png,.webp,.jpeg,.jpg"
                     />
-                  </div>
-                  <button type="submit">Submit</button>
+                  </StyledFileDiv>
+                  <StyledSubmit type="submit">Submit</StyledSubmit>
                   <div>
                     {failedUpload && <div>Failed to upload.</div>}
                     {invalidSize && <div>Size Over Limit!</div>}
                   </div>
-                </div>
+                </StyledFormDiv>
               </form>
-              <div onClick={handleClickIconOption}>
-                <button onClick={() => setIconOptions(!iconOptions)}>
+              <IconContainer onClick={handleClickIconOption}>
+                <IconButton onClick={() => setIconOptions(!iconOptions)}>
                   Icons
-                </button>
+                </IconButton>
                 {iconOptions && iconData && (
-                  <div>
+                  
+                    <IconDiv>
                     {iconData.icons.map((icon) => {
                       return (
-                        <img
+                        <IconImg
                           key={icon.id}
                           src={icon.source}
                           alt=""
@@ -133,11 +138,11 @@ export default function Self() {
                         />
                       );
                     })}
-                  </div>
+                    </IconDiv>
                 )}
-              </div>
-            </div>
-          </div>
+              </IconContainer>
+            </TopRight>
+          </TopContainer>
           <div>
             <div>Username:</div>
             <FormTextFields
@@ -162,8 +167,83 @@ export default function Self() {
           <div>User ID: {data.user.id}</div>
         </>
       ) : (
-        <div>Something went wrong...</div>
+        <StyledErrorMessage>Something went wrong...</StyledErrorMessage>
       )}
-    </main>
+      </StyledDefaultContainer>
+    </StyledMain>
   );
 };
+
+const ProfileImage = styled.img`
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+`;
+
+const TopContainer = styled(StyledFlex)`
+
+`;
+
+const TopRight = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+`;
+
+const IconContainer = styled.div`
+  position: relative;
+`;
+
+const IconDiv = styled.div`
+  position: absolute;
+  z-index: 5;
+  right: 0;
+  width: 170px;
+  padding: 5px;
+  border: solid 1px black;
+  background-color: rgb(212, 220, 255);
+`;
+
+const IconImg = styled.img`
+ &:hover {
+  opacity: 0.8;
+ }
+`;
+
+const IconButton = styled.button`
+  padding: 5px 10px;
+  background-color: rgb(223, 240, 255);
+  border-radius: 10px;
+  &:hover {
+    background-color: rgb(162, 187, 255);
+  };
+`;
+
+const StyledFormDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+`;
+
+const StyledSubmit = styled.button`
+  background-color: rgb(202, 234, 255);
+  border: solid 1px black;
+  padding: 3px 10px;
+  &:hover {
+    background-color: rgb(156, 215, 255);
+  };
+`;
+
+const StyledLabelStuff = styled(StyledFileLabel)`
+  background-color: rgb(187, 250, 255);
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid black;
+  font-weight: bold;
+  &:hover {
+    background-color: rgb(122, 246, 255);
+  };
+`;

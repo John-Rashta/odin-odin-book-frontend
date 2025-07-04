@@ -12,7 +12,7 @@ import ShowOptions from "./ShowOptions";
 import { ButtonClickType, ClickType } from "../../util/types";
 import ClickWrapper from "./ClickWrapper";
 import { useNavigate } from "react-router-dom";
-import { StyledContent, StyledFlex, StyledImage, StyledMessageImage, StyledUserBlue } from "../../util/style";
+import { StyledContent, StyledCounts, StyledEdited, StyledFlex, StyledImage, StyledMessageImage, StyledUserBlue } from "../../util/style";
 import styled from "styled-components";
 import { MessageSquare } from "lucide-react";
 
@@ -48,14 +48,14 @@ export default function CommentProfile({comment} : {comment: FullCommentInfo & L
                             <StyledUserBlue onClick={handleUserClick}>
                                 {comment.sender.username}
                             </StyledUserBlue>
-                            <StyledEdited>
+                            <StyledEditedDiv>
                                 {formatRelative(new Date(comment.sentAt), new Date(), { locale })}
-                            </StyledEdited>
+                            </StyledEditedDiv>
                         </StyledFlex>
                         <StyledFlex>
-                            <StyledEdited>
+                            <StyledEditedDiv>
                                 {comment.edited ? "Edited" : ""}
-                            </StyledEdited>
+                            </StyledEditedDiv>
                             <ShowOptions myId={myId} id={comment.senderid} textStuff={{
                                 textId: comment.id,
                                 type: "COMMENT",
@@ -99,8 +99,7 @@ export default function CommentProfile({comment} : {comment: FullCommentInfo & L
     )
 };
 
-const StyledEdited = styled.div`
-    font-size: 0.8rem;
+const StyledEditedDiv = styled(StyledEdited)`
     align-self: center;
 `;
 
@@ -136,13 +135,8 @@ const StyledBottomLeft = styled(StyledFlex)`
     width: 37px;
 `;
 
-const StyledCounts = styled.div`
-    font-size: 0.9rem;
-`;
-
-const StyledLikes = styled.div`
+const StyledLikes = styled(StyledCounts)`
     width: 8px;
-    font-size: 0.9rem;
 `;
 
 const StyledBottom = styled(StyledFlex)`

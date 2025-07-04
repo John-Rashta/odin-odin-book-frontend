@@ -69,14 +69,14 @@ export default function PostPage() {
                                 No Comments Yet!
                         </StyledErrorMessage>
                     }
-                    {
-                        (showModal && isUUID(editId)) && <PostEdit postid={editId} closeModal={() => setShowModal(false)} />
-                    }
                 </> : <StyledErrorMessage>
                     No Post Found!
                 </StyledErrorMessage>
             }
             </StyledDefault>
+            {
+                (showModal && isUUID(editId)) && <PostEdit postid={editId} closeModal={() => setShowModal(false)} />
+            }
         </StyledMain>
     )
 };

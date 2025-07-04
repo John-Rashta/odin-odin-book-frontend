@@ -5,6 +5,7 @@ import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
 import FollowOptions from "./FollowOptions";
 import styled from "styled-components";
+import { StyledContent } from "../../util/style";
 
 export default function UserProfile({info} : {info: UserInfo & UserExtra }) {
     const myId = useSelector(selectMyId);
@@ -68,9 +69,8 @@ const StyledBottomContainer = styled.div`
     gap: 20px;
 `;
 
-const StyledAbout = styled.div`
+const StyledAbout = styled(StyledContent)`
     max-width: 70%;
-    white-space: pre-line;
 `;
 
 const StyledName = styled.div`

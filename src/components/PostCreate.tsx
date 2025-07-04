@@ -4,6 +4,7 @@ import { Image } from "lucide-react";
 import { FormType } from "../../util/types";
 import styled from "styled-components";
 import ExpandableTextarea from "./ExpandableTextarea";
+import { StyledFileDiv, StyledFileLabel, StyledInputFile } from "../../util/style";
 
 export default function PostCreate() {
     const [ createPost ] = useCreatePostMutation();
@@ -59,11 +60,11 @@ export default function PostCreate() {
                 <StyledBottom>
                   <StyledFileDiv>
                       {invalidSize && (
-                      <StyledFileError>File Too Big!(Max 5MB)</StyledFileError>
+                      <StyledFileError>File Too Big! (Max 5MB)</StyledFileError>
                       )}
-                      <StyledLabel htmlFor="fileInput">
+                      <StyledFileLabel htmlFor="fileInput">
                         <Image />
-                      </StyledLabel>
+                      </StyledFileLabel>
                       <StyledInputFile type="file" id="fileInput" name="fileInput" />
                   </StyledFileDiv>
                   <StyledButton type="submit">Send</StyledButton>
@@ -81,26 +82,6 @@ const StyledTextarea = styled(ExpandableTextarea)`
 
 const FormContainer = styled.div`
   width: 70%;
-`;
-
-const StyledInputFile = styled.input`
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-`;
-
-const StyledLabel = styled.label`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-`;
-
-const StyledFileDiv = styled.div`
-  position: relative;
-  display: flex;
 `;
 
 const StyledFileError = styled.div`
