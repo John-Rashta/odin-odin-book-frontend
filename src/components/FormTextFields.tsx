@@ -2,6 +2,8 @@ import { useState } from "react";
 import { ReturnMessage, UserInfo } from "../../util/interfaces";
 import { FormType, MutationTriggerType } from "../../util/types";
 import ExpandableTextarea from "./ExpandableTextarea";
+import { StyledContent } from "../../util/style";
+import styled from "styled-components";
 
 type FieldNameOptions = "username" | "aboutMe";
 
@@ -52,39 +54,106 @@ export default function FormTextFields({
   };
 
   return (
-    <div className={className}>
+    <StyledContainer className={className}>
       {(showEdit && (
-        <form onSubmit={handleSubmit}>
+        <StyledForm onSubmit={handleSubmit}>
           {showError && <div>{errorMessage}</div>}
-          <label htmlFor={fieldname}></label>
           {area ? (
-            <ExpandableTextarea
+            <StyledTextArea
               names={fieldname}
               textValue={textValue}
               setTextValue={setTextValue}
-            ></ExpandableTextarea>
+            ></StyledTextArea>
           ) : (
-            <input
+            <StyledInput
               type="text"
               name={fieldname}
               id={fieldname}
               defaultValue={myData[fieldname] || ""}
             />
           )}
-          <button type="submit">Confirm</button>
-          <button type="button" onClick={() => setShowEdit(false)}>
-            Cancel
-          </button>
-        </form>
+          <StyledButtonsContainer>
+            <StyledConfirm type="submit">Confirm</StyledConfirm>
+            <StyledCancel type="button" onClick={() => setShowEdit(false)}>
+              Cancel
+            </StyledCancel>
+          </StyledButtonsContainer>
+        </StyledForm>
       )) ||
         (!showEdit && (
           <>
-            <div className="textField">{myData[fieldname]}</div>{" "}
-            <button onClick={() => setShowEdit(true)}>
+            <StyledTextStuff $fieldName={fieldname} className="textField">{myData[fieldname]}</StyledTextStuff>{" "}
+            <StyledEdit onClick={() => setShowEdit(true)}>
               Edit
-            </button>
+            </StyledEdit>
           </>
         ))}
-    </div>
+    </StyledContainer>
   );
-}
+};
+
+const StyledTextStuff = styled(StyledContent)<{$fieldName?: string}>`
+  word-break: break-all;
+  overflow-wrap: break-word;
+  text-align: ${(props) =>
+    props.$fieldName === "username" ?
+    "center" : "unset"};
+`;
+
+const StyledTextArea = styled(ExpandableTextarea)`
+  width: 90%;
+`;
+
+const StyledInput = styled.input`
+  width: 80%;
+  padding: 3px;
+
+`;
+
+const StyledEdit = styled.button`
+  align-self: center;
+  background-color: rgb(205, 252, 255);
+  border: 1px solid black;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-weight: bold;
+  &:hover {
+    background-color: rgb(155, 248, 255);
+  };
+`;
+
+const StyledContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+`;
+
+const StyledForm = styled.form`
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+`;
+
+const StyledButtonsContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+`;
+
+const StyledButtons = styled.button`
+    padding: 3px 10px;
+    &:hover {
+      opacity: 0.7;
+    };
+`
+
+const StyledConfirm = styled(StyledButtons)`
+    background-color: rgb(73, 186, 252);
+`;
+
+const StyledCancel = styled(StyledButtons)`
+    background-color: rgb(255, 31, 31);
+`;

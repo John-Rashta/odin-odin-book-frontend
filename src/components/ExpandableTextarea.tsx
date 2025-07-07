@@ -32,4 +32,5 @@ const StyledTextarea = styled.textarea`
     line-height: 1;
     padding: 8px;
     font-size: 1rem;
+    font-family: Times, "Times New Roman", Georgia, serif;
 `;

@@ -43,7 +43,7 @@ export default function CommentPage() {
             <>
                 <StyledBack />
                 <CommentProfile comment={commentData} />
-                {isUUID(myId) && <StyledForm postid={commentData.postid} commentid={commentData.id} />}
+                {isUUID(myId) && <StyledForm postid={commentData.postid} commentid={commentData.id} placeName="Comment here..." />}
                 {
                     (commentsData && commentsData.length > 0) ? <StyledCommentsContainer>
                         <StyledWrapper>

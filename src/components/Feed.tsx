@@ -27,7 +27,7 @@ export default function Feed() {
     return (
         <StyledMain>
             <StyledDefaultContainer>
-            <PostCreate />
+            <PostCreate placeName="Share your thoughts..." />
             {
                 isLoading ? <StyledErrorMessage>
                     Loading Feed...

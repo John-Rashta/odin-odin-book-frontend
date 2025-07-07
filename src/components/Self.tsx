@@ -143,28 +143,28 @@ export default function Self() {
               </IconContainer>
             </TopRight>
           </TopContainer>
-          <div>
-            <div>Username:</div>
-            <FormTextFields
+          <MainTextContainers>
+            <StyledFakeLabels>Username:</StyledFakeLabels>
+            <StyledChangeFields
               fieldname="username"
               myData={data.user}
               updater={updateMe}
             />
-          </div>
-          <button onClick={handleChangePassword}>
-            Change Password
-          </button>
-          <div>
-            <div>About Me:</div>
-            <FormTextFields
+          </MainTextContainers>
+          <MainTextContainers>
+            <StyledFakeLabels>About Me:</StyledFakeLabels>
+            <StyledChangeFields
               fieldname="aboutMe"
               myData={data.user}
               updater={updateMe}
               area={true}
             />
-          </div>
-          <div>Joined: {format(data.user.joinedAt, "MM/dd/yyyy")}</div>
-          <div>User ID: {data.user.id}</div>
+          </MainTextContainers>
+           <StyledChange onClick={handleChangePassword}>
+            Change Password
+          </StyledChange>
+          <StyledTextBottom>Joined: {format(data.user.joinedAt, "MM/dd/yyyy")}</StyledTextBottom>
+          <StyledTextBottom>User ID: {data.user.id}</StyledTextBottom>
         </>
       ) : (
         <StyledErrorMessage>Something went wrong...</StyledErrorMessage>
@@ -246,4 +246,35 @@ const StyledLabelStuff = styled(StyledFileLabel)`
   &:hover {
     background-color: rgb(122, 246, 255);
   };
+`;
+
+const StyledChange = styled.button`
+  padding: 3px 10px;
+  background-color: rgb(227, 242, 255);
+  font-weight: bold;
+  &:hover {
+    background-color: rgb(199, 229, 255);
+  };
+`;
+
+const StyledTextBottom = styled.div`
+  font-size: 1rem;
+`;
+
+const StyledChangeFields = styled(FormTextFields)`
+  
+`;
+
+const MainTextContainers = styled.div`
+  width: 100%;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+`;
+
+const StyledFakeLabels = styled.div`
+  font-size: 1.1rem;
+
 `;

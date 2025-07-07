@@ -6,7 +6,7 @@ import styled from "styled-components";
 import ExpandableTextarea from "./ExpandableTextarea";
 import { StyledFileDiv, StyledFileLabel, StyledInputFile } from "../../util/style";
 
-export default function PostCreate() {
+export default function PostCreate({placeName} : {placeName?: string}) {
     const [ createPost ] = useCreatePostMutation();
     const [ textValue, setTextValue ] = useState("");
     const [ invalidSize, setInvalidSize ] = useState(false);
@@ -56,6 +56,7 @@ export default function PostCreate() {
                   textValue={textValue}
                   setTextValue={setTextValue}
                   names="textInput"
+                  {...(typeof placeName === "string" ? {placeName: placeName} : {})}
                 />
                 <StyledBottom>
                   <StyledFileDiv>
