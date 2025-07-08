@@ -2,14 +2,16 @@ import { useNavigate } from "react-router-dom";
 import { UserExtra, UserFollowType, UserInfo } from "../../util/interfaces";
 import { useDeleteRequestMutation, useMakeRequestMutation, useStopFollowMutation } from "../features/book-api/book-api-slice";
 import styled from "styled-components";
+import { SimpleFunctionType } from "../../util/types";
+import ClickOutsideWrapper from "./ClickOutsideWrapper";
 
-export default function UserOptions({user, styleStuff} : {user: UserFollowType & UserExtra | UserInfo & UserExtra, styleStuff?: React.CSSProperties }) {
+export default function UserOptions({user, styleStuff, closeFunc, divRef} : {user: UserFollowType & UserExtra | UserInfo & UserExtra, styleStuff?: React.CSSProperties, closeFunc: SimpleFunctionType, divRef: React.RefObject<HTMLDivElement> }) {
     const navigate = useNavigate();
     const [ stopFollowing ] = useStopFollowMutation();
     const [ deleteRequest ] = useDeleteRequestMutation();
     const [ makeRequest ] = useMakeRequestMutation();
     return (
-        <StyledUserOptions style={{...styleStuff}}>
+        <StyledUserOptions divRef={divRef} closeFunc={closeFunc} style={{...styleStuff}}>
             <StyledButtons onClick={() => {
                 navigate(`/user?id=${user.id}`);
             }}>
@@ -18,12 +20,10 @@ export default function UserOptions({user, styleStuff} : {user: UserFollowType &
             {
             (user.followers && user.followers.length > 0) ?
                 <StyledButtons onClick={(e) =>  {
-                    e.stopPropagation();
                     stopFollowing({id: user.id});
                 }}>Stop Following</StyledButtons>
                  : (user.receivedRequests && user.receivedRequests.length > 0) ? 
                 <StyledButtons onClick={(e) => {
-                    e.stopPropagation();
                     if (!user.receivedRequests) {
                         return;
                     }
@@ -31,7 +31,6 @@ export default function UserOptions({user, styleStuff} : {user: UserFollowType &
                     }}>Cancel Request</StyledButtons>
              :  
                     <StyledButtons onClick={(e) => {
-                        e.stopPropagation();
                         makeRequest({id: user.id, type: "FOLLOW"});
                         }}>Request Follow</StyledButtons>
                     
@@ -40,7 +39,7 @@ export default function UserOptions({user, styleStuff} : {user: UserFollowType &
     );
 };
 
-const StyledUserOptions = styled.div`
+const StyledUserOptions = styled(ClickOutsideWrapper)`
     position: absolute;
     max-width: 200px;
     width: 120px;

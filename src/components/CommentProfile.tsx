@@ -6,37 +6,29 @@ import { locale } from "../../util/helpers";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
 import { useChangeCommentLikeMutation } from "../features/book-api/book-api-slice";
-import TextOptions from "./TextOptions";
 import LikeButton from "./LikeButton";
 import ShowOptions from "./ShowOptions";
-import { ButtonClickType, ClickType } from "../../util/types";
-import ClickWrapper from "./ClickWrapper";
+import { ClickType } from "../../util/types";
 import { useNavigate } from "react-router-dom";
 import { StyledContent, StyledCounts, StyledEdited, StyledFlex, StyledImage, StyledMessageImage, StyledUserBlue } from "../../util/style";
 import styled from "styled-components";
 import { MessageSquare } from "lucide-react";
+import { clickClass } from "../../util/globalValues";
 
 export default function CommentProfile({comment} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}) {
-    const [showOptions, setShowOptions] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
     const myId = useSelector(selectMyId);
     const [ changeLike ] = useChangeCommentLikeMutation();
     const navigate = useNavigate();
 
-    const handleClick = function handleClickingButton(e: ButtonClickType) {
-         e.stopPropagation();
-        setShowOptions(!showOptions);
-    };
-
      const handleUserClick = function handleClickUser(e: ClickType) {
-        e.stopPropagation();
         navigate(`/user?id=${comment.senderid}`);
     };
 
     return (
         <StyledContainer>
         <div >
-            <StyledImage onClick={handleUserClick} src={comment.sender.customIcon?.url || comment.sender.icon.source} alt="" />
+            <StyledImage className={clickClass} onClick={handleUserClick} src={comment.sender.customIcon?.url || comment.sender.icon.source} alt="" />
         </div>
         {showEdit ? <StyledEdit comment={comment} changeEdit={() =>  {
             setShowEdit(false);
@@ -45,7 +37,7 @@ export default function CommentProfile({comment} : {comment: FullCommentInfo & L
                 <StyledMainStuff>
                     <StyledTop>
                         <StyledFlex>
-                            <StyledUserBlue onClick={handleUserClick}>
+                            <StyledUserBlue className={clickClass} onClick={handleUserClick}>
                                 {comment.sender.username}
                             </StyledUserBlue>
                             <StyledEditedDiv>
@@ -84,7 +76,6 @@ export default function CommentProfile({comment} : {comment: FullCommentInfo & L
                             {comment.likesCount > 0 ? comment.likesCount : ""}
                             </StyledLikes>
                             <LikeButton myId={myId} likesInfo={comment.likes} clickFunction={(e) => {
-                                e.stopPropagation();
                                 ///e.currentTarget.disabled = true;
                                 changeLike({id: comment.id, action: ((comment.likes && comment.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
                                     ///e.currentTarget.disabled = false;

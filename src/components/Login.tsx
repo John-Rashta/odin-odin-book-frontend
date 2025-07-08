@@ -9,6 +9,7 @@ import { setAuthState } from "../features/auth/auth-slice";
 import { socket } from "../../sockets/socket";
 import styled from "styled-components";
 import { StyledButton, StyledContainer, StyledForm, StyledInput, StyledLabel, StyledWrongInput } from "../../util/style";
+import { ButtonClickType } from "../../util/types";
 
 export default function Login() {
   const [loginUser] = useLoginUserMutation();
@@ -39,9 +40,17 @@ export default function Login() {
       });
   };
 
+  const handleGuest = function handleEnteringAsGuest(event: ButtonClickType) {
+
+    socket.connect();
+    dispatch(setMyId("guest"));
+    dispatch(setAuthState(true));
+    navigate("/");
+  };
+
   return (
     <main>
-      <StyledContainer>
+      <StyledCentral>
         <StyledForm onSubmit={handleForm}>
           {wrongInputs ? (
             <StyledWrongInput>Username or Password wrong!</StyledWrongInput>
@@ -52,7 +61,21 @@ export default function Login() {
           <StyledInput type="password" name="password" id="password" required />
           <StyledButton type="submit">Login</StyledButton>
         </StyledForm>
-      </StyledContainer>
+        <StyledGuestButton onClick={handleGuest}>Enter As Guest</StyledGuestButton>
+      </StyledCentral>
     </main>
   );
 };
+
+const StyledGuestButton = styled.button`
+  padding: 5px 10px;
+  background-color: rgb(152, 205, 255);
+  &:hover {
+    background-color: rgb(97, 179, 255);
+  };
+`;
+
+const StyledCentral = styled(StyledContainer)`
+  flex-direction: column;
+  gap: 10px;
+`;

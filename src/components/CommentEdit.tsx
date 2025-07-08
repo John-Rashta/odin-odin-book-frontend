@@ -5,6 +5,7 @@ import { useUpdateCommentMutation } from "../features/book-api/book-api-slice";
 import ExpandableTextarea from "./ExpandableTextarea";
 import styled from "styled-components";
 import { StyledCancel, StyledConfirm } from "../../util/style";
+import { clickClass } from "../../util/globalValues";
 
 export default function CommentEdit({comment, changeEdit, className} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike, changeEdit: SimpleFunctionType, className?: string}) {
     const [ updateComment ] = useUpdateCommentMutation();
@@ -13,7 +14,6 @@ export default function CommentEdit({comment, changeEdit, className} : {comment:
 
     const handleSubmit = function handleSubmitingEdit(event: FormType) {
     event.preventDefault();
-    event.stopPropagation();
     if (buttonRef.current) {
         buttonRef.current.disabled = true;
     };
@@ -43,10 +43,9 @@ export default function CommentEdit({comment, changeEdit, className} : {comment:
 
     return (
             <form
-                className={className}
+                className={`${className || ""} ${clickClass}`}
                 style={{ position: "relative" }}
                 onSubmit={handleSubmit}
-                onClick={(e) => e.stopPropagation()}
                 >
                 <StyledText
                     names="textInput"
@@ -55,7 +54,6 @@ export default function CommentEdit({comment, changeEdit, className} : {comment:
                 />
                 <StyledButtonsContainer>
                     <StyledCancel ref={buttonRef} onClick={(e) => {
-                        e.stopPropagation()
                         changeEdit()}} type="button">
                         Cancel
                     </StyledCancel>

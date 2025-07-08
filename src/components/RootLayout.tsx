@@ -8,10 +8,12 @@ import Header from "./Header";
 import DefaultHeader from "./DefaultHeader";
 import Footer from "./Footer";
 import HomePage from "./HomePage";
-import { defaultPaths } from "../../util/globalValues";
+import { defaultPaths, guestPaths } from "../../util/globalValues";
 import { socket } from "../../sockets/socket";
 import styled, { createGlobalStyle } from "styled-components";
 import { mainBackgroundColor } from "../../util/style";
+import { isUUID } from "validator";
+import GuestHeader from "./GuestHeader";
 
 const GlobalStyle = createGlobalStyle`
     *,
@@ -73,10 +75,12 @@ export default function RootLayout() {
   return (
     <StyledDiv>
       <GlobalStyle />
-      {authState ? <Header /> : <DefaultHeader />}
+      {authState && isUUID(myId) ? <Header /> : authState && myId === "guest" ? <GuestHeader/>  : <DefaultHeader />}
       {!authState && !defaultPaths.includes(pathname) ? (
         <HomePage />
-      ) : authState && defaultPaths.includes(pathname) ? (
+      ) : authState && myId === "guest" && !guestPaths.includes(pathname) ?
+        <HomePage />
+      : (authState && isUUID(myId) && defaultPaths.includes(pathname)) ? (
         <HomePage />
       ) : (
         <Outlet />

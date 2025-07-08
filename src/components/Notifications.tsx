@@ -5,6 +5,7 @@ import ClickWrapper from "./ClickWrapper";
 import MiniNotifications from "./MiniNotifications";
 import { StyledDefaultContainer, StyledErrorMessage, StyledMain, StyledMainContainer, StylesReturn } from "../../util/style";
 import styled from "styled-components";
+import { clickClass } from "../../util/globalValues";
 
 export default function Notifications() {
     const myId = useSelector(selectMyId);
@@ -26,8 +27,7 @@ export default function Notifications() {
                     Failed Loading Notifications!
                 </StyledErrorMessage> : (notificationsData && notificationsData.length > 0) ? <StyledNotificationsContainer>
                     <div>
-                        <StyledClearButton onClick={(e) => {
-                            e.stopPropagation();
+                        <StyledClearButton className={clickClass} onClick={(e) => {
                             clearNotifications();
                         }}>Clear Notifications</StyledClearButton>
                     </div>

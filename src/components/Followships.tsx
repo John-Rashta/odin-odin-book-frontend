@@ -6,6 +6,7 @@ import ClickWrapper from "./ClickWrapper";
 import LoadMore from "./LoadMore";
 import { StyledDefaultContainer, StyledMain, StyledErrorMessage, StyledMainContainer, StyledClickButton } from "../../util/style";
 import styled from "styled-components";
+import { clickClass } from "../../util/globalValues";
 
 export default function Followships() {
     const [selectedType, setSelectedType] = useState("FOLLOWS");
@@ -25,7 +26,7 @@ export default function Followships() {
     return (
         <StyledMain>
             <StyledDefaultContainer>
-                <StyledButtonsContainer>
+                <StyledButtonsContainer className={clickClass}>
                     <StyledButtons
                         $trueType="FOLLOWS"
                         $currentType={selectedType}

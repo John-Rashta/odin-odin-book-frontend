@@ -4,6 +4,7 @@ import { FormType, MutationTriggerType } from "../../util/types";
 import ExpandableTextarea from "./ExpandableTextarea";
 import { StyledContent } from "../../util/style";
 import styled from "styled-components";
+import { clickClass } from "../../util/globalValues";
 
 type FieldNameOptions = "username" | "aboutMe";
 
@@ -27,7 +28,6 @@ export default function FormTextFields({
 
   const handleSubmit = function handleClickingEditSubmit(event: FormType) {
     event.preventDefault();
-    event.stopPropagation();
     const target = event.target as HTMLFormElement;
     const updatedValue = target[fieldname].value;
     const newForm = new FormData();
@@ -54,7 +54,7 @@ export default function FormTextFields({
   };
 
   return (
-    <StyledContainer className={className}>
+    <StyledContainer className={`${className || ""} ${clickClass}`}>
       {(showEdit && (
         <StyledForm onSubmit={handleSubmit}>
           {showError && <div>{errorMessage}</div>}
@@ -68,7 +68,6 @@ export default function FormTextFields({
             <StyledInput
               type="text"
               name={fieldname}
-              id={fieldname}
               defaultValue={myData[fieldname] || ""}
             />
           )}

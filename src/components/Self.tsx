@@ -22,7 +22,6 @@ export default function Self() {
 
   const handleSubmitImage = function handleSubmitingImage(event: FormType) {
     event.preventDefault();
-    event.stopPropagation();
     const target = event.target as HTMLFormElement;
     if (target.imageInput.files.length === 0) {
       return;
@@ -60,14 +59,12 @@ export default function Self() {
   const handleChangePassword = function handleClickingChangePassword(
     event: ButtonClickType,
   ) {
-    event.stopPropagation();
     navigate("/password");
   };
 
   const handleClickIconOption = function handleClickingIconOption(
     event: ClickType,
   ) {
-    event.stopPropagation();
     const target = event.target as HTMLDivElement;
     if (target.dataset.type === "ICONOPTION") {
       const possibleId = target.dataset.iconid;
@@ -99,7 +96,6 @@ export default function Self() {
             <TopRight>
               <form
                 onSubmit={handleSubmitImage}
-                onClick={(e) => e.stopPropagation()}
               >
                 <StyledFormDiv>
                   <StyledFileDiv>

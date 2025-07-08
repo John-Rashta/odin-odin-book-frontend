@@ -1,13 +1,19 @@
 import { Ellipsis } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { navMenuValue } from "../../util/style";
+import ClickOutsideWrapper from "./ClickOutsideWrapper";
 
 export default function NavMenu() {
     const [openOptions, setOpenOptions] = useState(false);
+    const divRef = useRef<HTMLDivElement>(null);
+    const handleClick = function handleClosingBox() {
+        setOpenOptions(false);
+    };
     return (
         <StyledDiv
+        ref={divRef}
         >
             <StyledButton onClick={(e) => {
                 setOpenOptions(!openOptions);
@@ -16,9 +22,9 @@ export default function NavMenu() {
             </StyledButton>
             {
                 openOptions && <StyledNav
-                    onClick={() => {
-                        setOpenOptions(false);
-                }}>
+                    closeFunc={handleClick}
+                    divRef={divRef}
+                    onClick={handleClick}>
                     <StyledNavLink to={"/requests"}>Requests</StyledNavLink>
                     <StyledNavLink to={"/followships"}>Followships</StyledNavLink>
                     <StyledNavLink to={"/users"}>Users</StyledNavLink>
@@ -37,7 +43,7 @@ const StyledDiv = styled.div`
   position: relative;
 `;
 
-const StyledNav = styled.nav`
+const StyledNav = styled(ClickOutsideWrapper)`
     position: absolute;
     right: 0;
     display: flex;

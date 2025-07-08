@@ -3,6 +3,7 @@ import { NotificationsInfo } from "../../util/interfaces";
 import { locale } from "../../util/helpers";
 import { useClearNotificationMutation } from "../features/book-api/book-api-slice";
 import styled from "styled-components";
+import { clickClass } from "../../util/globalValues";
 
 ///TODO LINKS
 export default function MiniNotifications({notification, className} : { notification: NotificationsInfo, className?: string}) {
@@ -30,8 +31,7 @@ export default function MiniNotifications({notification, className} : { notifica
                 <div>
                     {formatRelative(new Date(notification.createdAt), new Date(), { locale })}
                 </div>
-                <StyledButton onClick={(e) => {
-                    e.stopPropagation();
+                <StyledButton className={clickClass} onClick={(e) => {
                     clearNotification({id: notification.id});
                 }}>
                     X

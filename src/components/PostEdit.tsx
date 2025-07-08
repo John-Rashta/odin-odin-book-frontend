@@ -4,6 +4,7 @@ import { useGetPostQuery, useUpdatePostMutation } from "../features/book-api/boo
 import styled from "styled-components";
 import ExpandableTextarea from "./ExpandableTextarea";
 import { StyledCancel, StyledConfirm } from "../../util/style";
+import { clickClass } from "../../util/globalValues";
 
 export default function PostEdit({postid, closeModal} : {postid: string, closeModal: SimpleFunctionType}) {
   const [updatePost, {isLoading}] = useUpdatePostMutation();
@@ -34,7 +35,6 @@ export default function PostEdit({postid, closeModal} : {postid: string, closeMo
 
   const handleSubmit = function handleSubmitingEdit(event: FormType) {
     event.preventDefault();
-    event.stopPropagation();
     if (cancelRef.current) {
         cancelRef.current.disabled = true;
     };
@@ -80,7 +80,7 @@ export default function PostEdit({postid, closeModal} : {postid: string, closeMo
   return (
     <>
       {postData && (
-        <StyledBackground className="modalBackground"
+        <StyledBackground className={`modalBackground ${clickClass}`}
         onClick={(e) => {
           const target = e.target as HTMLDivElement;
           if (!target.closest(".modalContainer") && !isLoading) {
@@ -92,7 +92,6 @@ export default function PostEdit({postid, closeModal} : {postid: string, closeMo
           <StyledDiv className="modalContainer">
             <StyledForm
               onSubmit={handleSubmit}
-              onClick={(e) => e.stopPropagation()}
             >
               <StyledTextarea
                 names="editInput"

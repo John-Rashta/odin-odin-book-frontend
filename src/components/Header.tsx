@@ -1,9 +1,6 @@
-import { useState } from "react";
-import { useGetNotificationsQuery, useLogoutUserMutation, useSearchUsersInfiniteQuery } from "../features/book-api/book-api-slice"
-import { skipToken } from "@reduxjs/toolkit/query";
-import { useLocation, useNavigate } from "react-router-dom";
-import MiniUser from "./MiniUser";
-import { ClickType } from "../../util/types";
+import { useRef, useState } from "react";
+import { useGetNotificationsQuery, useLogoutUserMutation } from "../features/book-api/book-api-slice"
+import { useNavigate } from "react-router-dom";
 import MiniNotifications from "./MiniNotifications";
 import ClickWrapper from "./ClickWrapper";
 import NavMenu from "./NavMenu";
@@ -12,19 +9,14 @@ import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
 import styled from "styled-components";
 import { headerBackgroundColor, headerBorderBottom, headerPadding, navMenuValue, StyledNavLink } from "../../util/style";
+import SearchBar from "./SearchBar";
+import { clickClass } from "../../util/globalValues";
+import ClickOutsideWrapper from "./ClickOutsideWrapper";
 
 export default function Header() {
     const [logoutUser] = useLogoutUserMutation();
     const myId = useSelector(selectMyId);
-    const { pathname } = useLocation();
-    const [searchValue, setSearchValue] = useState("");
     const [showNotifications, setShowNotifications] = useState(false);
-    const { searchData } = useSearchUsersInfiniteQuery(searchValue !== "" ? searchValue : skipToken, {
-        selectFromResult: (result) => ({
-            ...result,
-             searchData: result.data?.pages.map(({users}) => users).flat()
-        })
-    });
      const { notificationsData } = useGetNotificationsQuery({id: myId}, {
         selectFromResult: (result) => ({
             ...result,
@@ -32,65 +24,22 @@ export default function Header() {
         })
     });
     const navigate = useNavigate();
-
-    const handleClick = function handleClickingSearchResult(event: ClickType) {
-    const target = event.target as HTMLElement;
-    const realTarget = target.closest(".searchResult");
-    if (!realTarget || !(realTarget instanceof HTMLElement)) {
-      return;
-    }
-    const possibleUser = realTarget.dataset.userid;
-    if (!possibleUser) {
-      return;
-    }
-
-    setSearchValue("");
-    navigate(`/user?id=${possibleUser}`);
-  };
+    const divRef = useRef<HTMLDivElement>(null);
+    const handleClose = function handleClosingNotifications() {
+        setShowNotifications(false);
+    };
 
     return (
         <StyledHeader>
             <StyledNav>
                 <StyledNavLink to={"/"}>Home</StyledNavLink>
-                { pathname !== "/search"  &&
-                    <div style={{position: "relative"}}>
-                        <form onSubmit={(e) => {
-                            e.preventDefault();
-                            setSearchValue("");
-                            navigate(`/search?user=${searchValue}`);
-                            return;
-                        }}>
-                            <StyledInput 
-                                type="text"
-                                name="searchBar"
-                                id="searchBar"
-                                value={searchValue}
-                                onChange={(e) => {
-                                    setSearchValue(e.target.value);
-                                }}
-                            />
-                        </form>
-                        {
-                            (searchData && searchValue !== "") && (
-                                <StyledSearchResult onClick={handleClick}>
-                                    {
-                                        (searchData.length > 0) ? searchData.map((ele) => {
-                                            return <MiniUser key={ele.id} user={ele} />
-                                        }) : <StyledNoResults>
-                                            No Results Found
-                                        </StyledNoResults>
-                                    }
-                                </StyledSearchResult>
-                            )
-                        }
-                    </div>
-                }
-                <StyledNotificationsMain>
+                <SearchBar/>
+                <StyledNotificationsMain ref={divRef}>
                     <StyledNotificationsButton onClick={() => {
                         setShowNotifications(!showNotifications);
                     }}>Notifications {notificationsData ? `${notificationsData.length}` : ""}</StyledNotificationsButton>
                     {
-                        ((showNotifications && notificationsData && notificationsData.length > 0) && <StyledNotificationsContainer>
+                        ((showNotifications && notificationsData && notificationsData.length > 0) && <StyledNotificationsContainer divRef={divRef} closeFunc={handleClose}>
                             <StyledWrapper>
                                 {
                                     notificationsData.slice(0, 25).map((ele) => {
@@ -98,17 +47,17 @@ export default function Header() {
                                     })
                                 }
                             </StyledWrapper>
-                            <StyledViewButton onClick={() => {
+                            <StyledViewButton className={clickClass} onClick={() => {
                                 navigate("/notifications");
                                 setShowNotifications(false);
                             }}>
                                 View All
                             </StyledViewButton>
-                        </StyledNotificationsContainer>) || (showNotifications && <StyledNotificationsContainer>
+                        </StyledNotificationsContainer>) || (showNotifications && <StyledNotificationsContainer divRef={divRef} closeFunc={handleClose}>
                             <StyledEmptyNotificationsText>
                                 No Notifications
                             </StyledEmptyNotificationsText>
-                            <StyledViewButton onClick={() => {
+                            <StyledViewButton className={clickClass} onClick={() => {
                                 navigate("/notifications");
                                 setShowNotifications(false);
                             }}>
@@ -160,30 +109,7 @@ const StyledNav = styled.nav`
   align-items: center;
 `;
 
-
-const StyledSearchResult = styled.div`
-  border: 1px solid black;
-  position: absolute;
-  background-color: rgb(255, 255, 255);
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  max-height: 300px;
-  overflow: auto;
-`;
-
-const StyledNoResults = styled.div`
-  padding: 10px;
-`;
-
-const StyledInput = styled.input`
-  padding: 7px;
-  background-color: rgb(255, 255, 255);
-  border: 1px solid black;
-  font-size: 1rem;
-`;
-
-const StyledNotificationsContainer = styled.div`
+const StyledNotificationsContainer = styled(ClickOutsideWrapper)`
     display: flex;
     flex-direction: column;
     align-items: center;

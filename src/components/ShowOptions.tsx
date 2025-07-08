@@ -1,11 +1,12 @@
 import { Ellipsis } from "lucide-react"
 import { ButtonClickType, ModalStartFunction, SimpleFunctionType } from "../../util/types"
 import { UserExtra, UserFollowType, UserInfo } from "../../util/interfaces"
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import TextOptions from "./TextOptions";
 import UserOptions from "./UserOptions";
 import { isUUID } from "validator";
 import styled from "styled-components";
+import { clickClass } from "../../util/globalValues";
 
 interface TextInterface {
     textId: string,
@@ -20,9 +21,9 @@ interface UserInterface {
 export default function ShowOptions({myId, id, textStuff, userStuff} : {myId: string, id:string, textStuff?: TextInterface , userStuff?: UserInterface}) {
     const [showOptions, setShowOptions] = useState(false);
     const [optionsStyle, setOptionsStyle] = useState({} as React.CSSProperties);
+    const divRef = useRef<HTMLDivElement>(null);
     
     const handleClick = function handleClickButton(e: ButtonClickType) {
-        e.stopPropagation();
         setShowOptions(!showOptions);
         const parent = e.currentTarget.closest(".optionsContainer") as HTMLDivElement;
         if (!parent) {
@@ -50,14 +51,14 @@ export default function ShowOptions({myId, id, textStuff, userStuff} : {myId: st
         <>
             {isUUID(myId) && 
                 ((myId !== id && userStuff || myId === id && textStuff) &&
-                    <StyledContainer className="optionsContainer" style={{position: "relative"}}>
+                    <StyledContainer ref={divRef} className={`optionsContainer ${clickClass}`} style={{position: "relative"}}>
                         <StyledButton onClick={handleClick}> <Ellipsis/> </StyledButton>
                         {showOptions &&
                             (
                                 textStuff ? 
-                                <TextOptions styleStuff={optionsStyle} textId={textStuff.textId} type={textStuff.type} editFunc={textStuff.editFunc} closeFunc={handleClose} /> : 
+                                <TextOptions divRef={divRef} styleStuff={optionsStyle} textId={textStuff.textId} type={textStuff.type} editFunc={textStuff.editFunc} closeFunc={handleClose} /> : 
                                 userStuff ? 
-                                <UserOptions styleStuff={optionsStyle} user={userStuff.user}/> : 
+                                <UserOptions divRef={divRef} styleStuff={optionsStyle} user={userStuff.user} closeFunc={handleClose}/> : 
                                 <></>
                             )
                         }

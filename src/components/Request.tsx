@@ -23,7 +23,6 @@ export default function Request({info} : {info: InfoType}) {
                     </StyledText>
                     <StyledButtonContainer>
                         <StyledRequestButton onClick={(e) => {
-                            e.stopPropagation();
                             deleteRequest({id: info.id, type: "CANCEL", userid: info.target.id});
                             }}>Cancel</StyledRequestButton>
                     </StyledButtonContainer>
@@ -34,11 +33,9 @@ export default function Request({info} : {info: InfoType}) {
                     </StyledText>
                     <StyledButtonContainer>
                         <StyledAccept onClick={(e) => {
-                            e.stopPropagation();
                             acceptRequest({id: info.id});
                             }}>Accept</StyledAccept>
                         <StyledRequestButton onClick={(e) => {
-                            e.stopPropagation();
                             deleteRequest({id: info.id, type: "REJECT", userid: info.sender.id})
                             }}>Reject</StyledRequestButton>
                     </StyledButtonContainer>

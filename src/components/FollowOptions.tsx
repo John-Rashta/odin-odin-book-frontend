@@ -2,6 +2,7 @@ import { isUUID } from "validator";
 import { optionalIdArray } from "../../util/types";
 import { useDeleteRequestMutation, useMakeRequestMutation, useStopFollowMutation } from "../features/book-api/book-api-slice";
 import styled from "styled-components";
+import { clickClass } from "../../util/globalValues";
 
 export default function FollowOptions({myId, id, followers, requests} : {myId: string, id: string, followers: optionalIdArray, requests: optionalIdArray}) {
     const [ deleteRequest ] = useDeleteRequestMutation();
@@ -11,8 +12,8 @@ export default function FollowOptions({myId, id, followers, requests} : {myId: s
         <>
             {(isUUID(myId) && myId !== id) && (
                 (followers && followers.length > 0)? 
-                    <StyledFollowButtons onClick={() =>  stopFollowing({id: id})}>Stop Following</StyledFollowButtons>
-                 : (requests && requests.length > 0) ? <StyledRequest>
+                    <StyledFollowButtons className={clickClass} onClick={() =>  stopFollowing({id: id})}>Stop Following</StyledFollowButtons>
+                 : (requests && requests.length > 0) ? <StyledRequest className={clickClass}>
                     Pending Request <StyledRequestButton onClick={() => {
                         if (!requests) {
                             return;
@@ -20,8 +21,7 @@ export default function FollowOptions({myId, id, followers, requests} : {myId: s
                         deleteRequest({id: requests[0].id, type: "CANCEL", userid: id})
                         }}>X</StyledRequestButton>
                 </StyledRequest> :  
-                        <StyledFollowButtons onClick={(e) => {
-                            e.stopPropagation();
+                        <StyledFollowButtons className={clickClass} onClick={(e) => {
                             makeRequest({id: id, type: "FOLLOW"});
                         }}>Request Follow</StyledFollowButtons>
                         

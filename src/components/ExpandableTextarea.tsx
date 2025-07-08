@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import styled from "styled-components";
+import { clickClass } from "../../util/globalValues";
 
 export default function ExpandableTextarea({names, className, textValue, setTextValue, placeName} : {names: string, textValue: string, setTextValue: React.Dispatch<React.SetStateAction<string>>, className?: string, placeName?:string}) {
     const textRef = useRef<HTMLTextAreaElement>(null);
@@ -16,9 +17,8 @@ export default function ExpandableTextarea({names, className, textValue, setText
 
     return (
         <StyledTextarea
-        className={className}
+        className={`${className || ""} ${clickClass}`}
         name={names}
-        id={names}
         ref={textRef}
         value={textValue}
         {...(typeof placeName === "string" ? {placeholder: placeName} : {})}

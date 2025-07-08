@@ -3,16 +3,15 @@ import { ButtonClickType, ModalStartFunction, SimpleFunctionType } from "../../u
 import { useDeleteCommentMutation, useDeletePostMutation } from "../features/book-api/book-api-slice";
 import React from "react";
 import styled from "styled-components";
+import ClickOutsideWrapper from "./ClickOutsideWrapper";
 
-export default function TextOptions({textId, editFunc, type, closeFunc, styleStuff} : {textId: string, editFunc: SimpleFunctionType | ModalStartFunction, type: "COMMENT" | "POST", closeFunc: SimpleFunctionType, styleStuff?: React.CSSProperties}) {
+export default function TextOptions({textId, editFunc, type, closeFunc, styleStuff , divRef} : {textId: string, editFunc: SimpleFunctionType | ModalStartFunction, type: "COMMENT" | "POST", closeFunc: SimpleFunctionType, styleStuff?: React.CSSProperties, divRef: React.RefObject<HTMLDivElement>}) {
     const [ deletePost ] = useDeletePostMutation();
     const [ deleteComment ] = useDeleteCommentMutation();
     const { pathname } = useLocation();
     const navigate = useNavigate();
 
     const handleDelete = function handleDeletesInOptions(event: ButtonClickType) {
-        event.stopPropagation();
-        event.preventDefault();
         const currentTarget = event.currentTarget;
         currentTarget.disabled = true;
 
@@ -48,8 +47,6 @@ export default function TextOptions({textId, editFunc, type, closeFunc, styleStu
     };
 
     const handleEdit = function handleClickingEdit (event: ButtonClickType) {
-        event.stopPropagation();
-        event.preventDefault();
         const currentTarget = event.currentTarget;
         currentTarget.disabled = true;
 
@@ -58,7 +55,7 @@ export default function TextOptions({textId, editFunc, type, closeFunc, styleStu
     };
 
     return (
-        <StyledTextOptions style={{...styleStuff}}>
+        <StyledTextOptions divRef={divRef} closeFunc={closeFunc} style={{...styleStuff}}>
             <StyledButtons onClick={handleEdit}>
                 Edit
             </StyledButtons>
@@ -69,7 +66,7 @@ export default function TextOptions({textId, editFunc, type, closeFunc, styleStu
     )
 };
 
-const StyledTextOptions = styled.div`
+const StyledTextOptions = styled(ClickOutsideWrapper)`
     position: absolute;
     max-width: 200px;
     width: 120px;

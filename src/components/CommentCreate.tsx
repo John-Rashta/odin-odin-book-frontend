@@ -5,6 +5,8 @@ import { Image } from "lucide-react";
 import ExpandableTextarea from "./ExpandableTextarea";
 import styled from "styled-components";
 import { StyledCancel, StyledConfirm, StyledFileDiv, StyledFileLabel, StyledFlex, StyledInputFile } from "../../util/style";
+import { clickClass } from "../../util/globalValues";
+import FileDiv from "./FileDiv";
 
 export default function CommentCreate({postid, commentid, changeCreate, className, placeName} : {postid: string, commentid?: string, changeCreate?: SimpleFunctionType, className?:string, placeName?:string}) {
     const [ createComment, {isLoading} ] = useCreateCommentMutation();
@@ -13,7 +15,6 @@ export default function CommentCreate({postid, commentid, changeCreate, classNam
 
     const handleClick = function handleSendingMessage(event: FormType) {
     event.preventDefault();
-    event.stopPropagation();
     const target = event.target as HTMLFormElement;
     const content = target.textInput.value;
     if (content === "" && target.fileInput.files.length === 0) {
@@ -55,11 +56,10 @@ export default function CommentCreate({postid, commentid, changeCreate, classNam
   };
 
     return (
-        <FormContainer className={className}>
+        <FormContainer className={`${className || ""} ${clickClass}`}>
             <form
                 style={{ position: "relative" }}
                 onSubmit={handleClick}
-                onClick={(e) => e.stopPropagation()}
                 >
                 <StyledText
                 names="textInput"
@@ -68,20 +68,11 @@ export default function CommentCreate({postid, commentid, changeCreate, classNam
                 {...(typeof placeName === "string" ? {placeName: placeName} : {})}
                 />
                 <StyledBottom>
-                  <StyledFileDiv>
-                      {invalidSize && (
-                      <StyledFileError>File Too Big! (Max 5MB)</StyledFileError>
-                      )}
-                      <StyledFileLabel htmlFor="fileInput">
-                        <Image />
-                      </StyledFileLabel>
-                      <StyledInputFile type="file" id="fileInput" name="fileInput" />
-                  </StyledFileDiv>
+                  <FileDiv invalidSize={invalidSize} />
                   <StyledFlex>
                       {
                         typeof changeCreate === "function" ? <StyledCancel type="button"
                         onClick={(e) => {
-                          e.stopPropagation();
                           if (!isLoading) {
                             changeCreate();
                             return;
@@ -99,15 +90,6 @@ export default function CommentCreate({postid, commentid, changeCreate, classNam
 
 const StyledText = styled(ExpandableTextarea)`
     width: min(100%, 700px);
-`;
-
-const StyledFileError = styled.div`
-  position: absolute;
-  bottom: -50%;
-  right:  -150px;
-  width: 150px;
-  text-align: center;
-  color: rgb(206, 0, 0);
 `;
 
 const FormContainer = styled.div`

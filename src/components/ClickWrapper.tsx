@@ -6,10 +6,8 @@ export default function ClickWrapper(props: React.ComponentPropsWithoutRef<"div"
     const navigate = useNavigate();
     const { children, className, ...restProps} = props;
     const handleClick = function handleClickingToRedirect(event: ClickType) {
-        event.stopPropagation();
-        event.preventDefault();
         const target = event.target as HTMLElement;
-        if (!target.closest(".clickOption")) {
+        if (!target.closest(".clickOption") || target.closest(".clickable")) {
             return;
         };
         const possibleUser = target.closest(".userOption") as HTMLElement | null;

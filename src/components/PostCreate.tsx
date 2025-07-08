@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useCreatePostMutation } from "../features/book-api/book-api-slice";
-import { Image } from "lucide-react";
 import { FormType } from "../../util/types";
 import styled from "styled-components";
 import ExpandableTextarea from "./ExpandableTextarea";
-import { StyledFileDiv, StyledFileLabel, StyledInputFile } from "../../util/style";
+import { clickClass } from "../../util/globalValues";
+import FileDiv from "./FileDiv";
 
 export default function PostCreate({placeName} : {placeName?: string}) {
     const [ createPost ] = useCreatePostMutation();
@@ -13,7 +13,6 @@ export default function PostCreate({placeName} : {placeName?: string}) {
 
     const handleClick = function handleSendingMessage(event: FormType) {
     event.preventDefault();
-    event.stopPropagation();
     const target = event.target as HTMLFormElement;
     const content = target.textInput.value;
     if (content === "" && target.fileInput.files.length === 0) {
@@ -46,11 +45,10 @@ export default function PostCreate({placeName} : {placeName?: string}) {
   };
 
     return (
-        <FormContainer>
+        <FormContainer className={`${clickClass}`}>
             <form
                 style={{ position: "relative" }}
                 onSubmit={handleClick}
-                onClick={(e) => e.stopPropagation()}
                 >
                 <StyledTextarea
                   textValue={textValue}
@@ -59,15 +57,7 @@ export default function PostCreate({placeName} : {placeName?: string}) {
                   {...(typeof placeName === "string" ? {placeName: placeName} : {})}
                 />
                 <StyledBottom>
-                  <StyledFileDiv>
-                      {invalidSize && (
-                      <StyledFileError>File Too Big! (Max 5MB)</StyledFileError>
-                      )}
-                      <StyledFileLabel htmlFor="fileInput">
-                        <Image />
-                      </StyledFileLabel>
-                      <StyledInputFile type="file" id="fileInput" name="fileInput" />
-                  </StyledFileDiv>
+                  <FileDiv invalidSize={invalidSize} />
                   <StyledButton type="submit">Send</StyledButton>
                 </StyledBottom>
             </form>
@@ -83,15 +73,6 @@ const StyledTextarea = styled(ExpandableTextarea)`
 
 const FormContainer = styled.div`
   width: 70%;
-`;
-
-const StyledFileError = styled.div`
-  position: absolute;
-  bottom: -50%;
-  right:  -150px;
-  width: 150px;
-  text-align: center;
-  color: rgb(206, 0, 0);
 `;
 
 const StyledBottom = styled.div`

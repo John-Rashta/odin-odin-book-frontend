@@ -4,16 +4,15 @@ import { selectMyId } from "../features/manager/manager-slice";
 import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
 import { useChangePostLikeMutation } from "../features/book-api/book-api-slice";
-import { ButtonClickType, ClickType, ModalStartFunction } from "../../util/types";
+import { ClickType, ModalStartFunction } from "../../util/types";
 import { useState } from "react";
-import TextOptions from "./TextOptions";
 import ShowOptions from "./ShowOptions";
 import LikeButton from "./LikeButton";
-import ClickWrapper from "./ClickWrapper";
 import { useNavigate } from "react-router-dom";
 import { StyledDivFlex, StyledImage, StyledMessageImage, StyledUserBlue, StyledFlex, StyledContent, StyledEdited, StyledCounts } from "../../util/style";
 import { MessageSquare } from "lucide-react";
 import styled from "styled-components";
+import { clickClass } from "../../util/globalValues";
 
 export default function PostProfile({post, modalFunc} : {post: FullPostInfo & Likes & YourLike & OwnCommentsCount, modalFunc?: ModalStartFunction}) {
     const myId = useSelector(selectMyId);
@@ -21,25 +20,19 @@ export default function PostProfile({post, modalFunc} : {post: FullPostInfo & Li
     const [showOptions, setShowOptions] = useState(false);
     const navigate = useNavigate();
 
-    const handleClick = function handleClickingButton(e: ButtonClickType) {
-        e.stopPropagation();
-        setShowOptions(!showOptions);
-    };
-
     const handleUserClick = function handleClickUser(e: ClickType) {
-        e.stopPropagation();
         navigate(`/user?id=${post.creator.id}`);
     };
 
     return (
         <StyledContainer>
             <div>
-                <StyledPostImage onClick={handleUserClick} src={post.creator.customIcon?.url || post.creator.icon.source} alt="" />
+                <StyledPostImage className={clickClass} onClick={handleUserClick} src={post.creator.customIcon?.url || post.creator.icon.source} alt="" />
             </div>
             <StyledMainStuff>
                 <StyledTopContainer>
                     <StyledFlex>
-                        <StyledUserBlue onClick={handleUserClick}>
+                        <StyledUserBlue className={clickClass} onClick={handleUserClick}>
                             {post.creator.username}
                         </StyledUserBlue>
                         <StyledEditedDiv>
@@ -77,7 +70,6 @@ export default function PostProfile({post, modalFunc} : {post: FullPostInfo & Li
                             {post.likesCount}
                         </StyledCounts>
                         <LikeButton myId={myId} likesInfo={post.likes} clickFunction={(e) => {
-                            e.stopPropagation();
                             ///e.currentTarget.disabled = true;
                             changeLike({id: post.id, action: ((post.likes && post.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
                             ///e.currentTarget.disabled = false;

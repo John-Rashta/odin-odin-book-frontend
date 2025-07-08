@@ -7,23 +7,21 @@ import { locale } from "../../util/helpers";
 import { isUUID } from "validator";
 import { useSelector } from "react-redux";
 import { selectMyId } from "../features/manager/manager-slice";
-import TextOptions from "./TextOptions";
 import CommentEdit from "./CommentEdit";
 import CommentCreate from "./CommentCreate";
 import CommentsDisplayButtons from "./CommentsDisplayButtons";
 import LoadMore from "./LoadMore";
 import LikeButton from "./LikeButton";
 import ShowOptions from "./ShowOptions";
-import { ButtonClickType } from "../../util/types";
 import ClickWrapper from "./ClickWrapper";
 import styled from "styled-components";
 import { MessageSquare } from "lucide-react";
 import { StyledContent, StyledCounts, StyledEdited, StyledFlex, StyledImage, StyledLoadCSS, StyledMessageImage, StyledUserBlue } from "../../util/style";
+import { clickClass } from "../../util/globalValues";
 
 export default function Comment({comment, depth = 0} : {comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike, depth?: number}) {
     const myId = useSelector(selectMyId);
     const [showComments, setShowComments] = useState(false);
-    const [showOptions, setShowOptions] = useState(false);
     const [showReply, setShowReply] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
     const [ changeLike ] = useChangeCommentLikeMutation();
@@ -33,11 +31,6 @@ export default function Comment({comment, depth = 0} : {comment: FullCommentInfo
             commentsData: result.data?.pages.map(({comments}) => comments).flat()
         })
     });
-
-    const handleClick = function handleClickButton(e: ButtonClickType) {
-        e.stopPropagation();
-        setShowOptions(!showOptions);
-    };
 
     return (
         <StyledComment>
@@ -91,15 +84,13 @@ export default function Comment({comment, depth = 0} : {comment: FullCommentInfo
                                         {comment.likesCount > 0 ? comment.likesCount : " "}
                                     </StyledLikes>
                                     <LikeButton myId={myId} likesInfo={comment.likes} clickFunction={(e) => {
-                                        e.stopPropagation();
                                         ///e.currentTarget.disabled = true;
                                         changeLike({id: comment.id, action: ((comment.likes && comment.likes.length > 0) ? "REMOVE" : "ADD")}).unwrap().finally(() => {
                                             ///e.currentTarget.disabled = false;
                                         })
                                     }} />
                                 </StyledBottomRight>
-                                {isUUID(myId) && <StyledReply onClick={(e) => {
-                                e.stopPropagation()
+                                {isUUID(myId) && <StyledReply className={clickClass} onClick={(e) => {
                                 setShowReply(true)
                                 }}>Reply</StyledReply>}
                             </StyledBottom>
