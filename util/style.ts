@@ -185,6 +185,8 @@ const StyledFlex = styled.div`
 
 const StyledContent = styled.div`
     white-space: pre-line;
+    word-break: break-all;
+    overflow-wrap: break-word;
 `;
 
 const StyledCancel = styled.button`
@@ -230,7 +232,29 @@ const StyledFileLabel = styled.label`
 const StyledFileDiv = styled.div`
   position: relative;
   display: flex;
+  flex-grow: 1;
 `;
+
+const StyledCancelFile = styled.button`
+  background-color: rgb(255, 209, 209);
+  &:hover {
+     background-color: rgb(255, 185, 185);
+  };
+  
+`;
+
+const StyledFileName = styled.div`
+  max-width: 90%;
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  left:  30px;
+  display: flex;
+  gap: 5px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+`;
+
 
 export {
     mainBackgroundColor,
@@ -270,4 +294,6 @@ export {
     StyledFileDiv,
     StyledFileLabel,
     StyledInputFile,
+    StyledCancelFile,
+    StyledFileName,
 };

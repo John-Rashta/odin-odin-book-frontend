@@ -3,8 +3,7 @@ import { StyledCancelFile, StyledFileDiv, StyledFileLabel, StyledFileName, Style
 import styled from "styled-components";
 import { Image } from "lucide-react";
 
-export default function FileDiv({invalidSize} : {invalidSize: boolean}) {
-    const [fileName, setFileName] = useState("");
+export default function FileDiv({invalidSize=false, fileName, setFileName} : {invalidSize?: boolean, fileName: string, setFileName: React.Dispatch<React.SetStateAction<string>>}) {
     const fileRef = useRef<HTMLInputElement>(null);
     return (
         <StyledFileDiv>

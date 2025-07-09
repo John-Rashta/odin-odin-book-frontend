@@ -12,6 +12,7 @@ export default function CommentCreate({postid, commentid, changeCreate, classNam
     const [ createComment, {isLoading} ] = useCreateCommentMutation();
     const [ textValue, setTextValue ] = useState("");
     const [ invalidSize, setInvalidSize ] = useState(false);
+    const [fileName, setFileName] = useState("");
 
     const handleClick = function handleSendingMessage(event: FormType) {
     event.preventDefault();
@@ -47,11 +48,13 @@ export default function CommentCreate({postid, commentid, changeCreate, classNam
       }).catch(() => {
         setTextValue("");
         target.reset();
+        setFileName("");
       });
     } else {
       createComment({info: newForm, id: postid, ...(commentid ? {comment: commentid} : {})});
       setTextValue("");
       target.reset();
+      setFileName("");
     };
   };
 
@@ -68,7 +71,7 @@ export default function CommentCreate({postid, commentid, changeCreate, classNam
                 {...(typeof placeName === "string" ? {placeName: placeName} : {})}
                 />
                 <StyledBottom>
-                  <FileDiv invalidSize={invalidSize} />
+                  <FileDiv fileName={fileName} setFileName={setFileName} invalidSize={invalidSize} />
                   <StyledFlex>
                       {
                         typeof changeCreate === "function" ? <StyledCancel type="button"

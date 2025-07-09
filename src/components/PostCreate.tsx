@@ -10,6 +10,7 @@ export default function PostCreate({placeName} : {placeName?: string}) {
     const [ createPost ] = useCreatePostMutation();
     const [ textValue, setTextValue ] = useState("");
     const [ invalidSize, setInvalidSize ] = useState(false);
+    const [fileName, setFileName] = useState("");
 
     const handleClick = function handleSendingMessage(event: FormType) {
     event.preventDefault();
@@ -42,6 +43,7 @@ export default function PostCreate({placeName} : {placeName?: string}) {
     createPost(newForm);
     target.reset();
     setTextValue("");
+    setFileName("");
   };
 
     return (
@@ -57,7 +59,7 @@ export default function PostCreate({placeName} : {placeName?: string}) {
                   {...(typeof placeName === "string" ? {placeName: placeName} : {})}
                 />
                 <StyledBottom>
-                  <FileDiv invalidSize={invalidSize} />
+                  <FileDiv fileName={fileName} setFileName={setFileName} invalidSize={invalidSize} />
                   <StyledButton type="submit">Send</StyledButton>
                 </StyledBottom>
             </form>

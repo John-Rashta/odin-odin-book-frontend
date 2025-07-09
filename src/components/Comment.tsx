@@ -14,7 +14,7 @@ import LoadMore from "./LoadMore";
 import LikeButton from "./LikeButton";
 import ShowOptions from "./ShowOptions";
 import ClickWrapper from "./ClickWrapper";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { MessageSquare } from "lucide-react";
 import { StyledContent, StyledCounts, StyledEdited, StyledFlex, StyledImage, StyledLoadCSS, StyledMessageImage, StyledUserBlue } from "../../util/style";
 import { clickClass } from "../../util/globalValues";
@@ -101,7 +101,7 @@ export default function Comment({comment, depth = 0} : {comment: FullCommentInfo
                             }
                             <CommentsDisplayButtons depth={depth} id={comment.id} count={comment.ownCommentsCount} showing={showComments} setShow={setShowComments}/>
                             {
-                                (showComments && commentsData && commentsData.length > 0 ) && <div>
+                                (showComments && commentsData && commentsData.length > 0 ) && <StyledDropDown>
                                     <ClickWrapper>
                                         {
                                             commentsData.map((ele) => {
@@ -110,7 +110,7 @@ export default function Comment({comment, depth = 0} : {comment: FullCommentInfo
                                         }
                                     </ClickWrapper>
                                     <StyledLoad isFetchingNextPage={isFetchingNextPage} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} />
-                                </div>
+                                </StyledDropDown>
                             }
                         </StyledExtraBottom>
                     </StyledMainStuff>
@@ -189,4 +189,19 @@ const StyledExtraBottom = styled.div`
 const StyledLoad = styled(LoadMore)`
     $${StyledLoadCSS};
     align-self: center;
+`;
+
+const dropAnimation = keyframes`
+    0% {
+        transform: scaleY(0)
+    }
+    100% {
+        transform: scaleY(1)
+    }
+`;
+
+const StyledDropDown = styled.div`
+    animation: ${dropAnimation} 300ms ease-in-out;
+    transform-origin: top center;
+
 `;

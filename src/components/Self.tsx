@@ -6,12 +6,14 @@ import { format } from "date-fns";
 import FormTextFields from "./FormTextFields";
 import { StyledDefaultContainer, StyledErrorMessage, StyledFileDiv, StyledFileLabel, StyledFlex, StyledInputFile, StyledMain } from "../../util/style";
 import styled from "styled-components";
+import FileDiv from "./FileDiv";
 
 export default function Self() {
     const { data, error, isLoading } = useGetSelfQuery();
   const [invalidSize, setInvalidSize] = useState(false);
   const [failedUpload, setFailedUpload] = useState(false);
   const [iconOptions, setIconOptions] = useState(false);
+  const [fileName, setFileName] = useState("");
   const [updateMe] = useUpdateMeMutation();
   const {
     data: iconData,
@@ -23,11 +25,11 @@ export default function Self() {
   const handleSubmitImage = function handleSubmitingImage(event: FormType) {
     event.preventDefault();
     const target = event.target as HTMLFormElement;
-    if (target.imageInput.files.length === 0) {
+    if (!target.fileInput.files || target.fileInput.files.length === 0) {
       return;
     }
 
-    const currentFile = target.imageInput.files[0] as File;
+    const currentFile = target.fileInput.files[0] as File;
     if (Number((currentFile.size / 1024 / 1024).toFixed(4)) > 5) {
       if (!invalidSize) {
         setTimeout(() => {
@@ -53,6 +55,7 @@ export default function Self() {
       })
       .finally(() => {
         target.reset();
+        setFileName("");
       });
   };
 
@@ -94,28 +97,18 @@ export default function Self() {
               alt=""
             />
             <TopRight>
-              <form
+              <StyledForm
                 onSubmit={handleSubmitImage}
               >
                 <StyledFormDiv>
-                  <StyledFileDiv>
-                    <StyledLabelStuff htmlFor="imageInput">
-                      Choose image for icon (max 5MB)
-                    </StyledLabelStuff>
-                    <StyledInputFile
-                      type="file"
-                      id="imageInput"
-                      name="imageInput"
-                      accept=".png,.webp,.jpeg,.jpg"
-                    />
-                  </StyledFileDiv>
+                  <FileDiv fileName={fileName} setFileName={setFileName}/>
                   <StyledSubmit type="submit">Submit</StyledSubmit>
-                  <div>
+                  <StyledFirstError>
                     {failedUpload && <div>Failed to upload.</div>}
                     {invalidSize && <div>Size Over Limit!</div>}
-                  </div>
+                  </StyledFirstError>
                 </StyledFormDiv>
-              </form>
+              </StyledForm>
               <IconContainer onClick={handleClickIconOption}>
                 <IconButton onClick={() => setIconOptions(!iconOptions)}>
                   Icons
@@ -177,14 +170,15 @@ const ProfileImage = styled.img`
 `;
 
 const TopContainer = styled(StyledFlex)`
-
+  align-self: start;
+  width: 100%;
 `;
 
 const TopRight = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 40px;
+  flex-grow: 1;
 `;
 
 const IconContainer = styled.div`
@@ -194,7 +188,6 @@ const IconContainer = styled.div`
 const IconDiv = styled.div`
   position: absolute;
   z-index: 5;
-  right: 0;
   width: 170px;
   padding: 5px;
   border: solid 1px black;
@@ -219,7 +212,6 @@ const IconButton = styled.button`
 const StyledFormDiv = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 10px;
 
 `;
@@ -228,19 +220,9 @@ const StyledSubmit = styled.button`
   background-color: rgb(202, 234, 255);
   border: solid 1px black;
   padding: 3px 10px;
+  align-self: start;
   &:hover {
     background-color: rgb(156, 215, 255);
-  };
-`;
-
-const StyledLabelStuff = styled(StyledFileLabel)`
-  background-color: rgb(187, 250, 255);
-  padding: 5px;
-  border-radius: 5px;
-  border: 1px solid black;
-  font-weight: bold;
-  &:hover {
-    background-color: rgb(122, 246, 255);
   };
 `;
 
@@ -273,4 +255,15 @@ const MainTextContainers = styled.div`
 const StyledFakeLabels = styled.div`
   font-size: 1.1rem;
 
+`;
+
+const StyledFirstError = styled.div`
+  position: absolute;
+  top: -40px;
+  left: 5px;
+  color: rgb(204, 5, 5);
+`;
+
+const StyledForm = styled.form`
+  position: relative;
 `;
