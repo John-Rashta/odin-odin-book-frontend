@@ -5,7 +5,7 @@ import isAscii from "validator/lib/isAscii";
 import isAlphanumeric from "validator/lib/isAlphanumeric";
 import usePasswordHandle from "../../util/usePasswordHandle";
 import PasswordConfirm from "./PasswordConfirm";
-import { ExtraForm, SignupWrongInput, StyledButton, StyledContainer, StyledDivFlex, StyledForm, StyledInput, StyledLabel, StyledWrongInput } from "../../util/style";
+import { ExtraForm, SignupWrongInput, StyledButton, StyledContainer, StyledDivFlex, StyledInput, StyledLabel } from "../../util/style";
 
 export default function SignUp() {
   const [createUser] = useCreateUserMutation();

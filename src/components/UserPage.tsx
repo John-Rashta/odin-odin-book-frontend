@@ -1,13 +1,11 @@
-import { useSelector } from "react-redux";
 import { useGetUserPostsInfiniteQuery, useGetUserQuery } from "../features/book-api/book-api-slice";
-import { selectUserId } from "../features/manager/manager-slice";
 import UserProfile from "./UserProfile";
 import Post from "./Post";
 import { useState } from "react";
 import PostEdit from "./PostEdit";
 import { isUUID } from "validator";
 import ClickWrapper from "./ClickWrapper";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import BackButton from "./BackButton";
 import LoadMore from "./LoadMore";

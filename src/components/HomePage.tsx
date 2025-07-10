@@ -13,7 +13,7 @@ export default function HomePage() {
             {
                 authState && isUUID(myId) ? <Feed /> :
                 authState && myId === "guest" ? <BareBonesMain>
-                    guest page
+                    Guest Page
                 </BareBonesMain> : <BareBonesMain>
                     Welcome to Odin Book!
                 </BareBonesMain>

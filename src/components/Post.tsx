@@ -5,7 +5,6 @@ import { FullPostInfo, Likes, OwnCommentsCount, YourLike } from "../../util/inte
 import { formatRelative } from "date-fns";
 import { locale } from "../../util/helpers";
 import { ModalStartFunction } from "../../util/types";
-import { useState } from "react";
 import { MessageSquare } from "lucide-react";
 import ShowOptions from "./ShowOptions";
 import LikeButton from "./LikeButton";

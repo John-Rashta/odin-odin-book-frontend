@@ -1,4 +1,3 @@
-import { NavLink } from "react-router-dom";
 import { headerBackgroundColor, headerBorderBottom, headerPadding, StyledNavLink } from "../../util/style";
 import styled from "styled-components";
 

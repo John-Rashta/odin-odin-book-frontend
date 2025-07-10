@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useCreateCommentMutation } from "../features/book-api/book-api-slice";
 import { FormType, SimpleFunctionType } from "../../util/types";
-import { Image } from "lucide-react";
 import ExpandableTextarea from "./ExpandableTextarea";
 import styled from "styled-components";
-import { StyledCancel, StyledConfirm, StyledFileDiv, StyledFileLabel, StyledFlex, StyledInputFile } from "../../util/style";
+import { StyledCancel, StyledConfirm, StyledFlex } from "../../util/style";
 import { clickClass } from "../../util/globalValues";
 import FileDiv from "./FileDiv";
 

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ButtonClickType, ClickType, FormType } from "../../util/types";
 import { format } from "date-fns";
 import FormTextFields from "./FormTextFields";
-import { StyledDefaultContainer, StyledErrorMessage, StyledFileDiv, StyledFileLabel, StyledFlex, StyledInputFile, StyledMain } from "../../util/style";
+import { StyledDefaultContainer, StyledErrorMessage, StyledFlex, StyledMain } from "../../util/style";
 import styled from "styled-components";
 import FileDiv from "./FileDiv";
 

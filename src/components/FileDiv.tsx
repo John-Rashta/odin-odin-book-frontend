@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { StyledCancelFile, StyledFileDiv, StyledFileLabel, StyledFileName, StyledInputFile } from "../../util/style";
 import styled from "styled-components";
 import { Image } from "lucide-react";
@@ -33,7 +33,8 @@ export default function FileDiv({invalidSize=false, fileName, setFileName} : {in
             }
             }}
             type="file" 
-            name="fileInput" 
+            name="fileInput"
+            accept=".png,.webp,.jpeg,.jpg"
             />
             </StyledFileLabel>
         </StyledFileDiv>
