@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import Requests from "../components/Requests";
+import Requests from "../components/requests/Requests";
 import { renderWithProviders } from "./setups/setupRedux";
 import {
   useGetReceivedRequestsQuery,
@@ -21,11 +21,13 @@ vi.mock("react-router-dom", () => {
 describe("User Requests", () => {
   it("Renders Normal Page Properly", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<Requests />, {preloadedState: {
+    renderWithProviders(<Requests />, {
+      preloadedState: {
         manager: {
-            myId: blueInfo.id
-        }
-    }});
+          myId: blueInfo.id,
+        },
+      },
+    });
     expect(screen.getByText("Accept")).toBeInTheDocument();
     expect(screen.getByText("Reject")).toBeInTheDocument();
     expect(

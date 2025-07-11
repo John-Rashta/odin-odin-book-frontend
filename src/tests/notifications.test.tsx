@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import Notifications from "../components/Notifications";
+import Notifications from "../components/notifications/Notifications";
 import { renderWithProviders } from "./setups/setupRedux";
 import { useGetNotificationsQuery } from "../features/book-api/book-api-slice";
 import { Mock } from "vitest";
@@ -23,17 +23,17 @@ describe("Notifications Page", () => {
     expect(screen.getByText("X")).toBeInTheDocument();
   });
 
-   it("shows No Results", () => {
-        vi.mocked(useGetNotificationsQuery).mockImplementation(
-          vi.fn(() => {
-            return {
-              isLoading: false,
-              error: false,
-              received: [],
-            };
-          }) as Mock,
-        );
-        renderWithProviders(<Notifications />);
-        expect(screen.getByText("No Notifications Yet!")).toBeInTheDocument();
-      });
+  it("shows No Results", () => {
+    vi.mocked(useGetNotificationsQuery).mockImplementation(
+      vi.fn(() => {
+        return {
+          isLoading: false,
+          error: false,
+          received: [],
+        };
+      }) as Mock,
+    );
+    renderWithProviders(<Notifications />);
+    expect(screen.getByText("No Notifications Yet!")).toBeInTheDocument();
+  });
 });

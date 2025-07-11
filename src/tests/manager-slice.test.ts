@@ -9,7 +9,7 @@ import {
 
 interface LocalTestContext {
   store: AppStore;
-};
+}
 
 describe<LocalTestContext>("manager reducer", (it) => {
   beforeEach<LocalTestContext>((context) => {

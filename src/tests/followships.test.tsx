@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import Followships from "../components/Followships";
+import Followships from "../components/followships/Followships";
 import { renderWithProviders } from "./setups/setupRedux";
 import {
   useGetFollowersInfiniteQuery,
@@ -26,7 +26,7 @@ describe("Your Followships", () => {
 
     const followersDiv = screen.getByText("Followers");
 
-      await user.click(followersDiv);
+    await user.click(followersDiv);
 
     expect(screen.getByText(blueInfo.username)).toBeInTheDocument();
   });

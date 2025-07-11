@@ -12,7 +12,7 @@ const root = createRoot(document.getElementById("root") as HTMLDivElement);
 root.render(
   <StrictMode>
     <Provider store={store}>
-      <RouterProvider router={router}/>
+      <RouterProvider router={router} />
     </Provider>
   </StrictMode>,
 );

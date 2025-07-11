@@ -1,27 +1,57 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RequestInfo, ReceivedExtra, SentExtra, UserExtra, UserFollowType, UserInfo, FullPostInfo, Likes, YourLike, OwnCommentsCount, FullCommentInfo, ReturnMessage, NotificationsInfo } from "../../../util/interfaces";
+import {
+  RequestInfo,
+  ReceivedExtra,
+  SentExtra,
+  UserExtra,
+  UserFollowType,
+  UserInfo,
+  FullPostInfo,
+  Likes,
+  YourLike,
+  OwnCommentsCount,
+  FullCommentInfo,
+  ReturnMessage,
+  NotificationsInfo,
+} from "../../../util/interfaces";
 import { getProperQuery } from "../../../util/helpers";
 import { socket } from "../../../sockets/socket";
-import { InitialPageParam, notificationTypes, requestTypes } from "../../../util/types";
-import { NewPostSocket, PostUpdateSocket, UserUpdateSocket, BasicId, FollowersSocket, FollowsSocket, NotificationSocket, CommentUpdateSocket, CommentDeleteSocket, NewCommentSocket, RequestSocketOptions } from "../../../sockets/socketTypes";
+import {
+  InitialPageParam,
+  notificationTypes,
+  requestTypes,
+} from "../../../util/types";
+import {
+  NewPostSocket,
+  PostUpdateSocket,
+  UserUpdateSocket,
+  BasicId,
+  FollowersSocket,
+  FollowsSocket,
+  NotificationSocket,
+  CommentUpdateSocket,
+  CommentDeleteSocket,
+  NewCommentSocket,
+  RequestSocketOptions,
+} from "../../../sockets/socketTypes";
 
 interface Credentials {
   username: string;
   password: string;
-};
+}
 
 interface UId {
-    id: string;
-};
+  id: string;
+}
 
 interface IconInfo {
   id: number;
   source: string;
-};
+}
 
 interface UpdateContent {
   content: string;
-};
+}
 
 interface UpdatedPost {
   id: string;
@@ -29,16 +59,16 @@ interface UpdatedPost {
   createdAt: Date;
   creatorid: string;
   edited: boolean;
-};
+}
 
 interface LikeTypes {
-  action: "ADD" | "REMOVE"
-};
+  action: "ADD" | "REMOVE";
+}
 
 interface RequestCreate {
-  id: string,
-  type: requestTypes
-};
+  id: string;
+  type: requestTypes;
+}
 
 interface CommentInfo {
   id: string;
@@ -48,35 +78,35 @@ interface CommentInfo {
   postid: string;
   sentAt: Date;
   senderid: string;
-};
+}
 
 export const apiSlice = createApi({
-    reducerPath: "api",
-    baseQuery: fetchBaseQuery({
-        baseUrl: "http://localhost:3000",
-        credentials: "include",
-    }),
-    keepUnusedDataFor: 1,
-    tagTypes: [
-        "SelfInfo",
-        "PostInfo",
-        "PostsInfo",
-        "UserPostsInfo",
-        "CommentInfo",
-        "CommentsInfo",
-        "UserInfo",
-        "UsersInfo",
-        "SearchInfo",
-        "SentInfo",
-        "ReceivedInfo",
-        "FeedInfo",
-        "NotificationInfo",
-        "NotificationsInfo",
-        "PostCommentsInfo",
-        "FollowersInfo",
-        "FollowsInfo",
-    ],
-    endpoints: (builder) => ({
+  reducerPath: "api",
+  baseQuery: fetchBaseQuery({
+    baseUrl: "http://localhost:3000",
+    credentials: "include",
+  }),
+  keepUnusedDataFor: 1,
+  tagTypes: [
+    "SelfInfo",
+    "PostInfo",
+    "PostsInfo",
+    "UserPostsInfo",
+    "CommentInfo",
+    "CommentsInfo",
+    "UserInfo",
+    "UsersInfo",
+    "SearchInfo",
+    "SentInfo",
+    "ReceivedInfo",
+    "FeedInfo",
+    "NotificationInfo",
+    "NotificationsInfo",
+    "PostCommentsInfo",
+    "FollowersInfo",
+    "FollowsInfo",
+  ],
+  endpoints: (builder) => ({
     createUser: builder.mutation<ReturnMessage, Credentials>({
       query: (body) => ({
         url: "/auth",
@@ -109,7 +139,7 @@ export const apiSlice = createApi({
       ) {
         const listener = (data: FollowersSocket) => {
           updateCachedData((draft) => {
-            if (data.action ===  "REMOVE") {
+            if (data.action === "REMOVE") {
               draft.user.followerCount -= 1;
             }
           });
@@ -117,9 +147,9 @@ export const apiSlice = createApi({
 
         const followsListener = (data: FollowsSocket) => {
           if (data.action === "ADD" && data.data) {
-            socket.emitWithAck("follow:join", {id: data.data.id});
+            socket.emitWithAck("follow:join", { id: data.data.id });
           } else if (data.action === "REMOVE" && data.id) {
-            socket.emitWithAck("follow:leave", {id: data.id});
+            socket.emitWithAck("follow:leave", { id: data.id });
           }
         };
         try {
@@ -128,14 +158,18 @@ export const apiSlice = createApi({
           socket.on("followers", listener);
           socket.on("follows", followsListener);
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("followers", listener);
         socket.off("follows", followsListener);
       },
     }),
-    searchUsers: builder.infiniteQuery<{ users: (UserInfo & UserExtra)[] }, string, InitialPageParam>({
+    searchUsers: builder.infiniteQuery<
+      { users: (UserInfo & UserExtra)[] },
+      string,
+      InitialPageParam
+    >({
       infiniteQueryOptions: {
         initialPageParam: {
           skip: 0,
@@ -151,13 +185,13 @@ export const apiSlice = createApi({
             return {
               skip: lastPageParam.amount + lastPageParam.skip,
               amount: lastPageParam.amount,
-            }
+            };
           } else {
             return undefined;
           }
         },
       },
-      query: ({pageParam, queryArg}) => ({
+      query: ({ pageParam, queryArg }) => ({
         url: `/users/search?user=${queryArg}${getProperQuery(pageParam).substring(1)}`,
       }),
       providesTags: ["SearchInfo"],
@@ -168,12 +202,14 @@ export const apiSlice = createApi({
         const listener = (data: UserUpdateSocket) => {
           updateCachedData((draft) => {
             if (data.type === "user" && data.data) {
-              draft.pages.forEach(({users}) => {
-                const possibleIndex = users.findIndex((ele) => ele.id === data.id);
+              draft.pages.forEach(({ users }) => {
+                const possibleIndex = users.findIndex(
+                  (ele) => ele.id === data.id,
+                );
                 if (possibleIndex !== -1) {
                   Object.assign(users[possibleIndex], data.data);
                 }
-              })
+              });
             }
           });
         };
@@ -183,32 +219,40 @@ export const apiSlice = createApi({
             return;
           }
           updateCachedData((draft) => {
-            draft.pages.forEach(({users}) => {
-              const possibleIndex = users.findIndex((ele) => ele.id === data.data?.id);
+            draft.pages.forEach(({ users }) => {
+              const possibleIndex = users.findIndex(
+                (ele) => ele.id === data.data?.id,
+              );
               if (possibleIndex !== -1) {
-                users[possibleIndex].followers = [{id: "1"}];
+                users[possibleIndex].followers = [{ id: "1" }];
                 users[possibleIndex].receivedRequests = undefined;
               }
-            })
+            });
           });
         };
 
         const requestListener = (data: RequestSocketOptions) => {
-          if (data.action !== "REMOVE" || !data.data.userid || !data.data.myid) {
+          if (
+            data.action !== "REMOVE" ||
+            !data.data.userid ||
+            !data.data.myid
+          ) {
             return;
-          };
+          }
 
           if (data.data.userid === data.data.myid) {
             return;
-          };
+          }
           updateCachedData((draft) => {
-            draft.pages.forEach(({users}) => {
-              const possibleIndex = users.findIndex((ele) => ele.id === data.data.userid);
+            draft.pages.forEach(({ users }) => {
+              const possibleIndex = users.findIndex(
+                (ele) => ele.id === data.data.userid,
+              );
               if (possibleIndex !== -1) {
                 users[possibleIndex].receivedRequests = undefined;
               }
             });
-          })
+          });
         };
         try {
           await cacheDataLoaded;
@@ -216,21 +260,20 @@ export const apiSlice = createApi({
           socket.on("user:updated", listener);
           socket.on("follows", followsListener);
           socket.on("request", requestListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("user:updated", listener);
         socket.off("follows", followsListener);
         socket.off("request", requestListener);
       },
     }),
-    getUser: builder.query<{ user: (UserInfo & UserExtra) }, string>({
+    getUser: builder.query<{ user: UserInfo & UserExtra }, string>({
       query: (user) => ({
         url: `/users/${user}`,
       }),
-      providesTags: (result, error, arg) => [ {type: "UserInfo", id: arg}],
+      providesTags: (result, error, arg) => [{ type: "UserInfo", id: arg }],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -240,7 +283,7 @@ export const apiSlice = createApi({
             return;
           }
           updateCachedData((draft) => {
-            if (data.type ===  "followers" && data.newCount !== undefined) {
+            if (data.type === "followers" && data.newCount !== undefined) {
               draft.user.followerCount = data.newCount;
             } else if (data.type === "user" && data.data) {
               Object.assign(draft.user, data.data);
@@ -248,25 +291,29 @@ export const apiSlice = createApi({
           });
         };
 
-         const followsListener = (data: FollowsSocket) => {
+        const followsListener = (data: FollowsSocket) => {
           if (data.action !== "ADD") {
             return;
-          };
+          }
 
           if (!data.data || data.data.id !== arg) {
             return;
-          };
+          }
 
-           updateCachedData((draft) => {
-            draft.user.followers = [{id: "1"}];
+          updateCachedData((draft) => {
+            draft.user.followers = [{ id: "1" }];
             draft.user.receivedRequests = undefined;
           });
         };
 
         const requestListener = (data: RequestSocketOptions) => {
-          if (data.action !== "REMOVE" || !data.data.userid || !data.data.myid) {
+          if (
+            data.action !== "REMOVE" ||
+            !data.data.userid ||
+            !data.data.myid
+          ) {
             return;
-          };
+          }
 
           if (data.data.userid !== arg) {
             return;
@@ -274,7 +321,7 @@ export const apiSlice = createApi({
 
           if (data.data.userid === data.data.myid) {
             return;
-          };
+          }
 
           updateCachedData((draft) => {
             draft.user.receivedRequests = undefined;
@@ -283,22 +330,30 @@ export const apiSlice = createApi({
         try {
           await cacheDataLoaded;
 
-          const response = await socket.emitWithAck("user:join", {id: arg});
+          const response = await socket.emitWithAck("user:join", { id: arg });
+          setTimeout(async () => {
+            await socket.emitWithAck("user:join", {
+              id: arg,
+            });
+          }, 1000);
           socket.on("user:updated", listener);
           socket.on("follows", followsListener);
           socket.on("request", requestListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
-        const response = await socket.emitWithAck("user:leave", {id: arg});
+
+        const response = await socket.emitWithAck("user:leave", { id: arg });
         socket.off("user:updated", listener);
         socket.off("follows", followsListener);
         socket.off("request", requestListener);
       },
     }),
-    getUsers: builder.infiniteQuery<{ users: (UserInfo & UserExtra)[] },void, InitialPageParam>({
+    getUsers: builder.infiniteQuery<
+      { users: (UserInfo & UserExtra)[] },
+      void,
+      InitialPageParam
+    >({
       infiniteQueryOptions: {
         initialPageParam: {
           skip: 0,
@@ -314,13 +369,13 @@ export const apiSlice = createApi({
             return {
               skip: lastPageParam.amount + lastPageParam.skip,
               amount: lastPageParam.amount,
-            }
+            };
           } else {
             return undefined;
           }
         },
       },
-      query: ({pageParam}) => ({
+      query: ({ pageParam }) => ({
         url: `/users${getProperQuery(pageParam)}`,
       }),
       providesTags: ["UsersInfo"],
@@ -331,12 +386,14 @@ export const apiSlice = createApi({
         const listener = (data: UserUpdateSocket) => {
           updateCachedData((draft) => {
             if (data.type === "user" && data.data) {
-              draft.pages.forEach(({users}) => {
-                const possibleIndex = users.findIndex((ele) => ele.id === data.id);
+              draft.pages.forEach(({ users }) => {
+                const possibleIndex = users.findIndex(
+                  (ele) => ele.id === data.id,
+                );
                 if (possibleIndex !== -1) {
                   Object.assign(users[possibleIndex], data.data);
                 }
-              })
+              });
             }
           });
         };
@@ -346,32 +403,40 @@ export const apiSlice = createApi({
             return;
           }
           updateCachedData((draft) => {
-            draft.pages.forEach(({users}) => {
-              const possibleIndex = users.findIndex((ele) => ele.id === data.data?.id);
+            draft.pages.forEach(({ users }) => {
+              const possibleIndex = users.findIndex(
+                (ele) => ele.id === data.data?.id,
+              );
               if (possibleIndex !== -1) {
-                users[possibleIndex].followers = [{id: "1"}];
+                users[possibleIndex].followers = [{ id: "1" }];
                 users[possibleIndex].receivedRequests = undefined;
               }
-            })
+            });
           });
         };
 
         const requestListener = (data: RequestSocketOptions) => {
-          if (data.action !== "REMOVE" || !data.data.userid || !data.data.myid) {
+          if (
+            data.action !== "REMOVE" ||
+            !data.data.userid ||
+            !data.data.myid
+          ) {
             return;
-          };
+          }
 
           if (data.data.userid === data.data.myid) {
             return;
-          };
+          }
           updateCachedData((draft) => {
-            draft.pages.forEach(({users}) => {
-              const possibleIndex = users.findIndex((ele) => ele.id === data.data.userid);
+            draft.pages.forEach(({ users }) => {
+              const possibleIndex = users.findIndex(
+                (ele) => ele.id === data.data.userid,
+              );
               if (possibleIndex !== -1) {
                 users[possibleIndex].receivedRequests = undefined;
               }
             });
-          })
+          });
         };
         try {
           await cacheDataLoaded;
@@ -379,11 +444,10 @@ export const apiSlice = createApi({
           socket.on("user:updated", listener);
           socket.on("follows", followsListener);
           socket.on("request", requestListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("user:updated", listener);
         socket.off("follows", followsListener);
         socket.off("request", requestListener);
@@ -434,8 +498,12 @@ export const apiSlice = createApi({
       },
       */
     }),
-    getUserPosts: builder.infiniteQuery<{ posts: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] }, string, InitialPageParam>({
-      query: ({queryArg, pageParam}) => ({
+    getUserPosts: builder.infiniteQuery<
+      { posts: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] },
+      string,
+      InitialPageParam
+    >({
+      query: ({ queryArg, pageParam }) => ({
         url: `/users/${queryArg}/posts${getProperQuery(pageParam)}`,
       }),
       infiniteQueryOptions: {
@@ -453,32 +521,34 @@ export const apiSlice = createApi({
             return {
               skip: lastPageParam.amount + lastPageParam.skip,
               amount: lastPageParam.amount,
-            }
+            };
           } else {
             return undefined;
           }
         },
       },
-       async onCacheEntryAdded(
+      async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
         const deleteListener = (data: BasicId) => {
           updateCachedData((draft) => {
-            draft.pages.forEach(({posts}) => {
-              const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
+            draft.pages.forEach(({ posts }) => {
+              const possibleIndex = posts.findIndex(
+                (ele) => ele.id === data.id,
+              );
               if (possibleIndex !== -1) {
                 posts.splice(possibleIndex, 1);
               }
-            })
+            });
           });
         };
         const newListener = (data: NewPostSocket) => {
           if (data.id !== arg) {
             return;
-          };
+          }
           updateCachedData((draft) => {
-            draft.pages[0].posts.unshift({...data.post, ownCommentsCount:0});
+            draft.pages[0].posts.unshift({ ...data.post, ownCommentsCount: 0 });
           });
         };
         const updateListener = (data: PostUpdateSocket) => {
@@ -486,17 +556,19 @@ export const apiSlice = createApi({
             return;
           }
           updateCachedData((draft) => {
-            draft.pages.forEach(({posts}) => {
-               const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
+            draft.pages.forEach(({ posts }) => {
+              const possibleIndex = posts.findIndex(
+                (ele) => ele.id === data.id,
+              );
               if (possibleIndex !== -1) {
-                if (data.type ===  "content" && data.content) {
-                posts[possibleIndex].content = data.content;
-                posts[possibleIndex].edited = true;
+                if (data.type === "content" && data.content) {
+                  posts[possibleIndex].content = data.content;
+                  posts[possibleIndex].edited = true;
                 } else if (data.type === "likes" && data.likes !== undefined) {
                   posts[possibleIndex].likesCount = data.likes;
                 }
               }
-            })
+            });
           });
         };
         try {
@@ -505,19 +577,22 @@ export const apiSlice = createApi({
           socket.on("post:deleted", deleteListener);
           socket.on("post:created", newListener);
           socket.on("post:updated", updateListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("post:deleted", deleteListener);
-          socket.off("post:created", newListener);
-          socket.off("post:updated", updateListener);
+        socket.off("post:created", newListener);
+        socket.off("post:updated", updateListener);
       },
-      providesTags: ["UserPostsInfo"]
+      providesTags: ["UserPostsInfo"],
     }),
-    getFeed: builder.infiniteQuery<{ feed: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] }, void, InitialPageParam>({
-      query: ({pageParam}) => ({
+    getFeed: builder.infiniteQuery<
+      { feed: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] },
+      void,
+      InitialPageParam
+    >({
+      query: ({ pageParam }) => ({
         url: `/users/self/feed${getProperQuery(pageParam)}`,
       }),
       infiniteQueryOptions: {
@@ -535,7 +610,7 @@ export const apiSlice = createApi({
             return {
               skip: lastPageParam.amount + lastPageParam.skip,
               amount: lastPageParam.amount,
-            }
+            };
           } else {
             return undefined;
           }
@@ -547,32 +622,32 @@ export const apiSlice = createApi({
       ) {
         const deleteListener = (data: BasicId) => {
           updateCachedData((draft) => {
-            draft.pages.forEach(({feed}) => {
+            draft.pages.forEach(({ feed }) => {
               const possibleIndex = feed.findIndex((ele) => ele.id === data.id);
               if (possibleIndex !== -1) {
                 feed.splice(possibleIndex, 1);
-              };
-            })
+              }
+            });
           });
         };
         const newListener = (data: NewPostSocket) => {
           updateCachedData((draft) => {
-            draft.pages[0].feed.unshift({...data.post, ownCommentsCount:0});
+            draft.pages[0].feed.unshift({ ...data.post, ownCommentsCount: 0 });
           });
         };
         const updateListener = (data: PostUpdateSocket) => {
           updateCachedData((draft) => {
-            draft.pages.forEach(({feed}) => {
+            draft.pages.forEach(({ feed }) => {
               const possibleIndex = feed.findIndex((ele) => ele.id === data.id);
               if (possibleIndex !== -1) {
-                if (data.type ===  "content" && data.content) {
+                if (data.type === "content" && data.content) {
                   feed[possibleIndex].content = data.content;
                   feed[possibleIndex].edited = true;
                 } else if (data.type === "likes" && data.likes !== undefined) {
                   feed[possibleIndex].likesCount = data.likes;
-                };
-              };
-            })
+                }
+              }
+            });
           });
         };
         try {
@@ -581,19 +656,22 @@ export const apiSlice = createApi({
           socket.on("follow:post:deleted", deleteListener);
           socket.on("follow:post:created", newListener);
           socket.on("follow:post:updated", updateListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("follow:post:deleted", deleteListener);
         socket.off("follow:post:created", newListener);
         socket.off("follow:post:updated", updateListener);
       },
       providesTags: ["FeedInfo"],
     }),
-    getFollowers: builder.infiniteQuery<{ followers: (UserFollowType & UserExtra)[] }, void, InitialPageParam>({
-      query: ({pageParam}) => ({
+    getFollowers: builder.infiniteQuery<
+      { followers: (UserFollowType & UserExtra)[] },
+      void,
+      InitialPageParam
+    >({
+      query: ({ pageParam }) => ({
         url: `/users/self/followers${getProperQuery(pageParam)}`,
       }),
       infiniteQueryOptions: {
@@ -611,7 +689,7 @@ export const apiSlice = createApi({
             return {
               skip: lastPageParam.amount + lastPageParam.skip,
               amount: lastPageParam.amount,
-            }
+            };
           } else {
             return undefined;
           }
@@ -624,25 +702,29 @@ export const apiSlice = createApi({
         const listener = (data: FollowersSocket) => {
           updateCachedData((draft) => {
             if (data.action === "REMOVE") {
-              draft.pages.forEach(({followers}) => {
-                const possibleIndex = followers.findIndex((ele) => ele.id === data.id);
+              draft.pages.forEach(({ followers }) => {
+                const possibleIndex = followers.findIndex(
+                  (ele) => ele.id === data.id,
+                );
                 if (possibleIndex !== -1) {
                   followers.splice(possibleIndex, 1);
-                };
+                }
               });
-            };
+            }
           });
         };
 
         const userListener = (data: UserUpdateSocket) => {
           updateCachedData((draft) => {
             if (data.type === "user" && data.data) {
-              draft.pages.forEach(({followers}) => {
-                const possibleIndex = followers.findIndex((ele) => ele.id === data.id);
+              draft.pages.forEach(({ followers }) => {
+                const possibleIndex = followers.findIndex(
+                  (ele) => ele.id === data.id,
+                );
                 if (possibleIndex !== -1) {
                   Object.assign(followers[possibleIndex], data.data);
                 }
-              })
+              });
             }
           });
         };
@@ -652,32 +734,40 @@ export const apiSlice = createApi({
             return;
           }
           updateCachedData((draft) => {
-            draft.pages.forEach(({followers}) => {
-              const possibleIndex = followers.findIndex((ele) => ele.id === data.data?.id);
+            draft.pages.forEach(({ followers }) => {
+              const possibleIndex = followers.findIndex(
+                (ele) => ele.id === data.data?.id,
+              );
               if (possibleIndex !== -1) {
-                followers[possibleIndex].followers = [{id: "1"}];
+                followers[possibleIndex].followers = [{ id: "1" }];
                 followers[possibleIndex].receivedRequests = undefined;
               }
-            })
+            });
           });
         };
 
         const requestListener = (data: RequestSocketOptions) => {
-          if (data.action !== "REMOVE" || !data.data.userid || !data.data.myid) {
+          if (
+            data.action !== "REMOVE" ||
+            !data.data.userid ||
+            !data.data.myid
+          ) {
             return;
-          };
+          }
 
           if (data.data.userid === data.data.myid) {
             return;
-          };
+          }
           updateCachedData((draft) => {
-            draft.pages.forEach(({followers}) => {
-              const possibleIndex = followers.findIndex((ele) => ele.id === data.data.userid);
+            draft.pages.forEach(({ followers }) => {
+              const possibleIndex = followers.findIndex(
+                (ele) => ele.id === data.data.userid,
+              );
               if (possibleIndex !== -1) {
                 followers[possibleIndex].receivedRequests = undefined;
               }
             });
-          })
+          });
         };
         try {
           await cacheDataLoaded;
@@ -686,21 +776,23 @@ export const apiSlice = createApi({
           socket.on("user:updated", userListener);
           socket.on("follows", followsListener);
           socket.on("request", requestListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("followers", listener);
         socket.off("user:updated", userListener);
         socket.off("follows", followsListener);
         socket.off("request", requestListener);
       },
       providesTags: ["FollowersInfo"],
-      
     }),
-    getFollows: builder.infiniteQuery<{ follows: (UserFollowType & UserExtra)[] }, void, InitialPageParam>({
-      query: ({pageParam}) => ({
+    getFollows: builder.infiniteQuery<
+      { follows: (UserFollowType & UserExtra)[] },
+      void,
+      InitialPageParam
+    >({
+      query: ({ pageParam }) => ({
         url: `/users/self/follows${getProperQuery(pageParam)}`,
       }),
       infiniteQueryOptions: {
@@ -718,7 +810,7 @@ export const apiSlice = createApi({
             return {
               skip: lastPageParam.amount + lastPageParam.skip,
               amount: lastPageParam.amount,
-            }
+            };
           } else {
             return undefined;
           }
@@ -734,19 +826,23 @@ export const apiSlice = createApi({
           }
           updateCachedData((draft) => {
             if (data.action === "ADD") {
-              draft.pages[0].follows.unshift(data.data as (UserFollowType & UserExtra));
+              draft.pages[0].follows.unshift(
+                data.data as UserFollowType & UserExtra,
+              );
             }
           });
         };
         const userListener = (data: UserUpdateSocket) => {
           updateCachedData((draft) => {
             if (data.type === "user" && data.data) {
-              draft.pages.forEach(({follows}) => {
-                const possibleIndex = follows.findIndex((ele) => ele.id === data.id);
+              draft.pages.forEach(({ follows }) => {
+                const possibleIndex = follows.findIndex(
+                  (ele) => ele.id === data.id,
+                );
                 if (possibleIndex !== -1) {
                   Object.assign(follows[possibleIndex], data.data);
                 }
-              })
+              });
             }
           });
         };
@@ -756,74 +852,81 @@ export const apiSlice = createApi({
 
           socket.on("follows", listener);
           socket.on("user:updated", userListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("follows", listener);
         socket.off("user:updated", userListener);
       },
       providesTags: ["FollowsInfo"],
     }),
     stopFollow: builder.mutation<ReturnMessage, UId>({
-      query: ({id}) => ({
+      query: ({ id }) => ({
         url: `/users/${id}/follow`,
-        method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, arg) => [{ type: 'UserInfo', id: arg.id }],
-      async onQueryStarted({ id }, { dispatch, getState ,queryFulfilled }) {
+      invalidatesTags: (result, error, arg) => [
+        { type: "UserInfo", id: arg.id },
+      ],
+      async onQueryStarted({ id }, { dispatch, getState, queryFulfilled }) {
         try {
           await queryFulfilled;
           const queryArgs = apiSlice.util.selectCachedArgsForQuery(
             getState(),
-            "searchUsers"
+            "searchUsers",
           );
 
           queryArgs.forEach((arg) => {
             dispatch(
-              apiSlice.util.updateQueryData('searchUsers', arg, (draft) => {
-                draft.pages.forEach(({users}) => {
+              apiSlice.util.updateQueryData("searchUsers", arg, (draft) => {
+                draft.pages.forEach(({ users }) => {
                   const possibleIndex = users.findIndex((ele) => ele.id === id);
                   if (possibleIndex !== -1) {
                     users[possibleIndex].followers = undefined;
                   }
-                })
+                });
               }),
             );
           });
 
           dispatch(
-            apiSlice.util.updateQueryData('getUsers', undefined, (draft) => {
-              draft.pages.forEach(({users}) => {
-                  const possibleIndex = users.findIndex((ele) => ele.id === id);
-                  if (possibleIndex !== -1) {
-                    users[possibleIndex].followers = undefined;
-                  }
-                })
+            apiSlice.util.updateQueryData("getUsers", undefined, (draft) => {
+              draft.pages.forEach(({ users }) => {
+                const possibleIndex = users.findIndex((ele) => ele.id === id);
+                if (possibleIndex !== -1) {
+                  users[possibleIndex].followers = undefined;
+                }
+              });
             }),
           );
 
           dispatch(
-            apiSlice.util.updateQueryData('getFollows', undefined, (draft) => {
-              draft.pages.forEach(({follows}) => {
+            apiSlice.util.updateQueryData("getFollows", undefined, (draft) => {
+              draft.pages.forEach(({ follows }) => {
                 const possibleIndex = follows.findIndex((ele) => ele.id === id);
                 if (possibleIndex !== -1) {
                   follows.splice(possibleIndex, 1);
                 }
-              })
+              });
             }),
           );
 
           dispatch(
-            apiSlice.util.updateQueryData('getFollowers', undefined, (draft) => {
-              draft.pages.forEach(({followers}) => {
-                const possibleIndex = followers.findIndex((ele) => ele.id === id);
-                if (possibleIndex !== -1) {
-                  followers[possibleIndex].followers = undefined;
-                }
-              })
-            }),
+            apiSlice.util.updateQueryData(
+              "getFollowers",
+              undefined,
+              (draft) => {
+                draft.pages.forEach(({ followers }) => {
+                  const possibleIndex = followers.findIndex(
+                    (ele) => ele.id === id,
+                  );
+                  if (possibleIndex !== -1) {
+                    followers[possibleIndex].followers = undefined;
+                  }
+                });
+              },
+            ),
           );
         } catch {}
       },
@@ -841,11 +944,14 @@ export const apiSlice = createApi({
         url: "/users/icons",
       }),
     }),
-    getReceivedRequests: builder.query<{ received: (RequestInfo & ReceivedExtra)[] }, void>({
+    getReceivedRequests: builder.query<
+      { received: (RequestInfo & ReceivedExtra)[] },
+      void
+    >({
       query: () => ({
         url: "/requests",
       }),
-      providesTags: ["ReceivedInfo"] ,
+      providesTags: ["ReceivedInfo"],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -854,194 +960,236 @@ export const apiSlice = createApi({
           updateCachedData((draft) => {
             if (data.action === "ADD" && data.data.request) {
               draft.received.unshift(data.data.request);
-            } else if (data.action === "REMOVE" && data.data.id && data.data.userid) {
+            } else if (
+              data.action === "REMOVE" &&
+              data.data.id &&
+              data.data.userid
+            ) {
               if (!draft.received[0]) {
                 return;
-              };
+              }
               if (draft.received[0].targetid !== data.data.userid) {
                 return;
-              };
+              }
 
-              const possibleIndex = draft.received.findIndex((ele) =>  ele.id === data.data.id);
+              const possibleIndex = draft.received.findIndex(
+                (ele) => ele.id === data.data.id,
+              );
               if (possibleIndex !== -1) {
                 draft.received.splice(possibleIndex, 1);
-              };
-            };
+              }
+            }
           });
         };
         try {
           await cacheDataLoaded;
 
           socket.on("request", listener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("request", listener);
       },
     }),
-    getSentRequests: builder.query<{ sent: (RequestInfo & SentExtra)[] }, void>({
-      query: () => ({
-        url: "/requests/sent",
-      }),
-      async onCacheEntryAdded(
-        arg,
-        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
-      ) {
-        const listener = (data: RequestSocketOptions) => {
-          if (data.action === "ADD") {
-            return;
+    getSentRequests: builder.query<{ sent: (RequestInfo & SentExtra)[] }, void>(
+      {
+        query: () => ({
+          url: "/requests/sent",
+        }),
+        async onCacheEntryAdded(
+          arg,
+          { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+        ) {
+          const listener = (data: RequestSocketOptions) => {
+            if (data.action === "ADD") {
+              return;
+            }
+            updateCachedData((draft) => {
+              if (
+                data.action === "REMOVE" &&
+                data.data.id &&
+                data.data.userid
+              ) {
+                if (!draft.sent[0]) {
+                  return;
+                }
+                if (draft.sent[0].senderid === data.data.userid) {
+                  return;
+                }
+
+                const possibleIndex = draft.sent.findIndex(
+                  (ele) => ele.id === data.data.id,
+                );
+                if (possibleIndex !== -1) {
+                  draft.sent.splice(possibleIndex, 1);
+                }
+              }
+            });
           };
-          updateCachedData((draft) => {
-            if (data.action === "REMOVE" && data.data.id && data.data.userid) {
-              if (!draft.sent[0]) {
-                return;
-              };
-              if (draft.sent[0].senderid === data.data.userid) {
-                return;
-              };
+          try {
+            await cacheDataLoaded;
 
-              const possibleIndex = draft.sent.findIndex((ele) =>  ele.id === data.data.id);
-              if (possibleIndex !== -1) {
-                draft.sent.splice(possibleIndex, 1);
-              };
-            };
-          });
-        };
-        try {
-          await cacheDataLoaded;
+            socket.on("request", listener);
+          } catch {}
 
-          socket.on("request", listener);
-          
-        } catch {}
-        
-        await cacheEntryRemoved;
-        
-        socket.off("request", listener);
+          await cacheEntryRemoved;
+
+          socket.off("request", listener);
+        },
+        providesTags: ["SentInfo"],
       },
-      providesTags: ["SentInfo"]
-    }),
+    ),
     makeRequest: builder.mutation<UId, RequestCreate>({
       query: (options) => ({
         url: "/requests",
         method: "POST",
-        body: options
+        body: options,
       }),
-      invalidatesTags: (result, error, arg) => [ "SentInfo",{ type: 'UserInfo', id: arg.id }],
-      async onQueryStarted({ id }, { dispatch, getState ,queryFulfilled }) {
+      invalidatesTags: (result, error, arg) => [
+        "SentInfo",
+        { type: "UserInfo", id: arg.id },
+      ],
+      async onQueryStarted({ id }, { dispatch, getState, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           const queryArgs = apiSlice.util.selectCachedArgsForQuery(
             getState(),
-            "searchUsers"
+            "searchUsers",
           );
 
           queryArgs.forEach((arg) => {
             dispatch(
-              apiSlice.util.updateQueryData('searchUsers', arg, (draft) => {
-                draft.pages.forEach(({users}) => {
+              apiSlice.util.updateQueryData("searchUsers", arg, (draft) => {
+                draft.pages.forEach(({ users }) => {
                   const possibleIndex = users.findIndex((ele) => ele.id === id);
                   if (possibleIndex !== -1) {
-                    users[possibleIndex].receivedRequests = [{id: data.id}];
+                    users[possibleIndex].receivedRequests = [{ id: data.id }];
                   }
-                })
+                });
               }),
             );
           });
 
           dispatch(
-            apiSlice.util.updateQueryData('getUsers', undefined, (draft) => {
-              draft.pages.forEach(({users}) => {
-                  const possibleIndex = users.findIndex((ele) => ele.id === id);
-                  if (possibleIndex !== -1) {
-                    users[possibleIndex].receivedRequests = [{id: data.id}];
-                  }
-                })
+            apiSlice.util.updateQueryData("getUsers", undefined, (draft) => {
+              draft.pages.forEach(({ users }) => {
+                const possibleIndex = users.findIndex((ele) => ele.id === id);
+                if (possibleIndex !== -1) {
+                  users[possibleIndex].receivedRequests = [{ id: data.id }];
+                }
+              });
             }),
           );
 
           dispatch(
-            apiSlice.util.updateQueryData('getFollowers', undefined, (draft) => {
-              draft.pages.forEach(({followers}) => {
-                  const possibleIndex = followers.findIndex((ele) => ele.id === id);
+            apiSlice.util.updateQueryData(
+              "getFollowers",
+              undefined,
+              (draft) => {
+                draft.pages.forEach(({ followers }) => {
+                  const possibleIndex = followers.findIndex(
+                    (ele) => ele.id === id,
+                  );
                   if (possibleIndex !== -1) {
-                    followers[possibleIndex].receivedRequests = [{id: data.id}];
+                    followers[possibleIndex].receivedRequests = [
+                      { id: data.id },
+                    ];
                   }
-                })
-            }),
+                });
+              },
+            ),
           );
         } catch {}
       },
     }),
     acceptRequest: builder.mutation<ReturnMessage, UId>({
-      query: ({id}) => ({
+      query: ({ id }) => ({
         url: `/requests/${id}`,
         method: "PUT",
       }),
       invalidatesTags: ["ReceivedInfo", "FollowersInfo"],
     }),
-    deleteRequest: builder.mutation<ReturnMessage, UId & {type: "CANCEL" | "REJECT"} & {userid: string}>({
-      query: ({id}) => ({
+    deleteRequest: builder.mutation<
+      ReturnMessage,
+      UId & { type: "CANCEL" | "REJECT" } & { userid: string }
+    >({
+      query: ({ id }) => ({
         url: `/requests/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, arg) => {
         if (arg.type === "CANCEL") {
-          return ["SentInfo", {type: "UserInfo", id: arg.userid}];
-        };
+          return ["SentInfo", { type: "UserInfo", id: arg.userid }];
+        }
         return ["ReceivedInfo"];
       },
-      async onQueryStarted({ id, userid, type }, { dispatch, getState ,queryFulfilled }) {
+      async onQueryStarted(
+        { id, userid, type },
+        { dispatch, getState, queryFulfilled },
+      ) {
         try {
           await queryFulfilled;
           if (type === "CANCEL") {
             const queryArgs = apiSlice.util.selectCachedArgsForQuery(
-            getState(),
-            "searchUsers"
+              getState(),
+              "searchUsers",
             );
             queryArgs.forEach((arg) => {
               dispatch(
-                apiSlice.util.updateQueryData('searchUsers', arg, (draft) => {
-                  draft.pages.forEach(({users}) => {
-                    const possibleIndex = users.findIndex((ele) => ele.id === userid);
+                apiSlice.util.updateQueryData("searchUsers", arg, (draft) => {
+                  draft.pages.forEach(({ users }) => {
+                    const possibleIndex = users.findIndex(
+                      (ele) => ele.id === userid,
+                    );
                     if (possibleIndex !== -1) {
                       users[possibleIndex].receivedRequests = undefined;
                     }
-                  })
+                  });
                 }),
               );
             });
             dispatch(
-              apiSlice.util.updateQueryData('getUsers', undefined, (draft) => {
-                draft.pages.forEach(({users}) => {
-                    const possibleIndex = users.findIndex((ele) => ele.id === userid);
-                    if (possibleIndex !== -1) {
-                      users[possibleIndex].receivedRequests = undefined;
-                    }
-                  })
+              apiSlice.util.updateQueryData("getUsers", undefined, (draft) => {
+                draft.pages.forEach(({ users }) => {
+                  const possibleIndex = users.findIndex(
+                    (ele) => ele.id === userid,
+                  );
+                  if (possibleIndex !== -1) {
+                    users[possibleIndex].receivedRequests = undefined;
+                  }
+                });
               }),
             );
             dispatch(
-            apiSlice.util.updateQueryData('getFollowers', undefined, (draft) => {
-              draft.pages.forEach(({followers}) => {
-                  const possibleIndex = followers.findIndex((ele) => ele.id === id);
-                  if (possibleIndex !== -1) {
-                    followers[possibleIndex].receivedRequests = undefined;
-                  }
-                })
-            }),
-           );
+              apiSlice.util.updateQueryData(
+                "getFollowers",
+                undefined,
+                (draft) => {
+                  draft.pages.forEach(({ followers }) => {
+                    const possibleIndex = followers.findIndex(
+                      (ele) => ele.id === id,
+                    );
+                    if (possibleIndex !== -1) {
+                      followers[possibleIndex].receivedRequests = undefined;
+                    }
+                  });
+                },
+              ),
+            );
           }
         } catch {}
       },
     }),
-    getPost: builder.query<{ post: FullPostInfo & Likes & YourLike & OwnCommentsCount }, UId>({
+    getPost: builder.query<
+      { post: FullPostInfo & Likes & YourLike & OwnCommentsCount },
+      UId
+    >({
       query: ({ id }) => ({
         url: `/posts/${id}`,
       }),
-      providesTags: (result, error, arg) => [{type: "PostInfo", id: arg.id}],
-       async onCacheEntryAdded(
+      providesTags: (result, error, arg) => [{ type: "PostInfo", id: arg.id }],
+      async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
@@ -1050,7 +1198,7 @@ export const apiSlice = createApi({
             return;
           }
           updateCachedData((draft) => {
-              if (data.type ===  "content" && data.content) {
+            if (data.type === "content" && data.content) {
               draft.post.content = data.content;
               draft.post.edited = true;
             } else if (data.type === "likes" && data.likes !== undefined) {
@@ -1061,51 +1209,61 @@ export const apiSlice = createApi({
         const deleteListener = (data: CommentDeleteSocket) => {
           if (data.postid !== arg.id) {
             return;
-          };
+          }
 
           if (data.superparentid || data.parentid) {
             return;
-          };
+          }
 
-          
           updateCachedData((draft) => {
             draft.post.ownCommentsCount -= 1;
           });
-          return; 
+          return;
         };
         const newListener = (data: NewCommentSocket) => {
           if (data.comment.postid !== arg.id) {
             return;
-          };
+          }
 
           if (data.superparentid || data.comment.commentid) {
             return;
-          };
-          
+          }
+
           updateCachedData((draft) => {
             draft.post.ownCommentsCount += 1;
           });
           return;
-          
         };
         try {
           await cacheDataLoaded;
-          const response = await socket.emitWithAck("post:join", {id: arg.id, comments: "yes"});
+          const response = await socket.emitWithAck("post:join", {
+            id: arg.id,
+            comments: "yes",
+          });
+          setTimeout(async () => {
+            await socket.emitWithAck("post:join", {
+              id: arg.id,
+              comments: "yes",
+            });
+          }, 1000);
           socket.on("post:updated", listener);
           socket.on("comment:deleted", deleteListener);
           socket.on("comment:created", newListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        const response = await socket.emitWithAck("post:leave", {id: arg.id});
+        const response = await socket.emitWithAck("post:leave", { id: arg.id });
         socket.off("post:updated", listener);
         socket.off("comment:deleted", deleteListener);
         socket.off("comment:created", newListener);
       },
     }),
-    getMyPosts: builder.infiniteQuery<{ posts: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] }, string,  InitialPageParam>({
-      query: ({pageParam}) => ({
+    getMyPosts: builder.infiniteQuery<
+      { posts: (FullPostInfo & Likes & YourLike & OwnCommentsCount)[] },
+      string,
+      InitialPageParam
+    >({
+      query: ({ pageParam }) => ({
         url: `/posts${getProperQuery(pageParam)}`,
       }),
       infiniteQueryOptions: {
@@ -1123,7 +1281,7 @@ export const apiSlice = createApi({
             return {
               skip: lastPageParam.amount + lastPageParam.skip,
               amount: lastPageParam.amount,
-            }
+            };
           } else {
             return undefined;
           }
@@ -1136,38 +1294,44 @@ export const apiSlice = createApi({
         const updateListener = (data: PostUpdateSocket) => {
           if (data.userid !== arg) {
             return;
-          };
+          }
           updateCachedData((draft) => {
-            draft.pages.forEach(({posts}) => {
-              const possibleIndex = posts.findIndex((ele) => ele.id === data.id);
+            draft.pages.forEach(({ posts }) => {
+              const possibleIndex = posts.findIndex(
+                (ele) => ele.id === data.id,
+              );
               if (possibleIndex !== -1) {
-                if (data.type ===  "content" && data.content) {
+                if (data.type === "content" && data.content) {
                   posts[possibleIndex].content = data.content;
                   posts[possibleIndex].edited = true;
-                } else if (data.type === "likes" && data.likes !==  undefined) {
+                } else if (data.type === "likes" && data.likes !== undefined) {
                   posts[possibleIndex].likesCount = data.likes;
-                };
-              };
+                }
+              }
             });
           });
         };
         try {
           await cacheDataLoaded;
           socket.on("post:updated", updateListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
         socket.off("post:updated", updateListener);
       },
     }),
-    updatePost: builder.mutation<{post: UpdatedPost & Likes & YourLike}, UpdateContent & UId>({
+    updatePost: builder.mutation<
+      { post: UpdatedPost & Likes & YourLike },
+      UpdateContent & UId
+    >({
       query: ({ id, content }) => ({
         url: `/posts/${id}`,
         method: "PUT",
-        body: {content},
+        body: { content },
       }),
-      invalidatesTags: (result, error, arg) => [{type:"PostInfo", id: arg.id}],
+      invalidatesTags: (result, error, arg) => [
+        { type: "PostInfo", id: arg.id },
+      ],
     }),
     deletePost: builder.mutation<ReturnMessage, UId>({
       query: ({ id }) => ({
@@ -1175,11 +1339,16 @@ export const apiSlice = createApi({
         method: "DELETE",
       }),
     }),
-     getComment: builder.query<{ comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike }, UId>({
+    getComment: builder.query<
+      { comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike },
+      UId
+    >({
       query: ({ id }) => ({
         url: `/comments/${id}`,
       }),
-      providesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
+      providesTags: (result, error, arg) => [
+        { type: "CommentInfo", id: arg.id },
+      ],
       async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -1189,63 +1358,82 @@ export const apiSlice = createApi({
             return;
           }
           updateCachedData((draft) => {
-              if (data.type === "likes" && data.likes !== undefined) {
-                draft.comment.likesCount = data.likes;
-              } else if (data.type === "comment" && data.comment) {
-                Object.assign(draft.comment, data.comment);
-              }
+            if (data.type === "likes" && data.likes !== undefined) {
+              draft.comment.likesCount = data.likes;
+            } else if (data.type === "comment" && data.comment) {
+              Object.assign(draft.comment, data.comment);
+            }
           });
         };
-         const deleteListener = (data: CommentDeleteSocket) => {
+        const deleteListener = (data: CommentDeleteSocket) => {
           if (data.parentid !== arg.id) {
             return;
-          };
+          }
 
           updateCachedData((draft) => {
             draft.comment.ownCommentsCount -= 1;
-          })
+          });
         };
         const newListener = (data: NewCommentSocket) => {
           if (data.comment.commentid !== arg.id) {
             return;
-          };
+          }
 
           updateCachedData((draft) => {
             draft.comment.ownCommentsCount += 1;
-          })
+          });
         };
-        let commentData : (FullCommentInfo & Likes & OwnCommentsCount & YourLike) | undefined;
+        let commentData:
+          | (FullCommentInfo & Likes & OwnCommentsCount & YourLike)
+          | undefined;
         try {
-          const {data: {comment}} = await cacheDataLoaded;
+          const {
+            data: { comment },
+          } = await cacheDataLoaded;
           commentData = comment;
-          const response = await socket.emitWithAck("post:join", {id: commentData.postid, comments: "yes"});
+          const response = await socket.emitWithAck("post:join", {
+            id: commentData.postid,
+            comments: "yes",
+          });
           setTimeout(async () => {
-            await socket.emitWithAck("post:join", {id: commentData?.postid as string, comments: "yes"});
+            await socket.emitWithAck("post:join", {
+              id: commentData?.postid as string,
+              comments: "yes",
+            });
           }, 1000);
           socket.on("comment:deleted", deleteListener);
           socket.on("comment:created", newListener);
           socket.on("comment:updated", listener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
         if (commentData) {
-          const response = await socket.emitWithAck("post:leave", {id: commentData.postid});
-        };
+          const response = await socket.emitWithAck("post:leave", {
+            id: commentData.postid,
+          });
+        }
         socket.off("comment:deleted", deleteListener);
         socket.off("comment:created", newListener);
         socket.off("comment:updated", listener);
       },
     }),
-    updateComment: builder.mutation<{comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike}, UpdateContent & UId>({
+    updateComment: builder.mutation<
+      { comment: FullCommentInfo & Likes & OwnCommentsCount & YourLike },
+      UpdateContent & UId
+    >({
       query: ({ id, content }) => ({
         url: `/comments/${id}`,
         method: "PUT",
-        body: {content},
+        body: { content },
       }),
-      invalidatesTags: (result, error, arg) => [{type: "CommentInfo", id: arg.id}],
+      invalidatesTags: (result, error, arg) => [
+        { type: "CommentInfo", id: arg.id },
+      ],
     }),
-    deleteComment: builder.mutation<UId & {postid: string, parentid?: string}, UId>({
+    deleteComment: builder.mutation<
+      UId & { postid: string; parentid?: string },
+      UId
+    >({
       query: ({ id }) => ({
         url: `/comments/${id}`,
         method: "DELETE",
@@ -1255,36 +1443,51 @@ export const apiSlice = createApi({
       query: (form) => ({
         url: `/posts`,
         method: "POST",
-        body: form
+        body: form,
       }),
     }),
-    createComment: builder.mutation<{ comment: FullCommentInfo & Likes & OwnCommentsCount }, UId & {info: FormData} & {comment?: string}>({
+    createComment: builder.mutation<
+      { comment: FullCommentInfo & Likes & OwnCommentsCount },
+      UId & { info: FormData } & { comment?: string }
+    >({
       query: ({ id, info, comment }) => ({
         url: `/posts/${id}${comment ? `?comment=${comment}` : ""}`,
         method: "POST",
-        body: info
+        body: info,
       }),
     }),
-    changePostLike: builder.mutation<{post: YourLike & UpdatedPost}, UId & LikeTypes>({
+    changePostLike: builder.mutation<
+      { post: YourLike & UpdatedPost },
+      UId & LikeTypes
+    >({
       query: ({ id, action }) => ({
         url: `/posts/${id}/likes`,
         method: "PUT",
         body: {
-          action
-        }
+          action,
+        },
       }),
-      invalidatesTags: (result, error, arg) => [{type:"PostInfo", id: arg.id}],
-       async onQueryStarted({ id, action }, { dispatch, getState ,queryFulfilled }) {
+      invalidatesTags: (result, error, arg) => [
+        { type: "PostInfo", id: arg.id },
+      ],
+      async onQueryStarted(
+        { id, action },
+        { dispatch, getState, queryFulfilled },
+      ) {
         try {
-          const { data : {post} } = await queryFulfilled;
+          const {
+            data: { post },
+          } = await queryFulfilled;
 
           dispatch(
-            apiSlice.util.updateQueryData('getFeed', undefined, (draft) => {
-              draft.pages.forEach(({feed}) => {
-                const possibleIndex = feed.findIndex((ele) => ele.id === post.id);
+            apiSlice.util.updateQueryData("getFeed", undefined, (draft) => {
+              draft.pages.forEach(({ feed }) => {
+                const possibleIndex = feed.findIndex(
+                  (ele) => ele.id === post.id,
+                );
                 if (possibleIndex !== -1) {
                   if (action === "ADD") {
-                    feed[possibleIndex].likes = [{id:"1"}];
+                    feed[possibleIndex].likes = [{ id: "1" }];
                   } else {
                     feed[possibleIndex].likes = undefined;
                   }
@@ -1294,92 +1497,123 @@ export const apiSlice = createApi({
           );
 
           dispatch(
-            apiSlice.util.updateQueryData('getUserPosts', post.creatorid, (draft) => {
-              draft.pages.forEach(({posts}) => {
-                const possibleIndex = posts.findIndex((ele) => ele.id === post.id);
-                if (possibleIndex !== -1) {
-                  if (action === "ADD") {
-                    posts[possibleIndex].likes = [{id:"1"}];
-                  } else {
-                    posts[possibleIndex].likes = undefined;
+            apiSlice.util.updateQueryData(
+              "getUserPosts",
+              post.creatorid,
+              (draft) => {
+                draft.pages.forEach(({ posts }) => {
+                  const possibleIndex = posts.findIndex(
+                    (ele) => ele.id === post.id,
+                  );
+                  if (possibleIndex !== -1) {
+                    if (action === "ADD") {
+                      posts[possibleIndex].likes = [{ id: "1" }];
+                    } else {
+                      posts[possibleIndex].likes = undefined;
+                    }
                   }
-                }
-              });
-            }),
+                });
+              },
+            ),
           );
 
           const queryArgs = apiSlice.util.selectCachedArgsForQuery(
             getState(),
-            "getMyPosts"
+            "getMyPosts",
           );
 
           queryArgs.forEach((myarg) => {
-            dispatch( 
-            apiSlice.util.updateQueryData('getMyPosts', myarg, (draft) => {
-              draft.pages.forEach(({posts}) => {
-                const possibleIndex = posts.findIndex((ele) => ele.id === post.id);
-                if (possibleIndex !== -1) {
-                  if (action === "ADD") {
-                    posts[possibleIndex].likes = [{id:"1"}];
-                  } else {
-                    posts[possibleIndex].likes = undefined;
+            dispatch(
+              apiSlice.util.updateQueryData("getMyPosts", myarg, (draft) => {
+                draft.pages.forEach(({ posts }) => {
+                  const possibleIndex = posts.findIndex(
+                    (ele) => ele.id === post.id,
+                  );
+                  if (possibleIndex !== -1) {
+                    if (action === "ADD") {
+                      posts[possibleIndex].likes = [{ id: "1" }];
+                    } else {
+                      posts[possibleIndex].likes = undefined;
+                    }
                   }
-                }
-              });
-            }),
-          );
+                });
+              }),
+            );
           });
         } catch {}
       },
     }),
-    changeCommentLike: builder.mutation<{comment: CommentInfo & YourLike}, UId & LikeTypes>({
+    changeCommentLike: builder.mutation<
+      { comment: CommentInfo & YourLike },
+      UId & LikeTypes
+    >({
       query: ({ id, action }) => ({
         url: `/comments/${id}/likes`,
         method: "PUT",
         body: {
-          action
-        }
+          action,
+        },
       }),
-      async onQueryStarted({ id, action}, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ id, action }, { dispatch, queryFulfilled }) {
         try {
-          const { data: {comment} } = await queryFulfilled;
+          const {
+            data: { comment },
+          } = await queryFulfilled;
           let patchResult;
           if (comment.commentid) {
-              patchResult = dispatch(
-                apiSlice.util.updateQueryData('getCommentComments', comment.commentid, (draft) => {
-                  draft.pages.forEach(({comments}) => {
-                    const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
+            patchResult = dispatch(
+              apiSlice.util.updateQueryData(
+                "getCommentComments",
+                comment.commentid,
+                (draft) => {
+                  draft.pages.forEach(({ comments }) => {
+                    const possibleIndex = comments.findIndex(
+                      (ele) => ele.id === comment.id,
+                    );
                     if (possibleIndex !== -1) {
                       if (action === "ADD") {
-                        comments[possibleIndex].likes = [{id:"1"}];
+                        comments[possibleIndex].likes = [{ id: "1" }];
                       } else {
                         comments[possibleIndex].likes = undefined;
                       }
                     }
                   });
-                }),
-              );
+                },
+              ),
+            );
           } else {
             patchResult = dispatch(
-              apiSlice.util.updateQueryData('getPostComments', comment.postid, (draft) => {
-                  draft.pages.forEach(({comments}) => {
-                    const possibleIndex = comments.findIndex((ele) => ele.id === comment.id);
+              apiSlice.util.updateQueryData(
+                "getPostComments",
+                comment.postid,
+                (draft) => {
+                  draft.pages.forEach(({ comments }) => {
+                    const possibleIndex = comments.findIndex(
+                      (ele) => ele.id === comment.id,
+                    );
                     if (possibleIndex !== -1) {
                       if (action === "ADD") {
-                        comments[possibleIndex].likes = [{id:"1"}];
+                        comments[possibleIndex].likes = [{ id: "1" }];
                       } else {
                         comments[possibleIndex].likes = undefined;
                       }
                     }
-                  })
-              }),
-            )
+                  });
+                },
+              ),
+            );
           }
         } catch {}
       },
-      invalidatesTags: (result, error, arg) => [{type:"CommentInfo", id: arg.id}],
+      invalidatesTags: (result, error, arg) => [
+        { type: "CommentInfo", id: arg.id },
+      ],
     }),
-    getCommentComments: builder.infiniteQuery<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, string,  InitialPageParam>({
+    getCommentComments: builder.infiniteQuery<
+      { comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] },
+      string,
+      InitialPageParam
+    >({
       query: ({ queryArg, pageParam }) => ({
         url: `/comments/${queryArg}/comments${getProperQuery(pageParam)}`,
       }),
@@ -1398,7 +1632,7 @@ export const apiSlice = createApi({
             return {
               skip: lastPageParam.amount + lastPageParam.skip,
               amount: lastPageParam.amount,
-            }
+            };
           } else {
             return undefined;
           }
@@ -1412,61 +1646,70 @@ export const apiSlice = createApi({
         const deleteListener = (data: CommentDeleteSocket) => {
           if (data.parentid !== arg && data.superparentid !== arg) {
             return;
-          };
+          }
 
           if (data.superparentid === arg && data.parentid) {
             updateCachedData((draft) => {
-              draft.pages.forEach(({comments}) => {
-                const possibleIndex = comments.findIndex((ele) => ele.id === data.parentid);
+              draft.pages.forEach(({ comments }) => {
+                const possibleIndex = comments.findIndex(
+                  (ele) => ele.id === data.parentid,
+                );
                 if (possibleIndex !== -1) {
                   comments[possibleIndex].ownCommentsCount -= 1;
-                };
-              })
+                }
+              });
             });
-          };
+          }
 
           if (data.parentid === arg) {
             updateCachedData((draft) => {
-              draft.pages.forEach(({comments}) => {
-                const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+              draft.pages.forEach(({ comments }) => {
+                const possibleIndex = comments.findIndex(
+                  (ele) => ele.id === data.id,
+                );
                 if (possibleIndex !== -1) {
                   comments.splice(possibleIndex, 1);
-                };
-              })
+                }
+              });
             });
-          };
+          }
         };
         const newListener = (data: NewCommentSocket) => {
           if (data.comment.commentid !== arg && data.superparentid !== arg) {
             return;
-          };
+          }
 
           if (data.superparentid === arg && data.comment.commentid) {
             updateCachedData((draft) => {
-              draft.pages.forEach(({comments}) => {
-                const possibleIndex = comments.findIndex((ele) => ele.id === data.comment.commentid);
+              draft.pages.forEach(({ comments }) => {
+                const possibleIndex = comments.findIndex(
+                  (ele) => ele.id === data.comment.commentid,
+                );
                 if (possibleIndex !== -1) {
                   comments[possibleIndex].ownCommentsCount += 1;
-                };
-              })
+                }
+              });
             });
           }
-          
+
           if (data.comment.commentid === arg) {
             updateCachedData((draft) => {
               draft.pages[0].comments.unshift(data.comment);
             });
-          };
+          }
         };
         const updateListener = (data: CommentUpdateSocket) => {
           if (data.parentid !== arg) {
             return;
-          };
+          }
+
           updateCachedData((draft) => {
-            draft.pages.forEach(({comments}) => {
-              const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+            draft.pages.forEach(({ comments }) => {
+              const possibleIndex = comments.findIndex(
+                (ele) => ele.id === data.id,
+              );
               if (possibleIndex !== -1) {
-                if (data.type ===  "comment" && data.comment) {
+                if (data.type === "comment" && data.comment) {
                   Object.assign(comments[possibleIndex], data.comment);
                 } else if (data.type === "likes" && data.likes !== undefined) {
                   comments[possibleIndex].likesCount = data.likes;
@@ -1481,17 +1724,20 @@ export const apiSlice = createApi({
           socket.on("comment:deleted", deleteListener);
           socket.on("comment:created", newListener);
           socket.on("comment:updated", updateListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("comment:deleted", deleteListener);
         socket.off("comment:created", newListener);
         socket.off("comment:updated", updateListener);
       },
     }),
-    getPostComments: builder.infiniteQuery<{ comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] }, string, InitialPageParam>({
+    getPostComments: builder.infiniteQuery<
+      { comments: (FullCommentInfo & Likes & OwnCommentsCount & YourLike)[] },
+      string,
+      InitialPageParam
+    >({
       query: ({ queryArg, pageParam }) => ({
         url: `/posts/${queryArg}/comments${getProperQuery(pageParam)}`,
       }),
@@ -1510,7 +1756,7 @@ export const apiSlice = createApi({
             return {
               skip: lastPageParam.amount + lastPageParam.skip,
               amount: lastPageParam.amount,
-            }
+            };
           } else {
             return undefined;
           }
@@ -1524,45 +1770,51 @@ export const apiSlice = createApi({
         const deleteListener = (data: CommentDeleteSocket) => {
           if (data.postid !== arg) {
             return;
-          };
+          }
 
-          if(!data.superparentid && data.parentid) {
+          if (!data.superparentid && data.parentid) {
             updateCachedData((draft) => {
-              draft.pages.forEach(({comments}) => {
-                const possibleIndex = comments.findIndex((ele) => ele.id === data.parentid);
+              draft.pages.forEach(({ comments }) => {
+                const possibleIndex = comments.findIndex(
+                  (ele) => ele.id === data.parentid,
+                );
                 if (possibleIndex !== -1) {
                   comments[possibleIndex].ownCommentsCount -= 1;
-                };
-              })
+                }
+              });
             });
             return;
-          };
+          }
 
           if (!data.parentid) {
             updateCachedData((draft) => {
-              draft.pages.forEach(({comments}) => {
-                const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+              draft.pages.forEach(({ comments }) => {
+                const possibleIndex = comments.findIndex(
+                  (ele) => ele.id === data.id,
+                );
                 if (possibleIndex !== -1) {
                   comments.splice(possibleIndex, 1);
-                };
-              })
+                }
+              });
             });
             return;
-          };
+          }
         };
         const newListener = (data: NewCommentSocket) => {
           if (data.comment.postid !== arg) {
             return;
-          };
+          }
 
           if (!data.superparentid && data.comment.commentid) {
             updateCachedData((draft) => {
-              draft.pages.forEach(({comments}) => {
-                const possibleIndex = comments.findIndex((ele) =>  ele.id === data.comment.commentid);
+              draft.pages.forEach(({ comments }) => {
+                const possibleIndex = comments.findIndex(
+                  (ele) => ele.id === data.comment.commentid,
+                );
                 if (possibleIndex !== -1) {
                   comments[possibleIndex].ownCommentsCount += 1;
                 }
-              })
+              });
             });
             return;
           }
@@ -1572,23 +1824,25 @@ export const apiSlice = createApi({
               draft.pages[0].comments.unshift(data.comment);
             });
             return;
-          };
+          }
         };
         const updateListener = (data: CommentUpdateSocket) => {
           if (data.parentid || data.postid !== arg) {
             return;
-          };
+          }
           updateCachedData((draft) => {
-            draft.pages.forEach(({comments}) => {
-              const possibleIndex = comments.findIndex((ele) => ele.id === data.id);
+            draft.pages.forEach(({ comments }) => {
+              const possibleIndex = comments.findIndex(
+                (ele) => ele.id === data.id,
+              );
               if (possibleIndex !== -1) {
-                if (data.type ===  "comment" && data.comment) {
+                if (data.type === "comment" && data.comment) {
                   Object.assign(comments[possibleIndex], data.comment);
                 } else if (data.type === "likes" && data.likes !== undefined) {
                   comments[possibleIndex].likesCount = data.likes;
                 }
-              };
-            })
+              }
+            });
           });
         };
         try {
@@ -1597,34 +1851,40 @@ export const apiSlice = createApi({
           socket.on("comment:deleted", deleteListener);
           socket.on("comment:created", newListener);
           socket.on("comment:updated", updateListener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("comment:deleted", deleteListener);
         socket.off("comment:created", newListener);
         socket.off("comment:updated", updateListener);
       },
     }),
-    getNotifications: builder.query<{ notifications: NotificationsInfo[] }, UId>({
+    getNotifications: builder.query<
+      { notifications: NotificationsInfo[] },
+      UId
+    >({
       query: () => ({
         url: `/notifications`,
       }),
-      providesTags: (result = {notifications: []}, error, arg) => [
+      providesTags: (result = { notifications: [] }, error, arg) => [
         "NotificationsInfo",
-        ...result.notifications.map(({id}) => ({type: "NotificationInfo", id}) as const)
+        ...result.notifications.map(
+          ({ id }) => ({ type: "NotificationInfo", id }) as const,
+        ),
       ],
-       async onCacheEntryAdded(
+      async onCacheEntryAdded(
         arg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
-        const listener = (data: NotificationSocket | BasicId & NotificationSocket) => {
-          if ("id" in data  && arg.id === data.id) {
+        const listener = (
+          data: NotificationSocket | (BasicId & NotificationSocket),
+        ) => {
+          if ("id" in data && arg.id === data.id) {
             return;
-          };
+          }
           updateCachedData((draft) => {
-              draft.notifications.unshift(data.notification);
+            draft.notifications.unshift(data.notification);
           });
         };
         try {
@@ -1632,30 +1892,31 @@ export const apiSlice = createApi({
 
           socket.on("extraNotifications", listener);
           socket.on("notification", listener);
-          
         } catch {}
-        
+
         await cacheEntryRemoved;
-        
+
         socket.off("extraNotifications", listener);
         socket.off("notification", listener);
       },
     }),
     clearNotification: builder.mutation<ReturnMessage, UId>({
-      query: ({id}) => ({
+      query: ({ id }) => ({
         url: `/notifications/${id}`,
-        method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, arg) => [{type: "NotificationInfo", id: arg.id}]
+      invalidatesTags: (result, error, arg) => [
+        { type: "NotificationInfo", id: arg.id },
+      ],
     }),
     clearNotifications: builder.mutation<ReturnMessage, void>({
       query: () => ({
         url: `/notifications`,
-        method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: ["NotificationsInfo"]
+      invalidatesTags: ["NotificationsInfo"],
     }),
-    })
+  }),
 });
 
 export const {

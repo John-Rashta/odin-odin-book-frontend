@@ -57,7 +57,7 @@ const StyledWrongInput = styled.div`
 const StyledButton = styled.button`
   align-self: center;
   padding: 3px 10px;
-  margin-top: 10px; 
+  margin-top: 10px;
   background-color: rgb(255, 255, 255);
   border: 2px solid rgb(0, 83, 138);
   font-size: 0.9rem;
@@ -97,28 +97,28 @@ const StyledReturn = styled.div`
 `;
 
 const StyledMain = styled.main`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const StyledDefaultContainer = styled.div`
-    border-left: 2px solid black;
-    border-right: 2px solid black;
-    max-width: 700px;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 50px;
-    padding-top: 50px;
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  max-width: 700px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 50px;
+  padding-top: 50px;
 `;
 
 const StyledMainContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const StyledClickButton = styled.button<{
@@ -134,17 +134,17 @@ const StyledClickButton = styled.button<{
 `;
 
 const StyledUsername = styled.div`
-    cursor: pointer;
-    &:hover {
-        text-decoration-line: underline;
-    };
+  cursor: pointer;
+  &:hover {
+    text-decoration-line: underline;
+  }
 `;
 
 const StyledImage = styled.img`
-    cursor: pointer;
-    &:hover {
-        opacity: 0.9;
-    };
+  cursor: pointer;
+  &:hover {
+    opacity: 0.9;
+  }
 `;
 
 const StyledMessageImage = styled.img`
@@ -154,63 +154,63 @@ const StyledMessageImage = styled.img`
 `;
 
 const StyledLoadCSS = css`
-    padding: 5px 15px;
-    background-color: rgb(195, 214, 255);
-    border: 1px solid black;
-    &:hover {
-        background-color: rgb(150, 184, 255);
-    };
-    font-weight: bold;
-    margin: 15px;
+  padding: 5px 15px;
+  background-color: rgb(195, 214, 255);
+  border: 1px solid black;
+  &:hover {
+    background-color: rgb(150, 184, 255);
+  }
+  font-weight: bold;
+  margin: 15px;
 `;
 
 const StyledBackCSS = css`
-    align-self: start;
-    border: none;
-    cursor: pointer;
-    background-color: transparent;
-    &:hover {
-       background-color: rgb(121, 192, 255);
-    };
+  align-self: start;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  &:hover {
+    background-color: rgb(121, 192, 255);
+  }
 `;
 
 const StyledUserBlue = styled(StyledUsername)`
-    color: rgb(32, 136, 255);
+  color: rgb(32, 136, 255);
 `;
 
 const StyledFlex = styled.div`
-    display: flex;
-    gap: 5px;
+  display: flex;
+  gap: 5px;
 `;
 
 const StyledContent = styled.div`
-    white-space: pre-line;
-    word-break: break-all;
-    overflow-wrap: break-word;
+  white-space: pre-line;
+  word-break: break-all;
+  overflow-wrap: break-word;
 `;
 
 const StyledCancel = styled.button`
-    background-color: rgb(166, 237, 255);
-    border-radius: 20px;
-    &:hover {
-        background-color: rgb(128, 229, 255);
-    };
+  background-color: rgb(166, 237, 255);
+  border-radius: 20px;
+  &:hover {
+    background-color: rgb(128, 229, 255);
+  }
 `;
 
 const StyledConfirm = styled.button`
-    background-color: rgb(193, 222, 255);
-    border-radius: 20px;
-    &:hover {
-        background-color: rgb(155, 202, 255);
-    };
+  background-color: rgb(193, 222, 255);
+  border-radius: 20px;
+  &:hover {
+    background-color: rgb(155, 202, 255);
+  }
 `;
 
 const StyledEdited = styled.div`
-    font-size: 0.8rem;
+  font-size: 0.8rem;
 `;
 
 const StyledCounts = styled.div`
- font-size: 0.9rem;
+  font-size: 0.9rem;
 `;
 
 const StyledInputFile = styled.input`
@@ -228,7 +228,6 @@ const StyledFileLabel = styled.label`
   cursor: pointer;
 `;
 
-
 const StyledFileDiv = styled.div`
   position: relative;
   display: flex;
@@ -238,9 +237,8 @@ const StyledFileDiv = styled.div`
 const StyledCancelFile = styled.button`
   background-color: rgb(255, 209, 209);
   &:hover {
-     background-color: rgb(255, 185, 185);
-  };
-  
+    background-color: rgb(255, 185, 185);
+  }
 `;
 
 const StyledFileName = styled.div`
@@ -248,52 +246,51 @@ const StyledFileName = styled.div`
   position: absolute;
   bottom: 0;
   top: 0;
-  left:  30px;
+  left: 30px;
   display: flex;
   gap: 5px;
   word-break: break-all;
   overflow-wrap: break-word;
 `;
 
-
 export {
-    mainBackgroundColor,
-    navMenuValue,
-    StyledNavLink,
-    headerBackgroundColor,
-    headerPadding,
-    headerBorderBottom,
-    StyledButton,
-    StyledContainer,
-    StyledForm,
-    StyledInput,
-    StyledLabel,
-    StyledWrongInput,
-    StyledDivFlex,
-    ExtraForm,
-    SignupWrongInput,
-    StyledErrorMessage,
-    StyledReturn,
-    StyledDefaultContainer,
-    StyledMain,
-    StyledMainContainer,
-    StylesReturn,
-    StyledClickButton,
-    StyledImage,
-    StyledUsername,
-    StyledMessageImage,
-    StyledLoadCSS,
-    StyledBackCSS,
-    StyledUserBlue,
-    StyledFlex,
-    StyledContent,
-    StyledCancel,
-    StyledConfirm,
-    StyledCounts,
-    StyledEdited,
-    StyledFileDiv,
-    StyledFileLabel,
-    StyledInputFile,
-    StyledCancelFile,
-    StyledFileName,
+  mainBackgroundColor,
+  navMenuValue,
+  StyledNavLink,
+  headerBackgroundColor,
+  headerPadding,
+  headerBorderBottom,
+  StyledButton,
+  StyledContainer,
+  StyledForm,
+  StyledInput,
+  StyledLabel,
+  StyledWrongInput,
+  StyledDivFlex,
+  ExtraForm,
+  SignupWrongInput,
+  StyledErrorMessage,
+  StyledReturn,
+  StyledDefaultContainer,
+  StyledMain,
+  StyledMainContainer,
+  StylesReturn,
+  StyledClickButton,
+  StyledImage,
+  StyledUsername,
+  StyledMessageImage,
+  StyledLoadCSS,
+  StyledBackCSS,
+  StyledUserBlue,
+  StyledFlex,
+  StyledContent,
+  StyledCancel,
+  StyledConfirm,
+  StyledCounts,
+  StyledEdited,
+  StyledFileDiv,
+  StyledFileLabel,
+  StyledInputFile,
+  StyledCancelFile,
+  StyledFileName,
 };

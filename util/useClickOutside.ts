@@ -7,18 +7,16 @@ export default function useClickOutside(
 ) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-        if (!ref.current) {
-            return;
-        };
-        const currentTarget = event.target as HTMLDivElement;
-        const currentRef = ref.current;
-        if (
-            currentRef.contains(currentTarget)
-        ) {
-            return;
-        } else {
-            handleOutside();
-        }
+      if (!ref.current) {
+        return;
+      }
+      const currentTarget = event.target as HTMLDivElement;
+      const currentRef = ref.current;
+      if (currentRef.contains(currentTarget)) {
+        return;
+      } else {
+        handleOutside();
+      }
     };
 
     document.addEventListener("mouseup", handleClickOutside);
@@ -27,4 +25,4 @@ export default function useClickOutside(
       document.removeEventListener("mouseup", handleClickOutside);
     };
   });
-};
+}

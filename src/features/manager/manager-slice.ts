@@ -21,7 +21,5 @@ export const managerSlice = createSlice({
   },
 });
 
-export const { setMyId } =
-  managerSlice.actions;
-export const { selectMyId } =
-  managerSlice.selectors;
+export const { setMyId } = managerSlice.actions;
+export const { selectMyId } = managerSlice.selectors;

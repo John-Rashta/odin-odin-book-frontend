@@ -2,8 +2,10 @@ import { AmountOptions } from "./interfaces";
 import { enIN } from "date-fns/locale";
 import { Locale } from "date-fns/locale";
 
-const getProperQuery = function getQueryFromAmountAndSkip(options: AmountOptions) {
-    return `${(options.amount || options.skip) ? "?" : ""}${options.amount ? `&amount=${options.amount}` : ""}${options.skip ? `&skip=${options.skip}` : ""}`;
+const getProperQuery = function getQueryFromAmountAndSkip(
+  options: AmountOptions,
+) {
+  return `${options.amount || options.skip ? "?" : ""}${options.amount ? `&amount=${options.amount}` : ""}${options.skip ? `&skip=${options.skip}` : ""}`;
 };
 
 const formatRelativeLocale = {
@@ -20,7 +22,4 @@ const locale: Locale = {
   formatRelative: (token) => formatRelativeLocale[token],
 };
 
-export {
-    getProperQuery,
-    locale,
-};
+export { getProperQuery, locale };

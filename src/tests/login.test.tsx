@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import Login from "../components/Login";
+import Login from "../components/defaults/Login";
 import { renderWithProviders } from "./setups/setupRedux";
 
 vi.mock("../features/book-api/book-api-slice");

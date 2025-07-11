@@ -1,337 +1,331 @@
-import { blueInfo, darkInfo, testComment, testDate, testPost } from "../../../../util/globalTestValues";
+import {
+  blueInfo,
+  darkInfo,
+  testComment,
+  testDate,
+  testPost,
+} from "../../../../util/globalTestValues";
 
 const useGetCommentCommentsInfiniteQuery = vi.fn(() => {
-    return {
-        error: false,
-        isLoading: false,
-        hasNextPage: false,
-        isFetchingNextPage: false,
-        fetchNextPage: vi.fn,
-        commentsData: [
-            testComment,
-        ]
-    }
+  return {
+    error: false,
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn,
+    commentsData: [testComment],
+  };
 });
 
 const useGetPostCommentsInfiniteQuery = vi.fn(() => {
-    return {
-        error: false,
-        isLoading: false,
-        hasNextPage: false,
-        isFetchingNextPage: false,
-        fetchNextPage: vi.fn,
-        commentsData: [
-            testComment,
-        ]
-    }
+  return {
+    error: false,
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn,
+    commentsData: [testComment],
+  };
 });
 
 const useGetUserPostsInfiniteQuery = vi.fn(() => {
-    return {
-        error: false,
-        isLoading: false,
-        hasNextPage: false,
-        isFetchingNextPage: false,
-        fetchNextPage: vi.fn,
-        postsData: [
-            testPost,
-        ]
-    }
-})
+  return {
+    error: false,
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn,
+    postsData: [testPost],
+  };
+});
 
 const useGetFeedInfiniteQuery = vi.fn(() => {
-    return {
-         error: false,
-        isLoading: false,
-        hasNextPage: false,
-        isFetchingNextPage: false,
-        fetchNextPage: vi.fn,
-        postsData: [
-            testPost,
-        ]
-    }
+  return {
+    error: false,
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn,
+    postsData: [testPost],
+  };
 });
 
 const useGetMyPostsInfiniteQuery = vi.fn(() => {
-    return {
-         error: false,
-        isLoading: false,
-        hasNextPage: false,
-        isFetchingNextPage: false,
-        fetchNextPage: vi.fn,
-        postsData: [
-            testPost,
-        ]
-    }
+  return {
+    error: false,
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn,
+    postsData: [testPost],
+  };
 });
 
 const useSearchUsersInfiniteQuery = vi.fn(() => {
-    return {
-        error: false,
-        isLoading: false,
-        hasNextPage: false,
-        isFetchingNextPage: false,
-        fetchNextPage: vi.fn,
-        searchData: [
-            {
-                id: darkInfo.id,
-                iconid: 3,
-                username: darkInfo.username,
-                aboutMe: "string",
-                joinedAt: testDate,
-                icon: {
-                    id: 3,
-                    source: "asfas12",
-                },
-                customIcon: null,
-                followerCount: 1,
-                receivedRequests: [],
-                followers: [],
-            }
-        ]
-    }
+  return {
+    error: false,
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn,
+    searchData: [
+      {
+        id: darkInfo.id,
+        iconid: 3,
+        username: darkInfo.username,
+        aboutMe: "string",
+        joinedAt: testDate,
+        icon: {
+          id: 3,
+          source: "asfas12",
+        },
+        customIcon: null,
+        followerCount: 1,
+        receivedRequests: [],
+        followers: [],
+      },
+    ],
+  };
 });
 
 const useGetUsersInfiniteQuery = vi.fn(() => {
-    return {
-        error: false,
-        isLoading: false,
-        hasNextPage: false,
-        isFetchingNextPage: false,
-        fetchNextPage: vi.fn,
-        usersData: [
-            {
-                id: darkInfo.id,
-                iconid: 3,
-                username: darkInfo.username,
-                aboutMe: "string",
-                joinedAt: testDate,
-                icon: {
-                    id: 3,
-                    source: "asfas12",
-                },
-                customIcon: null,
-                followerCount: 1,
-                receivedRequests: [],
-                followers: [],
-            },
-        ]
-    }
+  return {
+    error: false,
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn,
+    usersData: [
+      {
+        id: darkInfo.id,
+        iconid: 3,
+        username: darkInfo.username,
+        aboutMe: "string",
+        joinedAt: testDate,
+        icon: {
+          id: 3,
+          source: "asfas12",
+        },
+        customIcon: null,
+        followerCount: 1,
+        receivedRequests: [],
+        followers: [],
+      },
+    ],
+  };
 });
 
 const useGetFollowersInfiniteQuery = vi.fn(() => {
-    return {
-        error: false,
-        isLoading: false,
-        hasNextPage: false,
-        isFetchingNextPage: false,
-        fetchNextPage: vi.fn,
-        followersData: [
-            {
-                id: blueInfo.id,
-                username: blueInfo.username,
-                icon: {
-                    source: "stringasfas",
-                },
-                customIcon: null,
-                 receivedRequests: [],
-                followers: [],
-            }
-        ]
-    }
+  return {
+    error: false,
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn,
+    followersData: [
+      {
+        id: blueInfo.id,
+        username: blueInfo.username,
+        icon: {
+          source: "stringasfas",
+        },
+        customIcon: null,
+        receivedRequests: [],
+        followers: [],
+      },
+    ],
+  };
 });
 
 const useGetFollowsInfiniteQuery = vi.fn(() => {
-    return {
-        error: false,
-        isLoading: false,
-        hasNextPage: false,
-        isFetchingNextPage: false,
-        fetchNextPage: vi.fn,
-        followsData: [
-            {
-                id: darkInfo.id,
-                username: darkInfo.username,
-                icon: {
-                    source: "stringasfas",
-                },
-                customIcon: null,
-                 receivedRequests: [],
-                followers: [],
-            }
-        ]
-    }
+  return {
+    error: false,
+    isLoading: false,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: vi.fn,
+    followsData: [
+      {
+        id: darkInfo.id,
+        username: darkInfo.username,
+        icon: {
+          source: "stringasfas",
+        },
+        customIcon: null,
+        receivedRequests: [],
+        followers: [],
+      },
+    ],
+  };
 });
 
 const useGetCommentQuery = vi.fn(() => {
-    return {
-        isLoading: false,
-        error: false,
-        commentData: {
-            image: null,
-            sender: {
-                id: blueInfo.id,
-                username: blueInfo.username,
-                icon: {
-                    source: "asdaf4r42r",
-                },
-                customIcon: null,
-            },
-            id: "121321412dsa",
-            content: "sky",
-            edited: false,
-            sentAt: testDate,
-            commentid: null,
-            postid: "asdfas32",
-            senderid: blueInfo.id,
-            likesCount: 2,
-            ownCommentsCount: 2,
-            likes: [],
-        }
-    }
+  return {
+    isLoading: false,
+    error: false,
+    commentData: {
+      image: null,
+      sender: {
+        id: blueInfo.id,
+        username: blueInfo.username,
+        icon: {
+          source: "asdaf4r42r",
+        },
+        customIcon: null,
+      },
+      id: "121321412dsa",
+      content: "sky",
+      edited: false,
+      sentAt: testDate,
+      commentid: null,
+      postid: "asdfas32",
+      senderid: blueInfo.id,
+      likesCount: 2,
+      ownCommentsCount: 2,
+      likes: [],
+    },
+  };
 });
 
 const useGetNotificationsQuery = vi.fn(() => {
-    return {
-        isLoading: false,
-        error: false,
-        notificationsData: [
-            {
-                id: "asdasfsa",
-                content: "followsent",
-                createdAt: testDate,
-                type: "USER",
-                typeid: darkInfo.id,
-            }
-        ]
-    }
+  return {
+    isLoading: false,
+    error: false,
+    notificationsData: [
+      {
+        id: "asdasfsa",
+        content: "followsent",
+        createdAt: testDate,
+        type: "USER",
+        typeid: darkInfo.id,
+      },
+    ],
+  };
 });
 
 const useGetSelfQuery = vi.fn(() => {
-    return {
-        isLoading: false,
-        error: false,
-        data: {
-            user: {
-                id: darkInfo.id,
-                iconid: 2,
-                username: darkInfo.username,
-                aboutMe: "hello",
-                joinedAt: testDate,
-                icon: {
-                    id: 2,
-                    source: "ASFAS",
-                },
-                customIcon: null,
-                followerCount: 2,
-            }
-        }
-    }
+  return {
+    isLoading: false,
+    error: false,
+    data: {
+      user: {
+        id: darkInfo.id,
+        iconid: 2,
+        username: darkInfo.username,
+        aboutMe: "hello",
+        joinedAt: testDate,
+        icon: {
+          id: 2,
+          source: "ASFAS",
+        },
+        customIcon: null,
+        followerCount: 2,
+      },
+    },
+  };
 });
 
 const useGetIconsQuery = vi.fn(() => {
-    return {
-        isLoading: false,
-        error: false,
-        data: {
-            icons: [
-                {
-                    id: 2,
-                    source: "dasfas",
-                }
-            ]
-        }
-    }
+  return {
+    isLoading: false,
+    error: false,
+    data: {
+      icons: [
+        {
+          id: 2,
+          source: "dasfas",
+        },
+      ],
+    },
+  };
 });
 
-  const useGetReceivedRequestsQuery = vi.fn(() => {
-    return {
-        isLoading: false,
-        error: false,
-        received: [
-            {
-                id: "Sas123",
-                senderid: blueInfo.id,
-                targetid: darkInfo.id,
-                sentAt: testDate,
-                type: "FOLLOW",
-                sender: {
-                    id: blueInfo.id,
-                    username: blueInfo.username,
-                },
-            },
-        ]
-    }
-  }
-);
+const useGetReceivedRequestsQuery = vi.fn(() => {
+  return {
+    isLoading: false,
+    error: false,
+    received: [
+      {
+        id: "Sas123",
+        senderid: blueInfo.id,
+        targetid: darkInfo.id,
+        sentAt: testDate,
+        type: "FOLLOW",
+        sender: {
+          id: blueInfo.id,
+          username: blueInfo.username,
+        },
+      },
+    ],
+  };
+});
 
 const useGetSentRequestsQuery = vi.fn(() => {
-    return {
-        isLoading: false,
-        error: false,
-        sent: [
-            {
-                id: "Sas123",
-                senderid: blueInfo.id,
-                targetid: darkInfo.id,
-                sentAt: testDate,
-                type: "FOLLOW",
-                target: {
-                    id: darkInfo.id,
-                    username: darkInfo.username,
-                },
-            },
-        ]
-    }
-  }
-);
+  return {
+    isLoading: false,
+    error: false,
+    sent: [
+      {
+        id: "Sas123",
+        senderid: blueInfo.id,
+        targetid: darkInfo.id,
+        sentAt: testDate,
+        type: "FOLLOW",
+        target: {
+          id: darkInfo.id,
+          username: darkInfo.username,
+        },
+      },
+    ],
+  };
+});
 
 const useGetUserQuery = vi.fn(() => {
-    return {
-        isLoading: false,
-        error: false,
-        userData: {
-            id: darkInfo.id,
-            iconid: 3,
-            username: darkInfo.username,
-            aboutMe: "about",
-            joinedAt: testDate,
-            icon: {
-                id: 3,
-                source: "",
-            },
-            customIcon: null,
-            followerCount: 354,
-            receivedRequests: [],
-            followers: [],
-        }
-    }
+  return {
+    isLoading: false,
+    error: false,
+    userData: {
+      id: darkInfo.id,
+      iconid: 3,
+      username: darkInfo.username,
+      aboutMe: "about",
+      joinedAt: testDate,
+      icon: {
+        id: 3,
+        source: "",
+      },
+      customIcon: null,
+      followerCount: 354,
+      receivedRequests: [],
+      followers: [],
+    },
+  };
 });
 
 const useGetPostQuery = vi.fn(() => {
-    return {
-        isLoading: false,
-        error: false,
-        postData: {
-            id: "asdasf345",
-            content: "Goodnight",
-            createdAt: testDate,
-            creatorid: blueInfo.id,
-            edited: true,
-            image: null,
-            creator: {
-                id: blueInfo.id,
-                username: blueInfo.username,
-                icon: {
-                    source: "asdasf",
-                },
-                customIcon: null,
-            },
-            likesCount: 3,
-            ownCommentsCount: 4,
-            likes: [],
-        }
-    }
+  return {
+    isLoading: false,
+    error: false,
+    postData: {
+      id: "asdasf345",
+      content: "Goodnight",
+      createdAt: testDate,
+      creatorid: blueInfo.id,
+      edited: true,
+      image: null,
+      creator: {
+        id: blueInfo.id,
+        username: blueInfo.username,
+        icon: {
+          source: "asdasf",
+        },
+        customIcon: null,
+      },
+      likesCount: 3,
+      ownCommentsCount: 4,
+      likes: [],
+    },
+  };
 });
 const useAcceptRequestMutation = vi.fn(() => {
   return [vi.fn];
@@ -354,7 +348,7 @@ const useChangePostLikeMutation = vi.fn(() => {
 });
 
 const useCreateCommentMutation = vi.fn(() => {
-  return [vi.fn];
+  return [vi.fn, { isLoading: false }];
 });
 
 const useCreatePostMutation = vi.fn(() => {
@@ -382,7 +376,7 @@ const useLogoutUserMutation = vi.fn(() => {
 });
 
 const useUpdatePostMutation = vi.fn(() => {
-  return [vi.fn];
+  return [vi.fn, { isLoading: false }];
 });
 
 const useClearNotificationMutation = vi.fn(() => {
@@ -406,39 +400,39 @@ const useChangeCommentLikeMutation = vi.fn(() => {
 });
 
 export {
-    useAcceptRequestMutation,
-    useChangeCommentLikeMutation,
-    useChangePostLikeMutation,
-    useClearNotificationMutation,
-    useClearNotificationsMutation,
-    useCreateCommentMutation,
-    useCreatePostMutation,
-    useCreateUserMutation,
-    useDeleteCommentMutation,
-    useDeletePostMutation,
-    useDeleteRequestMutation,
-    useGetCommentCommentsInfiniteQuery,
-    useGetCommentQuery,
-    useGetFeedInfiniteQuery,
-    useGetFollowersInfiniteQuery,
-    useGetFollowsInfiniteQuery,
-    useGetIconsQuery,
-    useGetMyPostsInfiniteQuery,
-    useGetNotificationsQuery,
-    useGetPostCommentsInfiniteQuery,
-    useGetPostQuery,
-    useGetReceivedRequestsQuery,
-    useGetSelfQuery,
-    useGetSentRequestsQuery,
-    useGetUserPostsInfiniteQuery,
-    useGetUserQuery,
-    useGetUsersInfiniteQuery,
-    useLoginUserMutation,   
-    useLogoutUserMutation,
-    useMakeRequestMutation,
-    useSearchUsersInfiniteQuery,
-    useStopFollowMutation,
-    useUpdateCommentMutation,
-    useUpdateMeMutation,
-    useUpdatePostMutation,
-}
+  useAcceptRequestMutation,
+  useChangeCommentLikeMutation,
+  useChangePostLikeMutation,
+  useClearNotificationMutation,
+  useClearNotificationsMutation,
+  useCreateCommentMutation,
+  useCreatePostMutation,
+  useCreateUserMutation,
+  useDeleteCommentMutation,
+  useDeletePostMutation,
+  useDeleteRequestMutation,
+  useGetCommentCommentsInfiniteQuery,
+  useGetCommentQuery,
+  useGetFeedInfiniteQuery,
+  useGetFollowersInfiniteQuery,
+  useGetFollowsInfiniteQuery,
+  useGetIconsQuery,
+  useGetMyPostsInfiniteQuery,
+  useGetNotificationsQuery,
+  useGetPostCommentsInfiniteQuery,
+  useGetPostQuery,
+  useGetReceivedRequestsQuery,
+  useGetSelfQuery,
+  useGetSentRequestsQuery,
+  useGetUserPostsInfiniteQuery,
+  useGetUserQuery,
+  useGetUsersInfiniteQuery,
+  useLoginUserMutation,
+  useLogoutUserMutation,
+  useMakeRequestMutation,
+  useSearchUsersInfiniteQuery,
+  useStopFollowMutation,
+  useUpdateCommentMutation,
+  useUpdateMeMutation,
+  useUpdatePostMutation,
+};

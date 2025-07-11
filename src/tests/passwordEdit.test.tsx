@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import PasswordEdit from "../components/PasswordEdit";
+import PasswordEdit from "../components/partials/PasswordEdit";
 import { renderWithProviders } from "./setups/setupRedux";
 
 vi.mock("../features/book-api/book-api-slice");

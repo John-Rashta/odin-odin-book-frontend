@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import Self from "../components/Self";
+import Self from "../components/yourpages/Self";
 import { renderWithProviders } from "./setups/setupRedux";
 import { darkInfo } from "../../util/globalTestValues";
 

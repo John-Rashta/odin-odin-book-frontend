@@ -24,4 +24,4 @@ export default function usePasswordHandle() {
     },
     resetPasswords,
   ] as PassHandle;
-};
+}
